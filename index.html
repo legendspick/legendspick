@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LegendsPick — Draft das Lendas do Futebol</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C96A;
+  --dark: #0A0A0A;
+  --dark2: #111111;
+  --dark3: #1A1A1A;
+  --dark4: #242424;
+  --border: rgba(255,255,255,0.07);
+  --text: #F0EDE6;
+  --text2: #9A9690;
+  --text3: #5A5650;
+  --green: #2D7A4F;
+  --red: #8A2525;
+  --amber: #8A5E1A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NOISE OVERLAY */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+/* HEADER */
+header {
+  padding: 28px 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.header-inner { display: flex; align-items: center; justify-content: space-between; }
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-decoration: none;
+}
+.logo span { color: var(--text); }
+.tagline { font-size: 11px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+
+/* SCREENS */
+.screen { display: none; padding: 40px 0 60px; }
+.screen.active { display: block; }
+
+/* HERO */
+.hero { padding: 64px 0 48px; text-align: center; }
+.hero-eyebrow {
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 10vw, 96px);
+  line-height: 0.95;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+.hero h1 em { color: var(--gold); font-style: normal; }
+.hero p {
+  font-size: 15px; color: var(--text2); max-width: 460px;
+  margin: 0 auto 40px; line-height: 1.7;
+}
+.hero-stats {
+  display: flex; justify-content: center; gap: 0;
+  border: 1px solid var(--border); border-radius: 2px;
+  max-width: 420px; margin: 0 auto 48px; overflow: hidden;
+}
+.hero-stat {
+  flex: 1; padding: 16px 12px; border-right: 1px solid var(--border);
+  text-align: center;
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat .num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; color: var(--gold); display: block;
+}
+.hero-stat .lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* BUTTONS */
+.btn {
+  display: inline-block; padding: 12px 28px; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.05em; border: 1px solid var(--border); border-radius: 2px;
+  cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  background: var(--dark3); color: var(--text);
+}
+.btn:hover { background: var(--dark4); border-color: rgba(255,255,255,0.15); }
+.btn-gold {
+  background: var(--gold); color: var(--dark); border-color: var(--gold);
+  font-weight: 600;
+}
+.btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* SECTION TITLE */
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px; letter-spacing: 2px; color: var(--text);
+  margin-bottom: 6px;
+}
+.section-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; }
+
+/* TACTIC GRID */
+.tactic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 28px; }
+.tactic-card {
+  background: var(--dark2); padding: 20px 18px; cursor: pointer;
+  transition: background 0.15s; position: relative;
+}
+.tactic-card:hover { background: var(--dark3); }
+.tactic-card.selected { background: var(--dark3); }
+.tactic-card.selected::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gold);
+}
+.tac-name { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--gold); margin-bottom: 2px; letter-spacing: 1px; }
+.tac-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+.tac-viz { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.tac-row { display: flex; justify-content: center; gap: 5px; }
+.tac-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--gold); opacity: 0.5; }
+.tac-dot.gr { background: #4A9E6F; opacity: 1; }
+.tac-desc { font-size: 12px; color: var(--text3); line-height: 1.5; margin-bottom: 10px; }
+.tac-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.tac-badge { font-size: 10px; padding: 2px 8px; border: 1px solid var(--border); color: var(--text3); border-radius: 1px; }
+
+/* PROGRESS */
+.prog-wrap { margin-bottom: 6px; }
+.prog-bar { height: 2px; background: var(--dark4); }
+.prog-fill { height: 100%; background: var(--gold); transition: width 0.4s; }
+.prog-label { font-size: 11px; color: var(--text3); margin-top: 6px; margin-bottom: 28px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* DRAFT INFO BAR */
+.draft-info {
+  padding: 14px 18px; background: var(--dark2); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold); margin-bottom: 16px;
+  font-size: 14px; color: var(--text2);
+}
+.draft-info strong { color: var(--text); }
+
+/* SLOTS */
+.slots-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.slot-pill {
+  font-size: 10px; padding: 3px 10px; border: 1px solid var(--border);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.slot-pill.open { border-color: var(--gold); color: var(--gold); }
+.slot-pill.filled { color: var(--text3); text-decoration: line-through; }
+
+/* PLAYER GRID */
+.player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 24px; }
+.player-card {
+  background: var(--dark2); padding: 16px 14px; cursor: pointer;
+  transition: background 0.15s; position: relative;
+}
+.player-card:hover:not(.locked) { background: var(--dark3); }
+.player-card.selected { background: var(--dark3); }
+.player-card.selected::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--gold);
+}
+.player-card.locked { opacity: 0.25; cursor: not-allowed; }
+.p-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; color: var(--text); }
+.p-pos { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.p-rating-bar { height: 2px; background: var(--dark4); margin-bottom: 6px; }
+.p-rating-fill { height: 100%; }
+.p-rating-num { font-size: 12px; color: var(--text3); }
+.p-rating-num strong { font-weight: 600; }
+.p-locked-msg { font-size: 10px; color: var(--text3); margin-top: 6px; }
+
+/* DRAFT ACTIONS */
+.draft-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 32px; }
+.reroll-info { font-size: 12px; color: var(--text3); }
+
+/* MINI SQUAD */
+.mini-squad-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 10px; border-top: 1px solid var(--border); padding-top: 20px; }
+.mini-squad { display: flex; flex-wrap: wrap; gap: 6px; }
+.mini-pill {
+  font-size: 11px; padding: 4px 12px; background: var(--dark3); border: 1px solid var(--border);
+  color: var(--text2);
+}
+.mini-pill .mp { color: var(--text3); margin-left: 4px; font-size: 10px; }
+
+/* PITCH */
+.pitch {
+  background: linear-gradient(180deg, #0D1F0D 0%, #112211 50%, #0D1F0D 100%);
+  border: 1px solid rgba(255,255,255,0.06); border-radius: 2px;
+  padding: 28px 20px; margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+.pitch::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 40% at 50% 50%, rgba(45,122,79,0.15) 0%, transparent 70%);
+}
+.pitch-rows { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 20px; }
+.pitch-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.pitch-slot { text-align: center; width: 80px; }
+.pitch-avatar {
+  width: 50px; height: 50px; border-radius: 50%; background: var(--dark3);
+  border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin: 0 auto 6px;
+}
+.pitch-name { font-size: 10px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pitch-info { font-size: 9px; color: var(--text3); margin-top: 2px; }
+
+/* SQUAD HEADER */
+.squad-header { margin-bottom: 28px; }
+.squad-avg {
+  display: inline-block; font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px; color: var(--gold); line-height: 1;
+}
+.squad-avg-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* SIM LOG */
+.sim-log {
+  background: var(--dark2); border: 1px solid var(--border);
+  padding: 20px; font-size: 13px; line-height: 1.9;
+  max-height: 380px; overflow-y: auto; margin-bottom: 24px;
+}
+.sim-log::-webkit-scrollbar { width: 3px; }
+.sim-log::-webkit-scrollbar-track { background: var(--dark2); }
+.sim-log::-webkit-scrollbar-thumb { background: var(--border); }
+.sim-match { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.sim-match:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.sim-round { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 2px; }
+.sim-teams { color: var(--text); font-weight: 500; }
+.result-win { color: #4A9E6F; font-weight: 600; }
+.result-loss { color: #9E4A4A; font-weight: 600; }
+.result-draw { color: #9E8A4A; font-weight: 600; }
+
+/* RESULT BANNER */
+.result-banner {
+  text-align: center; padding: 40px 20px;
+  border: 1px solid var(--border); background: var(--dark2);
+  margin-bottom: 24px; position: relative; overflow: hidden;
+}
+.result-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
+}
+.result-trophy { font-size: 56px; display: block; margin-bottom: 12px; }
+.result-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+  letter-spacing: 3px; color: var(--gold); display: block; margin-bottom: 6px;
+}
+.result-sub { font-size: 13px; color: var(--text3); }
+
+/* FINAL STATS */
+.final-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 28px; }
+.fstat { background: var(--dark2); padding: 18px 14px; }
+.fstat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 6px; }
+.fstat-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--text); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border); padding: 24px 0;
+  text-align: center; font-size: 11px; color: var(--text3);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="header-inner">
+      <div>
+        <a class="logo" href="#"><span>Legends</span>Pick</a>
+        <div class="tagline">World Cup Fantasy Draft</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- START -->
+  <div id="screen-start" class="screen active">
+    <div class="hero">
+      <div class="hero-eyebrow">⚽ World Cup Fantasy Draft</div>
+      <h1>Draft as<br><em>Lendas</em><br>do Futebol</h1>
+      <p>Constrói o teu 11 com as maiores lendas de todas as Copas do Mundo. Escolhe a tática, faz o draft e conquista o mundo.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="num">15</span><span class="lbl">Seleções</span></div>
+        <div class="hero-stat"><span class="num">1930</span><span class="lbl">Até 2022</span></div>
+        <div class="hero-stat"><span class="num">11</span><span class="lbl">Titulares</span></div>
+      </div>
+      <button class="btn btn-gold" onclick="showScreen('screen-tactics')">Começar Draft →</button>
+    </div>
+  </div>
+
+  <!-- TACTICS -->
+  <div id="screen-tactics" class="screen">
+    <div class="section-title">Escolhe a Tática</div>
+    <div class="section-sub">A formação define quantos defesas, médios e avançados podes recrutar no draft.</div>
+    <div id="tactic-grid" class="tactic-grid"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-gold" id="btn-tactic-confirm" onclick="confirmTactic()" disabled>Confirmar e Começar Draft →</button>
+      <button class="btn" onclick="showScreen('screen-start')">← Voltar</button>
+    </div>
+  </div>
+
+  <!-- DRAFT -->
+  <div id="screen-draft" class="screen">
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+      <div class="prog-label" id="prog-label"></div>
+    </div>
+    <div class="draft-info" id="draft-info"></div>
+    <div id="slots-display" class="slots-row"></div>
+    <div id="player-grid" class="player-grid"></div>
+    <div class="draft-actions">
+      <button class="btn btn-gold" id="btn-confirm" onclick="confirmPick()" disabled>Confirmar Escolha →</button>
+      <button class="btn" onclick="rerollSelection()">🎲 Nova Seleção</button>
+      <span class="reroll-info" id="reroll-count"></span>
+    </div>
+    <div class="mini-squad-title">O Teu Plantel <span id="tactic-badge-small"></span></div>
+    <div id="mini-squad" class="mini-squad"></div>
+  </div>
+
+  <!-- SQUAD -->
+  <div id="screen-squad" class="screen">
+    <div class="squad-header">
+      <div class="section-title">O Teu 11</div>
+      <span class="squad-avg" id="squad-avg">—</span>
+      <span class="squad-avg-label"> / 100 nota média</span>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px" id="squad-tactic-label"></div>
+    </div>
+    <div id="pitch-display" class="pitch"><div class="pitch-rows" id="pitch-rows"></div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="startSimulation()">Simular Copa do Mundo →</button>
+      <button class="btn" onclick="showScreen('screen-tactics')">Novo Draft</button>
+    </div>
+  </div>
+
+  <!-- SIM -->
+  <div id="screen-sim" class="screen">
+    <div class="section-title">Simulação</div>
+    <div class="section-sub" id="sim-subtitle"></div>
+    <div id="sim-log" class="sim-log"></div>
+    <div id="sim-result" style="display:none">
+      <div id="result-banner" class="result-banner"></div>
+      <div id="final-stats" class="final-stats"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-gold" onclick="showScreen('screen-tactics')">Jogar Novamente →</button>
+        <button class="btn" onclick="showScreen('screen-squad')">Ver Plantel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>LegendsPick &nbsp;·&nbsp; World Cup Fantasy Draft &nbsp;·&nbsp; Todas as eras, uma equipa</footer>
+</div>
+
+<script>
+const TACTICS = [
+  { id:'442', name:'4-4-2', label:'Clássico', desc:'Sólido e versátil. Dois avançados com suporte de quatro médios.', quota:{GR:1,DEF:4,MED:4,AVA:2} },
+  { id:'433', name:'4-3-3', label:'Ataque total', desc:'Três avançados dinâmicos. Alta pressão, ofensivo e direto.', quota:{GR:1,DEF:4,MED:3,AVA:3} },
+  { id:'532', name:'5-3-2', label:'Fortaleza', desc:'Cinco defesas, bloco baixo, contra-ataque letal.', quota:{GR:1,DEF:5,MED:3,AVA:2} },
+  { id:'352', name:'3-5-2', label:'Posse', desc:'Cinco médios controlam o jogo. Três defesas cobrem o espaço.', quota:{GR:1,DEF:3,MED:5,AVA:2} },
+  { id:'451', name:'4-5-1', label:'Pressing', desc:'Um avançado de referência. Meio-campo overload, pressing intenso.', quota:{GR:1,DEF:4,MED:5,AVA:1} }
+];
+const POS_LABELS = {GR:'Guarda-redes',DEF:'Defesa',MED:'Médio',AVA:'Avançado'};
+const RC = r => r>=90?'#C9A84C':r>=80?'#4A9E6F':r>=70?'#9E8A4A':'#9E4A4A';
+
+const SELS = [
+  { id:'bra70', name:'Brasil 1970', flag:'🇧🇷', players:[{name:'Félix',pos:'GR',rating:72},{name:'Carlos Alberto',pos:'DEF',rating:91},{name:'Brito',pos:'DEF',rating:76},{name:'Piazza',pos:'DEF',rating:75},{name:'Everaldo',pos:'DEF',rating:77},{name:'Clodoaldo',pos:'MED',rating:82},{name:'Gérson',pos:'MED',rating:88},{name:'Rivelino',pos:'MED',rating:90},{name:'Jairzinho',pos:'AVA',rating:92},{name:'Tostão',pos:'AVA',rating:88},{name:'Pelé',pos:'AVA',rating:99}]},
+  { id:'ger74', name:'Alemanha 1974', flag:'🇩🇪', players:[{name:'Maier',pos:'GR',rating:93},{name:'Vogts',pos:'DEF',rating:85},{name:'Schwarzenbeck',pos:'DEF',rating:82},{name:'Beckenbauer',pos:'DEF',rating:97},{name:'Breitner',pos:'DEF',rating:87},{name:'Bonhof',pos:'MED',rating:80},{name:'Hoeness',pos:'MED',rating:83},{name:'Overath',pos:'MED',rating:86},{name:'Grabowski',pos:'AVA',rating:81},{name:'Müller G.',pos:'AVA',rating:96},{name:'Holzenbein',pos:'AVA',rating:79}]},
+  { id:'arg86', name:'Argentina 1986', flag:'🇦🇷', players:[{name:'Pumpido',pos:'GR',rating:80},{name:'Cuciuffo',pos:'DEF',rating:74},{name:'Brown',pos:'DEF',rating:78},{name:'Ruggeri',pos:'DEF',rating:82},{name:'Olarticoechea',pos:'DEF',rating:75},{name:'Batista',pos:'MED',rating:77},{name:'Giusti',pos:'MED',rating:76},{name:'Burruchaga',pos:'MED',rating:85},{name:'Valdano',pos:'AVA',rating:84},{name:'Enrique',pos:'AVA',rating:79},{name:'Maradona',pos:'AVA',rating:99}]},
+  { id:'fra98', name:'França 1998', flag:'🇫🇷', players:[{name:'Barthez',pos:'GR',rating:88},{name:'Thuram',pos:'DEF',rating:89},{name:'Leboeuf',pos:'DEF',rating:80},{name:'Desailly',pos:'DEF',rating:88},{name:'Lizarazu',pos:'DEF',rating:85},{name:'Deschamps',pos:'MED',rating:85},{name:'Petit',pos:'MED',rating:82},{name:'Zidane',pos:'MED',rating:97},{name:'Djorkaeff',pos:'AVA',rating:84},{name:"Guivarc'h",pos:'AVA',rating:72},{name:'Dugarry',pos:'AVA',rating:79}]},
+  { id:'bra02', name:'Brasil 2002', flag:'🇧🇷', players:[{name:'Marcos',pos:'GR',rating:82},{name:'Lúcio',pos:'DEF',rating:86},{name:'Edmílson',pos:'DEF',rating:79},{name:'Roque Júnior',pos:'DEF',rating:77},{name:'Roberto Carlos',pos:'DEF',rating:93},{name:'Cafu',pos:'DEF',rating:90},{name:'Gilberto Silva',pos:'MED',rating:83},{name:'Kléberson',pos:'MED',rating:76},{name:'Ronaldinho',pos:'MED',rating:93},{name:'Rivaldo',pos:'AVA',rating:91},{name:'Ronaldo',pos:'AVA',rating:97}]},
+  { id:'ita06', name:'Itália 2006', flag:'🇮🇹', players:[{name:'Buffon',pos:'GR',rating:95},{name:'Zambrotta',pos:'DEF',rating:84},{name:'Cannavaro',pos:'DEF',rating:93},{name:'Materazzi',pos:'DEF',rating:79},{name:'Grosso',pos:'DEF',rating:78},{name:'Pirlo',pos:'MED',rating:92},{name:'Gattuso',pos:'MED',rating:84},{name:'Perrotta',pos:'MED',rating:78},{name:'Camoranesi',pos:'MED',rating:79},{name:'Totti',pos:'AVA',rating:87},{name:'Toni',pos:'AVA',rating:81}]},
+  { id:'esp10', name:'Espanha 2010', flag:'🇪🇸', players:[{name:'Casillas',pos:'GR',rating:93},{name:'Sergio Ramos',pos:'DEF',rating:90},{name:'Piqué',pos:'DEF',rating:86},{name:'Puyol',pos:'DEF',rating:88},{name:'Capdevila',pos:'DEF',rating:78},{name:'Alonso',pos:'MED',rating:90},{name:'Busquets',pos:'MED',rating:87},{name:'Iniesta',pos:'MED',rating:95},{name:'Silva',pos:'MED',rating:88},{name:'Villa',pos:'AVA',rating:88},{name:'Torres',pos:'AVA',rating:83}]},
+  { id:'ger14', name:'Alemanha 2014', flag:'🇩🇪', players:[{name:'Neuer',pos:'GR',rating:96},{name:'Lahm',pos:'DEF',rating:92},{name:'Boateng',pos:'DEF',rating:87},{name:'Hummels',pos:'DEF',rating:88},{name:'Höwedes',pos:'DEF',rating:79},{name:'Schweinsteiger',pos:'MED',rating:88},{name:'Kroos',pos:'MED',rating:91},{name:'Özil',pos:'MED',rating:88},{name:'Müller T.',pos:'AVA',rating:90},{name:'Klose',pos:'AVA',rating:87},{name:'Götze',pos:'AVA',rating:83}]},
+  { id:'fra18', name:'França 2018', flag:'🇫🇷', players:[{name:'Lloris',pos:'GR',rating:88},{name:'Pavard',pos:'DEF',rating:80},{name:'Varane',pos:'DEF',rating:88},{name:'Umtiti',pos:'DEF',rating:82},{name:'Hernández',pos:'DEF',rating:81},{name:'Kanté',pos:'MED',rating:92},{name:'Pogba',pos:'MED',rating:87},{name:'Tolisso',pos:'MED',rating:78},{name:'Griezmann',pos:'AVA',rating:90},{name:'Mbappé',pos:'AVA',rating:95},{name:'Giroud',pos:'AVA',rating:81}]},
+  { id:'arg22', name:'Argentina 2022', flag:'🇦🇷', players:[{name:'E. Martínez',pos:'GR',rating:91},{name:'Molina',pos:'DEF',rating:82},{name:'Otamendi',pos:'DEF',rating:84},{name:'Romero',pos:'DEF',rating:85},{name:'Tagliafico',pos:'DEF',rating:79},{name:'De Paul',pos:'MED',rating:85},{name:'Mac Allister',pos:'MED',rating:83},{name:'Enzo F.',pos:'MED',rating:84},{name:'Di María',pos:'AVA',rating:87},{name:'Álvarez',pos:'AVA',rating:83},{name:'Messi',pos:'AVA',rating:99}]},
+  { id:'ned74', name:'Holanda 1974', flag:'🇳🇱', players:[{name:'Jongbloed',pos:'GR',rating:78},{name:'Suurbier',pos:'DEF',rating:80},{name:'Rijsbergen',pos:'DEF',rating:77},{name:'Haan',pos:'DEF',rating:79},{name:'Krol',pos:'DEF',rating:88},{name:'Jansen',pos:'MED',rating:81},{name:'Van Hanegem',pos:'MED',rating:87},{name:'Neeskens',pos:'MED',rating:91},{name:'Rep',pos:'AVA',rating:84},{name:'Cruyff',pos:'AVA',rating:99},{name:'Rensenbrink',pos:'AVA',rating:84}]},
+  { id:'eng66', name:'Inglaterra 1966', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', players:[{name:'Banks',pos:'GR',rating:92},{name:'Cohen',pos:'DEF',rating:79},{name:'Charlton J.',pos:'DEF',rating:84},{name:'Moore',pos:'DEF',rating:95},{name:'Wilson',pos:'DEF',rating:78},{name:'Ball',pos:'MED',rating:83},{name:'Stiles',pos:'MED',rating:80},{name:'Charlton B.',pos:'MED',rating:93},{name:'Peters',pos:'AVA',rating:82},{name:'Hurst',pos:'AVA',rating:88},{name:'Hunt',pos:'AVA',rating:78}]},
+  { id:'por66', name:'Portugal 1966', flag:'🇵🇹', players:[{name:'Pereira',pos:'GR',rating:78},{name:'Festa',pos:'DEF',rating:74},{name:'Vicente',pos:'DEF',rating:75},{name:'Hilário',pos:'DEF',rating:76},{name:'Baptista',pos:'DEF',rating:73},{name:'Graça',pos:'MED',rating:78},{name:'Coluna',pos:'MED',rating:87},{name:'Augusto',pos:'MED',rating:82},{name:'Torres',pos:'AVA',rating:83},{name:'Eusébio',pos:'AVA',rating:97},{name:'Simões',pos:'AVA',rating:81}]},
+  { id:'bra94', name:'Brasil 1994', flag:'🇧🇷', players:[{name:'Taffarel',pos:'GR',rating:86},{name:'Cafu',pos:'DEF',rating:89},{name:'Aldair',pos:'DEF',rating:83},{name:'Marcio Santos',pos:'DEF',rating:80},{name:'Branco',pos:'DEF',rating:81},{name:'Mauro Silva',pos:'MED',rating:77},{name:'Mazinho',pos:'MED',rating:78},{name:'Zinho',pos:'MED',rating:82},{name:'Rai',pos:'MED',rating:80},{name:'Romário',pos:'AVA',rating:97},{name:'Bebeto',pos:'AVA',rating:92}]},
+  { id:'uru30', name:'Uruguai 1930', flag:'🇺🇾', players:[{name:'Ballesteros',pos:'GR',rating:74},{name:'Nasazzi',pos:'DEF',rating:84},{name:'Mascheroni',pos:'DEF',rating:77},{name:'Andrade',pos:'DEF',rating:85},{name:'Gestido',pos:'DEF',rating:78},{name:'Álvarez',pos:'MED',rating:76},{name:'Fernández',pos:'MED',rating:82},{name:'Castro',pos:'AVA',rating:79},{name:'Cea',pos:'AVA',rating:83},{name:'Scarone',pos:'AVA',rating:86},{name:'Iriarte',pos:'AVA',rating:78}]}
+];
+
+let squad=[], currentRound=0, currentSelection=null, selectedPlayer=null, rerollsLeft=3, shownThisRound=[], chosenTactic=null;
+
+function spotsLeft(){
+  const filled={GR:0,DEF:0,MED:0,AVA:0};
+  squad.forEach(p=>filled[p.pos]++);
+  const left={};
+  Object.keys(chosenTactic.quota).forEach(pos=>{left[pos]=chosenTactic.quota[pos]-filled[pos];});
+  return left;
+}
+function isLocked(pos){ return spotsLeft()[pos]<=0; }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='screen-tactics') renderTactics();
+}
+
+function renderTactics(){
+  document.getElementById('tactic-grid').innerHTML=TACTICS.map(t=>{
+    const rows=[{pos:'AVA',c:t.quota.AVA},{pos:'MED',c:t.quota.MED},{pos:'DEF',c:t.quota.DEF},{pos:'GR',c:1}]
+      .map(r=>`<div class="tac-row">${Array(r.c).fill(0).map(()=>`<div class="tac-dot${r.pos==='GR'?' gr':''}"></div>`).join('')}</div>`).join('');
+    return `<div class="tactic-card${chosenTactic&&chosenTactic.id===t.id?' selected':''}" id="tc-${t.id}" onclick="selectTactic('${t.id}')">
+      <div class="tac-name">${t.name}</div><div class="tac-label">${t.label}</div>
+      <div class="tac-viz">${rows}</div>
+      <div class="tac-desc">${t.desc}</div>
+      <div class="tac-badges"><span class="tac-badge">${t.quota.DEF} DEF</span><span class="tac-badge">${t.quota.MED} MED</span><span class="tac-badge">${t.quota.AVA} AVA</span></div>
+    </div>`;
+  }).join('');
+}
+
+function selectTactic(id){
+  chosenTactic=TACTICS.find(t=>t.id===id);
+  document.querySelectorAll('.tactic-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('tc-'+id).classList.add('selected');
+  document.getElementById('btn-tactic-confirm').disabled=false;
+}
+
+function confirmTactic(){
+  squad=[]; currentRound=0; selectedPlayer=null; rerollsLeft=3; shownThisRound=[];
+  document.getElementById('tactic-badge-small').textContent='· '+chosenTactic.name;
+  showScreen('screen-draft');
+  loadRound();
+}
+
+function pickSelection(){
+  const fresh=SELS.filter(s=>!shownThisRound.includes(s.id));
+  const pool=fresh.length>0?fresh:SELS.filter(s=>s.id!==(currentSelection&&currentSelection.id));
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function loadRound(){
+  shownThisRound=[];
+  currentSelection=pickSelection();
+  shownThisRound.push(currentSelection.id);
+  selectedPlayer=null;
+  const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
+  document.getElementById('prog').style.width=(currentRound/total*100)+'%';
+  document.getElementById('prog-label').textContent=`Escolha ${currentRound+1} de ${total}`;
+  renderSlotsDisplay();
+  renderDraftInfo();
+  document.getElementById('btn-confirm').disabled=true;
+  document.getElementById('reroll-count').textContent=`Rerolls: ${rerollsLeft} restantes`;
+  renderPlayerGrid();
+  renderMiniSquad();
+}
+
+function renderSlotsDisplay(){
+  const left=spotsLeft();
+  const order=['GR','DEF','MED','AVA'];
+  document.getElementById('slots-display').innerHTML=order.map(pos=>{
+    const total=chosenTactic.quota[pos]; const filled=total-left[pos];
+    return Array(total).fill(0).map((_,i)=>`<span class="slot-pill ${i<filled?'filled':'open'}">${POS_LABELS[pos]}</span>`).join('');
+  }).join('');
+}
+
+function renderDraftInfo(){
+  const left=spotsLeft();
+  const avail=Object.entries(left).filter(([,v])=>v>0).map(([k,v])=>`${v}× ${POS_LABELS[k]}`).join(', ');
+  document.getElementById('draft-info').innerHTML=`<strong>${currentSelection.flag} ${currentSelection.name}</strong> &nbsp;·&nbsp; Vagas: ${avail}`;
+}
+
+function renderPlayerGrid(){
+  const sorted=[...currentSelection.players].sort((a,b)=>b.rating-a.rating);
+  document.getElementById('player-grid').innerHTML=sorted.map(p=>{
+    const locked=isLocked(p.pos);
+    const sid='pc_'+p.name.replace(/[^a-zA-Z0-9]/g,'_');
+    const sname=p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div class="player-card${locked?' locked':''}" id="${sid}" ${locked?'':` onclick="selectPlayer(this,'${sname}')"`}>
+      <div class="p-name">${p.name}</div>
+      <div class="p-pos">${POS_LABELS[p.pos]}</div>
+      <div class="p-rating-bar"><div class="p-rating-fill" style="width:${p.rating}%;background:${RC(p.rating)}"></div></div>
+      <div class="p-rating-num">Nota: <strong style="color:${RC(p.rating)}">${p.rating}</strong></div>
+      ${locked?'<div class="p-locked-msg">Posição completa</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function selectPlayer(el,name){
+  selectedPlayer=currentSelection.players.find(p=>p.name===name);
+  if(!selectedPlayer||isLocked(selectedPlayer.pos)) return;
+  document.querySelectorAll('.player-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('btn-confirm').disabled=false;
+}
+
+function confirmPick(){
+  if(!selectedPlayer||isLocked(selectedPlayer.pos)) return;
+  squad.push({...selectedPlayer,flag:currentSelection.flag,selName:currentSelection.name});
+  currentRound++;
+  const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
+  if(currentRound>=total){showSquad();return;}
+  loadRound();
+}
+
+function rerollSelection(){
+  if(rerollsLeft<=0) return;
+  rerollsLeft--;
+  const newSel=pickSelection();
+  shownThisRound.push(newSel.id);
+  currentSelection=newSel;
+  selectedPlayer=null;
+  document.getElementById('btn-confirm').disabled=true;
+  document.getElementById('reroll-count').textContent=`Rerolls: ${rerollsLeft} restantes`;
+  renderDraftInfo();
+  renderPlayerGrid();
+}
+
+function renderMiniSquad(){
+  document.getElementById('mini-squad').innerHTML=squad.map(p=>
+    `<span class="mini-pill">${p.flag} ${p.name}<span class="mp">${p.pos}</span></span>`
+  ).join('');
+}
+
+function showSquad(){
+  const avg=Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length);
+  document.getElementById('squad-avg').textContent=avg;
+  document.getElementById('squad-tactic-label').textContent=`Tática: ${chosenTactic.name} · ${chosenTactic.label}`;
+  const rows=[squad.filter(p=>p.pos==='AVA'),squad.filter(p=>p.pos==='MED'),squad.filter(p=>p.pos==='DEF'),squad.filter(p=>p.pos==='GR')].filter(r=>r.length);
+  document.getElementById('pitch-rows').innerHTML=rows.map(row=>
+    `<div class="pitch-row">${row.map(p=>`<div class="pitch-slot"><div class="pitch-avatar">${p.flag}</div><div class="pitch-name">${p.name}</div><div class="pitch-info">${p.pos} · ${p.rating}</div></div>`).join('')}</div>`
+  ).join('');
+  showScreen('screen-squad');
+}
+
+function squadRating(){ return squad.reduce((s,p)=>s+p.rating,0)/squad.length; }
+
+const OPPONENTS=[{name:'Senegal',flag:'🇸🇳'},{name:'Dinamarca',flag:'🇩🇰'},{name:'México',flag:'🇲🇽'},{name:'Japão',flag:'🇯🇵'},{name:'Colômbia',flag:'🇨🇴'},{name:'Croácia',flag:'🇭🇷'},{name:'Marrocos',flag:'🇲🇦'},{name:'EUA',flag:'🇺🇸'},{name:'Suíça',flag:'🇨🇭'},{name:'Austrália',flag:'🇦🇺'},{name:'Polónia',flag:'🇵🇱'},{name:'Costa Rica',flag:'🇨🇷'}];
+const ROUNDS=['Fase de Grupos (J1)','Fase de Grupos (J2)','Fase de Grupos (J3)','Oitavos de Final','Quartos de Final','Meia-Final','Final'];
+function getOppRating(r){return [74,76,78,81,84,87,89][Math.min(r,6)]+Math.floor(Math.random()*8)-3;}
+function simMatch(myR,oppR){const myG=Math.floor(Math.random()*4*(myR/100)*1.5);const oppG=Math.floor(Math.random()*4*(oppR/100)*1.5);return{myG,oppG,won:myG>oppG,drew:myG===oppG};}
+
+async function startSimulation(){
+  const myRating=squadRating();
+  document.getElementById('sim-subtitle').textContent=`${chosenTactic.name} · Nota média ${Math.round(myRating)}/100`;
+  showScreen('screen-sim');
+  const log=document.getElementById('sim-log');
+  document.getElementById('sim-result').style.display='none';
+  log.innerHTML='';
+  const usedOpps=[];let wins=0,losses=0,draws=0,totalGoals=0,groupPts=0,eliminated=false;
+  function getOpp(){const avail=OPPONENTS.filter(o=>!usedOpps.includes(o.name));const o=(avail.length?avail:OPPONENTS)[Math.floor(Math.random()*(avail.length||OPPONENTS.length))];usedOpps.push(o.name);return o;}
+  for(let r=0;r<7;r++){
+    await new Promise(res=>setTimeout(res,700));
+    const opp=getOpp();const oppR=getOppRating(r);const res=simMatch(myRating,oppR);
+    totalGoals+=res.myG;
+    let cls,txt;
+    if(r<3){
+      if(res.won){wins++;groupPts+=3;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG} (+3 pts)`;}
+      else if(res.drew){draws++;groupPts+=1;cls='result-draw';txt=`Empate ${res.myG}-${res.myG} (+1 pt)`;}
+      else{losses++;cls='result-loss';txt=`Derrota ${res.myG}-${res.oppG} (+0 pts)`;}
+    } else {
+      if(res.won){wins++;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG}`;}
+      else if(res.drew){const pen=Math.random()>0.45;if(pen){wins++;cls='result-draw';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✓`;}else{eliminated=true;cls='result-loss';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✗ — Eliminado`;}}
+      else{eliminated=true;cls='result-loss';txt=`Derrota ${res.myG}-${res.oppG} — Eliminado`;}
+    }
+    log.innerHTML+=`<div class="sim-match"><div class="sim-round">${ROUNDS[r]}</div><span class="sim-teams">LegendsPick vs ${opp.flag} ${opp.name}</span> — <span class="${cls}">${txt}</span></div>`;
+    log.scrollTop=log.scrollHeight;
+    if(r===2&&groupPts<3){await new Promise(res=>setTimeout(res,400));log.innerHTML+=`<div class="sim-match"><span style="color:var(--text3)">Eliminado na fase de grupos com ${groupPts} pontos.</span></div>`;eliminated=true;}
+    if(eliminated) break;
+  }
+  await new Promise(res=>setTimeout(res,600));
+  const champion=!eliminated&&wins>=4;
+  document.getElementById('result-banner').innerHTML=champion
+    ?`<span class="result-trophy">🏆</span><span class="result-title">Campeão do Mundo</span><span class="result-sub">O teu ${chosenTactic.name} conquistou a Copa do Mundo</span>`
+    :`<span class="result-trophy">⚽</span><span class="result-title">Torneio Terminado</span><span class="result-sub">${wins} vitórias · ${draws} empates · ${losses} derrotas</span>`;
+  document.getElementById('final-stats').innerHTML=`
+    <div class="fstat"><div class="fstat-label">Nota Média</div><div class="fstat-value">${Math.round(myRating)}</div></div>
+    <div class="fstat"><div class="fstat-label">Tática</div><div class="fstat-value" style="font-size:24px">${chosenTactic.name}</div></div>
+    <div class="fstat"><div class="fstat-label">Vitórias</div><div class="fstat-value">${wins}</div></div>
+    <div class="fstat"><div class="fstat-label">Golos</div><div class="fstat-value">${totalGoals}</div></div>`;
+  document.getElementById('sim-result').style.display='block';
+}
+</script>
+</body>
+</html>
