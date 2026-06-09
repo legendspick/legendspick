@@ -177,8 +177,8 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
       <h1>Draft as<br><em>Lendas</em><br>do Futebol</h1>
       <p>Constrói o teu 11 com as maiores lendas de todas as Copas do Mundo. Escolhe a tática, faz o draft e conquista o mundo.</p>
       <div class="hero-stats">
-        <div class="hero-stat"><span class="num">15</span><span class="lbl">Seleções</span></div>
-        <div class="hero-stat"><span class="num">1930</span><span class="lbl">Até 2022</span></div>
+        <div class="hero-stat"><span class="num">30</span><span class="lbl">Seleções</span></div>
+        <div class="hero-stat"><span class="num">1930</span><span class="lbl">Até 2026</span></div>
         <div class="hero-stat"><span class="num">11</span><span class="lbl">Titulares</span></div>
       </div>
       <button class="btn btn-gold" onclick="showScreen('screen-tactics')">Começar Draft →</button>
@@ -289,12 +289,31 @@ const SELS=[
   {id:'eng66',name:'Inglaterra 1966',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',players:[{name:'Banks',pos:'GR',rating:92},{name:'Cohen',pos:'DEF',rating:79},{name:'Charlton J.',pos:'DEF',rating:84},{name:'Moore',pos:'DEF',rating:95},{name:'Wilson',pos:'DEF',rating:78},{name:'Ball',pos:'MED',rating:83},{name:'Stiles',pos:'MED',rating:80},{name:'Charlton B.',pos:'MED',rating:93},{name:'Peters',pos:'AVA',rating:82},{name:'Hurst',pos:'AVA',rating:88},{name:'Hunt',pos:'AVA',rating:78}]},
   {id:'por66',name:'Portugal 1966',flag:'🇵🇹',players:[{name:'Pereira',pos:'GR',rating:78},{name:'Festa',pos:'DEF',rating:74},{name:'Vicente',pos:'DEF',rating:75},{name:'Hilário',pos:'DEF',rating:76},{name:'Baptista',pos:'DEF',rating:73},{name:'Graça',pos:'MED',rating:78},{name:'Coluna',pos:'MED',rating:87},{name:'Augusto',pos:'MED',rating:82},{name:'Torres',pos:'AVA',rating:83},{name:'Eusébio',pos:'AVA',rating:97},{name:'Simões',pos:'AVA',rating:81}]},
   {id:'bra94',name:'Brasil 1994',flag:'🇧🇷',players:[{name:'Taffarel',pos:'GR',rating:86},{name:'Cafu',pos:'DEF',rating:89},{name:'Aldair',pos:'DEF',rating:83},{name:'Marcio Santos',pos:'DEF',rating:80},{name:'Branco',pos:'DEF',rating:81},{name:'Mauro Silva',pos:'MED',rating:77},{name:'Mazinho',pos:'MED',rating:78},{name:'Zinho',pos:'MED',rating:82},{name:'Rai',pos:'MED',rating:80},{name:'Romário',pos:'AVA',rating:97},{name:'Bebeto',pos:'AVA',rating:92}]},
-  {id:'uru30',name:'Uruguai 1930',flag:'🇺🇾',players:[{name:'Ballesteros',pos:'GR',rating:74},{name:'Nasazzi',pos:'DEF',rating:84},{name:'Mascheroni',pos:'DEF',rating:77},{name:'Andrade',pos:'DEF',rating:85},{name:'Gestido',pos:'DEF',rating:78},{name:'Álvarez',pos:'MED',rating:76},{name:'Fernández',pos:'MED',rating:82},{name:'Castro',pos:'AVA',rating:79},{name:'Cea',pos:'AVA',rating:83},{name:'Scarone',pos:'AVA',rating:86},{name:'Iriarte',pos:'AVA',rating:78}]}
+  {id:'uru30',name:'Uruguai 1930',flag:'🇺🇾',players:[{name:'Ballesteros',pos:'GR',rating:74},{name:'Nasazzi',pos:'DEF',rating:84},{name:'Mascheroni',pos:'DEF',rating:77},{name:'Andrade',pos:'DEF',rating:85},{name:'Gestido',pos:'DEF',rating:78},{name:'Álvarez',pos:'MED',rating:76},{name:'Fernández',pos:'MED',rating:82},{name:'Castro',pos:'AVA',rating:79},{name:'Cea',pos:'AVA',rating:83},{name:'Scarone',pos:'AVA',rating:86},{name:'Iriarte',pos:'AVA',rating:78}]},
+  {id:'bul94',name:'Bulgária 1994',flag:'🇧🇬',players:[{name:'Mikhailov',pos:'GR',rating:78},{name:'Hubchev',pos:'DEF',rating:73},{name:'Ivanov',pos:'DEF',rating:74},{name:'Lechkov',pos:'DEF',rating:72},{name:'Kiriakov',pos:'DEF',rating:72},{name:'Letchkov',pos:'MED',rating:83},{name:'Balakov',pos:'MED',rating:82},{name:'Yankov',pos:'MED',rating:75},{name:'Kostadinov',pos:'AVA',rating:79},{name:'Sirakov',pos:'AVA',rating:74},{name:'Stoichkov',pos:'AVA',rating:92}]},
+  {id:'rom94',name:'Roménia 1994',flag:'🇷🇴',players:[{name:'Stelea',pos:'GR',rating:78},{name:'Belodedici',pos:'DEF',rating:79},{name:'Popescu',pos:'DEF',rating:82},{name:'Petrescu',pos:'DEF',rating:80},{name:'Selymes',pos:'DEF',rating:72},{name:'Lupescu',pos:'MED',rating:76},{name:'Munteanu',pos:'MED',rating:78},{name:'Dumitrescu',pos:'MED',rating:84},{name:'Hagi',pos:'MED',rating:91},{name:'Lacatus',pos:'AVA',rating:77},{name:'Raducioiu',pos:'AVA',rating:82}]},
+  {id:'cro98',name:'Croácia 1998',flag:'🇭🇷',players:[{name:'Ladić',pos:'GR',rating:81},{name:'Bilić',pos:'DEF',rating:83},{name:'Jarni',pos:'DEF',rating:82},{name:'Štimac',pos:'DEF',rating:80},{name:'Tudor',pos:'DEF',rating:78},{name:'Boban',pos:'MED',rating:88},{name:'Prosinečki',pos:'MED',rating:84},{name:'Asanović',pos:'MED',rating:79},{name:'Soldo',pos:'MED',rating:76},{name:'Šuker',pos:'AVA',rating:91},{name:'Vlović',pos:'AVA',rating:74}]},
+  {id:'hun54',name:'Hungria 1954',flag:'🇭🇺',players:[{name:'Grosics',pos:'GR',rating:85},{name:'Buzánszky',pos:'DEF',rating:78},{name:'Lóránt',pos:'DEF',rating:80},{name:'Lantos',pos:'DEF',rating:79},{name:'Tóth',pos:'DEF',rating:74},{name:'Bozsik',pos:'MED',rating:88},{name:'Hidegkuti',pos:'MED',rating:89},{name:'Budai',pos:'MED',rating:76},{name:'Czibor',pos:'AVA',rating:85},{name:'Kocsis',pos:'AVA',rating:92},{name:'Puskás',pos:'AVA',rating:96}]},
+  {id:'den92',name:'Dinamarca 1992',flag:'🇩🇰',players:[{name:'Schmeichel',pos:'GR',rating:93},{name:'Olsen',pos:'DEF',rating:78},{name:'Nielsen',pos:'DEF',rating:76},{name:'Sivebæk',pos:'DEF',rating:75},{name:'Piechnik',pos:'DEF',rating:72},{name:'Jensen',pos:'MED',rating:80},{name:'Vilfort',pos:'MED',rating:79},{name:'Christofte',pos:'MED',rating:74},{name:'Laudrup B.',pos:'MED',rating:87},{name:'Povlsen',pos:'AVA',rating:78},{name:'Laudrup M.',pos:'AVA',rating:91}]},
+  {id:'tur02',name:'Turquia 2002',flag:'🇹🇷',players:[{name:'Rüştü',pos:'GR',rating:85},{name:'Alpay',pos:'DEF',rating:79},{name:'Bülent',pos:'DEF',rating:76},{name:'Fatih',pos:'DEF',rating:74},{name:'Yıldıray',pos:'DEF',rating:73},{name:'Emre',pos:'MED',rating:83},{name:'Davala',pos:'MED',rating:80},{name:'Okan',pos:'MED',rating:77},{name:'Ergun',pos:'MED',rating:72},{name:'Hasan Şaş',pos:'AVA',rating:81},{name:'Şükür',pos:'AVA',rating:86}]},
+  {id:'kor02',name:'Coreia do Sul 2002',flag:'🇰🇷',players:[{name:'Lee Woon-jae',pos:'GR',rating:80},{name:'Choi Jin-cheul',pos:'DEF',rating:78},{name:'Lee Young-pyo',pos:'DEF',rating:82},{name:'Hong Myung-bo',pos:'DEF',rating:84},{name:'Kim Tae-young',pos:'DEF',rating:74},{name:'Park Ji-sung',pos:'MED',rating:85},{name:'Yoo Sang-chul',pos:'MED',rating:79},{name:'Kim Nam-il',pos:'MED',rating:77},{name:'Song Chong-gug',pos:'MED',rating:75},{name:'Ahn Jung-hwan',pos:'AVA',rating:84},{name:'Choi Yong-soo',pos:'AVA',rating:76}]},
+  {id:'cze96',name:'Rep. Checa 1996',flag:'🇨🇿',players:[{name:'Kouba',pos:'GR',rating:79},{name:'Kadlec',pos:'DEF',rating:78},{name:'Horňák',pos:'DEF',rating:74},{name:'Rada',pos:'DEF',rating:75},{name:'Novák',pos:'DEF',rating:73},{name:'Nedvěd',pos:'MED',rating:86},{name:'Poborský',pos:'MED',rating:85},{name:'Berger',pos:'MED',rating:84},{name:'Frýdek',pos:'MED',rating:72},{name:'Šmicer',pos:'AVA',rating:80},{name:'Kuka',pos:'AVA',rating:82}]},
+
+{id:'por16',name:'Portugal 2016',flag:'🇵🇹',players:[{name:'Rui Patrício',pos:'GR',rating:84},{name:'Cédric',pos:'DEF',rating:76},{name:'Pepe',pos:'DEF',rating:85},{name:'Fonte',pos:'DEF',rating:80},{name:'Guerreiro',pos:'DEF',rating:79},{name:'Moutinho',pos:'MED',rating:84},{name:'Adrien Silva',pos:'MED',rating:76},{name:'William Carvalho',pos:'MED',rating:78},{name:'Quaresma',pos:'AVA',rating:82},{name:'Nani',pos:'AVA',rating:81},{name:'Ronaldo',pos:'AVA',rating:95}]},
+  {id:'sen02',name:'Senegal 2002',flag:'🇸🇳',players:[{name:'Diallo',pos:'GR',rating:78},{name:'Cissé',pos:'DEF',rating:76},{name:'Diatta',pos:'DEF',rating:75},{name:'Daf',pos:'DEF',rating:74},{name:'Coly',pos:'DEF',rating:73},{name:'Diop',pos:'MED',rating:80},{name:'Fadiga',pos:'MED',rating:79},{name:'Camara',pos:'MED',rating:77},{name:'Thiaw',pos:'DEF',rating:72},{name:'Henri Camara',pos:'AVA',rating:82},{name:'Diouf',pos:'AVA',rating:88}]},
+  {id:'alg14',name:'Argélia 2014',flag:'🇩🇿',players:[{name:"M'Bolhi",pos:'GR',rating:82},{name:'Halliche',pos:'DEF',rating:75},{name:'Bougherra',pos:'DEF',rating:78},{name:'Gaouaoui',pos:'DEF',rating:73},{name:'Ghoulam',pos:'DEF',rating:79},{name:'Taider',pos:'MED',rating:77},{name:'Bentaleb',pos:'MED',rating:78},{name:'Brahimi',pos:'MED',rating:84},{name:'Feghouli',pos:'AVA',rating:82},{name:'Soudani',pos:'AVA',rating:76},{name:'Slimani',pos:'AVA',rating:83}]},
+  {id:'mar22',name:'Marrocos 2022',flag:'🇲🇦',players:[{name:'Bono',pos:'GR',rating:87},{name:'Hakimi',pos:'DEF',rating:87},{name:'Saïss',pos:'DEF',rating:83},{name:'Aguerd',pos:'DEF',rating:81},{name:'Mazraoui',pos:'DEF',rating:82},{name:'Amrabat',pos:'MED',rating:86},{name:'Ounahi',pos:'MED',rating:80},{name:'Dari',pos:'DEF',rating:76},{name:'Ziyech',pos:'AVA',rating:84},{name:'En-Nesyri',pos:'AVA',rating:83},{name:'Boufal',pos:'AVA',rating:80}]},
+  {id:'gha10',name:'Gana 2010',flag:'🇬🇭',players:[{name:'Kingson',pos:'GR',rating:79},{name:'Pantsil',pos:'DEF',rating:74},{name:'Mensah',pos:'DEF',rating:78},{name:'Inkoom',pos:'DEF',rating:73},{name:'Asamoah',pos:'MED',rating:82},{name:'Muntari',pos:'MED',rating:83},{name:'Annan',pos:'MED',rating:76},{name:'Boateng K.',pos:'MED',rating:80},{name:'Ayew A.',pos:'AVA',rating:79},{name:'Dede Ayew',pos:'AVA',rating:76},{name:'Gyan',pos:'AVA',rating:87}]},
+  {id:'usa26',name:'EUA 2026',flag:'🇺🇸',players:[{name:'Turner',pos:'GR',rating:80},{name:'Dest',pos:'DEF',rating:79},{name:'Zimmerman',pos:'DEF',rating:78},{name:'Richards',pos:'DEF',rating:77},{name:'Robinson',pos:'DEF',rating:78},{name:'McKennie',pos:'MED',rating:82},{name:'Adams',pos:'MED',rating:84},{name:'Musah',pos:'MED',rating:81},{name:'Reyna',pos:'AVA',rating:80},{name:'Weah',pos:'AVA',rating:78},{name:'Pulisic',pos:'AVA',rating:87}]},
+  {id:'jpn22',name:'Japão 2022',flag:'🇯🇵',players:[{name:'Gonda',pos:'GR',rating:79},{name:'Yamane',pos:'DEF',rating:78},{name:'Yoshida',pos:'DEF',rating:82},{name:'Itakura',pos:'DEF',rating:80},{name:'Nagatomo',pos:'DEF',rating:77},{name:'Endo',pos:'MED',rating:84},{name:'Tanaka',pos:'MED',rating:81},{name:'Kamada',pos:'MED',rating:82},{name:'Doan',pos:'AVA',rating:80},{name:'Asano',pos:'AVA',rating:79},{name:'Mitoma',pos:'AVA',rating:83}]}
 ];
 
 function selAvgRating(sel){ return Math.round(sel.players.reduce((s,p)=>s+p.rating,0)/sel.players.length); }
 
-let squad=[],currentRound=0,currentSelection=null,selectedPlayer=null,rerollsLeft=3,shownThisRound=[],chosenTactic=null,lastAdded=null;
+// State
+let squad=[], currentRound=0, currentSelection=null, selectedPlayer=null;
+let rerollsLeft=3, chosenTactic=null, lastAdded=null;
+let usedSelectionIds=[]; // selections already shown this draft — never repeat
 
 function spotsLeft(){
   const filled={GR:0,DEF:0,MED:0,AVA:0};
@@ -303,7 +322,9 @@ function spotsLeft(){
   Object.keys(chosenTactic.quota).forEach(pos=>{left[pos]=chosenTactic.quota[pos]-filled[pos];});
   return left;
 }
-function isLocked(pos){ return spotsLeft()[pos]<=0; }
+function isPosLocked(pos){ return spotsLeft()[pos]<=0; }
+// A player is locked if their position is full OR they're already in the squad
+function isPlayerLocked(p){ return isPosLocked(p.pos) || squad.some(s=>s.name===p.name); }
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -332,21 +353,23 @@ function selectTactic(id){
 }
 
 function confirmTactic(){
-  squad=[]; currentRound=0; selectedPlayer=null; rerollsLeft=3; shownThisRound=[]; lastAdded=null;
+  squad=[]; currentRound=0; selectedPlayer=null; rerollsLeft=3; lastAdded=null;
+  usedSelectionIds=[];
   showScreen('screen-draft');
   loadRound();
 }
 
 function pickSelection(){
-  const fresh=SELS.filter(s=>!shownThisRound.includes(s.id));
-  const pool=fresh.length>0?fresh:SELS.filter(s=>s.id!==(currentSelection&&currentSelection.id));
+  // Never repeat a selection already used in this draft
+  const fresh=SELS.filter(s=>!usedSelectionIds.includes(s.id));
+  // Fallback if somehow all used (11 picks, 15 sels — shouldn't happen)
+  const pool=fresh.length>0 ? fresh : SELS.filter(s=>s.id!==(currentSelection&&currentSelection.id));
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
 function loadRound(){
-  shownThisRound=[];
   currentSelection=pickSelection();
-  shownThisRound.push(currentSelection.id);
+  usedSelectionIds.push(currentSelection.id); // mark as used for entire draft
   selectedPlayer=null; lastAdded=null;
   const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
   document.getElementById('prog').style.width=(currentRound/total*100)+'%';
@@ -376,72 +399,56 @@ function renderDraftInfo(){
 function renderPlayerGrid(){
   const sorted=[...currentSelection.players].sort((a,b)=>b.rating-a.rating);
   document.getElementById('player-grid').innerHTML=sorted.map(p=>{
-    const locked=isLocked(p.pos);
+    const locked=isPlayerLocked(p);
     const sid='pc_'+p.name.replace(/[^a-zA-Z0-9]/g,'_');
     const sname=p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const lockMsg = locked
+      ? `<div class="p-locked-msg">${squad.some(s=>s.name===p.name)?'Já no plantel':'Posição completa'}</div>`
+      : '';
     return `<div class="player-card${locked?' locked':''}" id="${sid}" ${locked?'':` onclick="selectPlayer(this,'${sname}')"`}>
       <div class="p-name">${p.name}</div>
       <div class="p-pos">${POS_LABELS[p.pos]}</div>
       <div class="p-rating-bar"><div class="p-rating-fill" style="width:${p.rating}%;background:${RC(p.rating)}"></div></div>
       <div class="p-rating-num">Nota: <strong style="color:${RC(p.rating)}">${p.rating}</strong></div>
-      ${locked?'<div class="p-locked-msg">Posição completa</div>':''}
+      ${lockMsg}
     </div>`;
   }).join('');
 }
 
-// Build live pitch rows based on tactic quota
-function buildPitchRows(squadData, newPlayerName) {
-  const quota = chosenTactic.quota;
-  // Always render one row per position group: AVA, MED, DEF, GR (top to bottom)
-  const posOrder = ['AVA','MED','DEF','GR'];
-  const html = posOrder.map(pos => {
-    const total = quota[pos];
-    // Get all players of this pos from squad, in order added
-    const filled = squadData.filter(p => p.pos === pos);
-    let rowHtml = '';
-    // Always render exactly `total` slots for this position
-    for(let i = 0; i < total; i++){
-      const p = filled[i] || null;
-      const isNew = p && p.name === newPlayerName;
-      if(p){
-        rowHtml += `<div class="lp-slot filled${isNew?' just-added':''}">
-          <div class="lp-avatar">${p.flag}</div>
-          <div class="lp-name">${p.name}</div>
-          <div class="lp-rat">${p.rating}</div>
-        </div>`;
-      } else {
-        rowHtml += `<div class="lp-slot">
-          <div class="lp-avatar">·</div>
-          <div class="lp-name">${POS_LABELS[pos]}</div>
-          <div class="lp-rat">&nbsp;</div>
-        </div>`;
-      }
+function buildPitchRows(squadData, newPlayerName){
+  const quota=chosenTactic.quota;
+  return ['AVA','MED','DEF','GR'].map(pos=>{
+    const total=quota[pos];
+    const filled=squadData.filter(p=>p.pos===pos);
+    let rowHtml='';
+    for(let i=0;i<total;i++){
+      const p=filled[i]||null;
+      const isNew=p&&p.name===newPlayerName;
+      rowHtml+=p
+        ?`<div class="lp-slot filled${isNew?' just-added':''}"><div class="lp-avatar">${p.flag}</div><div class="lp-name">${p.name}</div><div class="lp-rat">${p.rating}</div></div>`
+        :`<div class="lp-slot"><div class="lp-avatar">·</div><div class="lp-name">${POS_LABELS[pos]}</div><div class="lp-rat">&nbsp;</div></div>`;
     }
-    // Each position is always ONE row, all slots side by side
     return `<div class="lp-row">${rowHtml}</div>`;
   }).join('');
-  return html;
 }
 
 function renderLivePitch(newPlayerName){
-  const pitch = document.getElementById('live-pitch');
-  pitch.innerHTML = buildPitchRows(squad, newPlayerName);
-  // Update avg
-  const avg = squad.length ? Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length) : '—';
-  document.getElementById('lp-avg').textContent = avg;
+  document.getElementById('live-pitch').innerHTML=buildPitchRows(squad,newPlayerName);
+  const avg=squad.length?Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length):'—';
+  document.getElementById('lp-avg').textContent=avg;
 }
 
 function selectPlayer(el,name){
   selectedPlayer=currentSelection.players.find(p=>p.name===name);
-  if(!selectedPlayer||isLocked(selectedPlayer.pos)) return;
+  if(!selectedPlayer||isPlayerLocked(selectedPlayer)) return;
   document.querySelectorAll('.player-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
   document.getElementById('btn-confirm').disabled=false;
 }
 
 function confirmPick(){
-  if(!selectedPlayer||isLocked(selectedPlayer.pos)) return;
-  const added = {...selectedPlayer, flag:currentSelection.flag, selName:currentSelection.name};
+  if(!selectedPlayer||isPlayerLocked(selectedPlayer)) return;
+  const added={...selectedPlayer,flag:currentSelection.flag,selName:currentSelection.name};
   squad.push(added);
   currentRound++;
   renderLivePitch(added.name);
@@ -454,7 +461,7 @@ function rerollSelection(){
   if(rerollsLeft<=0) return;
   rerollsLeft--;
   const newSel=pickSelection();
-  shownThisRound.push(newSel.id);
+  usedSelectionIds.push(newSel.id); // also mark rerolled selection as used
   currentSelection=newSel;
   selectedPlayer=null;
   document.getElementById('btn-confirm').disabled=true;
@@ -556,7 +563,6 @@ async function startSimulation(){
     <div class="fstat"><div class="fstat-label">Tática</div><div class="fstat-value" style="font-size:24px">${chosenTactic.name}</div></div>
     <div class="fstat"><div class="fstat-label">Vitórias</div><div class="fstat-value">${wins}</div></div>
     <div class="fstat"><div class="fstat-label">Golos</div><div class="fstat-value">${totalGoals}</div></div>`;
-  // Render squad in result
   renderFullPitch('sim-pitch-rows');
   document.getElementById('sim-result').style.display='block';
 }
