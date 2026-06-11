@@ -695,13 +695,18 @@ function generateScorers(n, squadData) {
 // Generate opponent scorers (generic names based on selection)
 function generateOppScorers(n, oppSel) {
   const scorers = [];
-  // Use actual players from the opponent selection if available
-  const attackers = oppSel.players ? oppSel.players.filter(p => p.pos==='AVA' || p.pos==='MED') : [];
-  for (let i=0; i<n; i++) {
+  let pool = [];
+  if(oppSel.players && oppSel.players.length) {
+    if(typeof oppSel.players[0] === 'string') {
+      pool = oppSel.players;
+    } else {
+      const atk = oppSel.players.filter(p=>p.pos==='AVA'||p.pos==='MED');
+      pool = (atk.length ? atk : oppSel.players).map(p=>p.name);
+    }
+  }
+  for(let i=0; i<n; i++) {
     const min = Math.floor(Math.random()*90)+1;
-    const name = attackers.length
-      ? attackers[Math.floor(Math.random()*attackers.length)].name
-      : 'Desconhecido';
+    const name = pool.length ? pool[Math.floor(Math.random()*pool.length)] : '?';
     scorers.push({ name, min });
   }
   return scorers.sort((a,b) => a.min - b.min);
@@ -797,52 +802,76 @@ function dismissReveal() {
 // WORLD CUP 2026 REAL GROUPS
 const WC2026_GROUPS = {
   A: [
-    {name:'México',flag:'🇲🇽',rating:78},{name:'Czechia',flag:'🇨🇿',rating:74},
-    {name:'Coreia do Sul',flag:'🇰🇷',rating:76},{name:'África do Sul',flag:'🇿🇦',rating:64}
+    {name:'México',flag:'🇲🇽',rating:78,players:['Ochoa','Sánchez','Araujo','Álvarez','Lozano','Antuna','Giménez']},
+    {name:'Czechia',flag:'🇨🇿',rating:74,players:['Vaclík','Kúdela','Holeš','Souček','Schick','Barák','Jankto']},
+    {name:'Coreia do Sul',flag:'🇰🇷',rating:76,players:['Kim S.','Kim M.','Lee J.','Hwang H.','Son H.','Lee K.','Hwang U.']},
+    {name:'África do Sul',flag:'🇿🇦',rating:64,players:['Williams','Tau','Zwane','Dolly','Mothiba','Lakay','Foster']}
   ],
   B: [
-    {name:'Canadá',flag:'🇨🇦',rating:74},{name:'Suíça',flag:'🇨🇭',rating:77},
-    {name:'Bósnia-Herzegovina',flag:'🇧🇦',rating:68},{name:'Qatar',flag:'🇶🇦',rating:62}
+    {name:'Canadá',flag:'🇨🇦',rating:74,players:['Borjan','Johnston','Buchanan','Eustáquio','David','Davies','Laryea']},
+    {name:'Suíça',flag:'🇨🇭',rating:77,players:['Sommer','Akanji','Rodríguez','Freuler','Shaqiri','Embolo','Vargas']},
+    {name:'Bósnia-Herzegovina',flag:'🇧🇦',rating:68,players:['Sehic','Civic','Kolasinac','Pjanic','Dzeko','Prevljak','Krunic']},
+    {name:'Qatar',flag:'🇶🇦',rating:62,players:['Al Sheeb','Khoukhi','Hassan','Ali','Almoez','Afif','Boudiaf']}
   ],
   C: [
-    {name:'Brasil',flag:'🇧🇷',rating:85},{name:'Marrocos',flag:'🇲🇦',rating:79},
-    {name:'Escócia',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',rating:70},{name:'Haiti',flag:'🇭🇹',rating:55}
+    {name:'Brasil',flag:'🇧🇷',rating:85,players:['Alisson','Militão','Marquinhos','Danilo','Rodrygo','Vinicius','Endrick']},
+    {name:'Marrocos',flag:'🇲🇦',rating:79,players:['Bono','Hakimi','Saïss','Amrabat','Ziyech','En-Nesyri','Boufal']},
+    {name:'Escócia',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',rating:70,players:['Gordon','Hendry','McTominay','McGinn','Adams','Christie','Robertson']},
+    {name:'Haiti',flag:'🇭🇹',rating:55,players:['Voltaire','Pierre','Herold','Chery','Borgella','Noel','Saintil']}
   ],
   D: [
-    {name:'EUA',flag:'🇺🇸',rating:76},{name:'Paraguai',flag:'🇵🇾',rating:68},
-    {name:'Turquia',flag:'🇹🇷',rating:75},{name:'Austrália',flag:'🇦🇺',rating:71}
+    {name:'EUA',flag:'🇺🇸',rating:76,players:['Turner','Dest','Zimmerman','Adams','Musah','McKennie','Pulisic']},
+    {name:'Paraguai',flag:'🇵🇾',rating:68,players:['Silva','Alonso','Balbuena','Cubas','Bareiro','Sanabria','Romero']},
+    {name:'Turquia',flag:'🇹🇷',rating:75,players:['Çakır','Söyüncü','Kabak','Calhanoglu','Yazici','Yilmaz','Akturkoglu']},
+    {name:'Austrália',flag:'🇦🇺',rating:71,players:['Ryan','Souttar','Rowles','Mooy','Irvine','Leckie','Duke']}
   ],
   E: [
-    {name:'Alemanha',flag:'🇩🇪',rating:84},{name:'Equador',flag:'🇪🇨',rating:72},
-    {name:'Costa do Marfim',flag:'🇨🇮',rating:73},{name:'Curaçao',flag:'🇨🇼',rating:58}
+    {name:'Alemanha',flag:'🇩🇪',rating:84,players:['Neuer','Rüdiger','Schlotterbeck','Kimmich','Kroos','Musiala','Havertz']},
+    {name:'Equador',flag:'🇪🇨',rating:72,players:['Galíndez','Preciado','Hincapié','Gruezo','Caicedo','Plata','Valencia']},
+    {name:'Costa do Marfim',flag:'🇨🇮',rating:73,players:['Sangaré','Konaté','Fofana','Zaha','Pépé','Gradel','Haller']},
+    {name:'Curaçao',flag:'🇨🇼',rating:58,players:['Wilnis','Cijntje','Marchena','Do Rego','Martina','Bacuna','Vlijter']}
   ],
   F: [
-    {name:'Holanda',flag:'🇳🇱',rating:83},{name:'Japão',flag:'🇯🇵',rating:77},
-    {name:'Suécia',flag:'🇸🇪',rating:76},{name:'Tunísia',flag:'🇹🇳',rating:67}
+    {name:'Holanda',flag:'🇳🇱',rating:83,players:['Flekken','De Ligt','Dumfries','De Jong','Van Dijk','Gakpo','Depay']},
+    {name:'Japão',flag:'🇯🇵',rating:77,players:['Gonda','Yoshida','Itakura','Endo','Tanaka','Mitoma','Doan']},
+    {name:'Suécia',flag:'🇸🇪',rating:76,players:['Olsen','Lindelöf','Danielson','Larsson','Ekdal','Isak','Kulusevski']},
+    {name:'Tunísia',flag:'🇹🇳',rating:67,players:['Dahmen','Meriah','Talbi','Skhiri','Ben Slimane','Msakni','Jebali']}
   ],
   G: [
-    {name:'Bélgica',flag:'🇧🇪',rating:80},{name:'Irão',flag:'🇮🇷',rating:70},
-    {name:'Egito',flag:'🇪🇬',rating:68},{name:'Nova Zelândia',flag:'🇳🇿',rating:59}
+    {name:'Bélgica',flag:'🇧🇪',rating:80,players:['Casteels','Alderweireld','Vertonghen','De Bruyne','Tielemans','Lukaku','Doku']},
+    {name:'Irão',flag:'🇮🇷',rating:70,players:['Beiranvand','Pouraliganji','Rezaeian','Ezatolahi','Hajsafi','Azmoun','Taremi']},
+    {name:'Egito',flag:'🇪🇬',rating:68,players:['El Shenawy','Hegazi','Farouk','Elneny','Trezeguet','Salah','Mostafa']},
+    {name:'Nova Zelândia',flag:'🇳🇿',rating:59,players:['Sail','Hogg','Boxall','Waine','Cacace','Wood','Just']}
   ],
   H: [
-    {name:'Espanha',flag:'🇪🇸',rating:87},{name:'Uruguai',flag:'🇺🇾',rating:79},
-    {name:'Arábia Saudita',flag:'🇸🇦',rating:70},{name:'Cabo Verde',flag:'🇨🇻',rating:63}
+    {name:'Espanha',flag:'🇪🇸',rating:87,players:['Unai Simón','Carvajal','Laporte','Pedri','Gavi','Yamal','Morata']},
+    {name:'Uruguai',flag:'🇺🇾',rating:79,players:['Rochet','Godín','Araújo','Valverde','Bentancur','Núñez','Suárez']},
+    {name:'Arábia Saudita',flag:'🇸🇦',rating:70,players:['Al-Owais','Al-Bulaihi','Al-Tambakti','Al-Faraj','Al-Dawsari','Al-Shehri','Salem']},
+    {name:'Cabo Verde',flag:'🇨🇻',rating:63,players:['Vozinha','Júnior','Stopira','Andrade','Garry','Tavares','Ryan Mendes']}
   ],
   I: [
-    {name:'França',flag:'🇫🇷',rating:86},{name:'Noruega',flag:'🇳🇴',rating:78},
-    {name:'Senegal',flag:'🇸🇳',rating:74},{name:'Iraque',flag:'🇮🇶',rating:62}
+    {name:'França',flag:'🇫🇷',rating:86,players:['Maignan','Pavard','Upamecano','Tchouaméni','Camavinga','Mbappé','Dembélé']},
+    {name:'Noruega',flag:'🇳🇴',rating:78,players:['Nyland','Hanche-Olsen','Ajer','Berge','Ødeegard','Haaland','Sorloth']},
+    {name:'Senegal',flag:'🇸🇳',rating:74,players:['Mendy','Koulibaly','Kouyaté','Gueye','Sarr','Mané','Diatta']},
+    {name:'Iraque',flag:'🇮🇶',rating:62,players:['Doham','Jasim','Tariq','Amjed','Mohanad','Aymen','Hussein']}
   ],
   J: [
-    {name:'Argentina',flag:'🇦🇷',rating:88},{name:'Argélia',flag:'🇩🇿',rating:73},
-    {name:'Áustria',flag:'🇦🇹',rating:76},{name:'Jordânia',flag:'🇯🇴',rating:60}
+    {name:'Argentina',flag:'🇦🇷',rating:88,players:['E.Martínez','Romero','Otamendi','De Paul','Mac Allister','Álvarez','Messi']},
+    {name:'Argélia',flag:'🇩🇿',rating:73,players:["M'Bolhi",'Mandi','Benlamri','Bentaleb','Benrahma','Slimani','Mahrez']},
+    {name:'Áustria',flag:'🇦🇹',rating:76,players:['Pentz','Posch','Lienhart','Grillitsch','Sabitzer','Arnautovic','Gregoritsch']},
+    {name:'Jordânia',flag:'🇯🇴',rating:60,players:['Shafi','Taha','Al-Rawabdeh','Bani Attiah','Bani Yaseen','Al-Tamari','Safawi']}
   ],
   K: [
-    {name:'Portugal',flag:'🇵🇹',rating:85},{name:'Colômbia',flag:'🇨🇴',rating:79},
-    {name:'Congo RD',flag:'🇨🇩',rating:65},{name:'Uzbequistão',flag:'🇺🇿',rating:63}
+    {name:'Portugal',flag:'🇵🇹',rating:85,players:['Rui Patrício','Cancelo','Pepe','Vitinha','Bernardo','Leão','Ronaldo']},
+    {name:'Colômbia',flag:'🇨🇴',rating:79,players:['Vargas','Dávinson','Mina','Barrios','Cuadrado','James','Díaz']},
+    {name:'Congo RD',flag:'🇨🇩',rating:65,players:['Kiassumbua','Mpoku','Bokadi','Bope','Meschack','Mbokani','Kakuta']},
+    {name:'Uzbequistão',flag:'🇺🇿',rating:63,players:['Nesterov','Ashurmatov','Khamdamov','Tursunov','Shomurodov','Masharipov','Jaloliddinov']}
   ],
   L: [
-    {name:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',rating:85},{name:'Croácia',flag:'🇭🇷',rating:78},
-    {name:'Gana',flag:'🇬🇭',rating:67},{name:'Panamá',flag:'🇵🇦',rating:62}
+    {name:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',rating:85,players:['Ramsdale','Walker','Maguire','Rice','Bellingham','Saka','Kane']},
+    {name:'Croácia',flag:'🇭🇷',rating:78,players:['Livakovic','Gvardiol','Erlic','Modric','Kovacic','Perisic','Kramaric']},
+    {name:'Gana',flag:'🇬🇭',rating:67,players:['Ati-Zigi','Salisu','Amartey','Partey','Kudus','Ayew','Sulemana']},
+    {name:'Panamá',flag:'🇵🇦',rating:62,players:['Penedo','Murillo','Miller','Godoy','Fajardo','Córdoba','Arroyo']}
   ]
 };
 
@@ -896,75 +925,144 @@ async function startSimulation(){
 
   let wins=0,losses=0,draws=0,totalGoals=0,groupPts=0,eliminated=false;
   const goalTally={}; // track goals per player name
-  // Group stage: play the other 3 teams in the group
+  // --- GROUP STAGE: show each of my 3 games live, then final table ---
   const groupOpponents = groupTeams.filter(t=>t.name!=='LegendsPick');
-  // Knockout opponents: progressively harder teams from other groups
-  const allTeams = Object.values(WC2026_GROUPS).flat();
-  const usedNames = new Set([...groupTeams.map(t=>t.name),'LegendsPick']);
-  function pickKnockoutOpp(minR, maxR) {
-    const pool = allTeams.filter(t=>!usedNames.has(t.name)&&t.rating>=minR&&t.rating<=maxR);
-    const t = pool.length ? pool[Math.floor(Math.random()*pool.length)] : allTeams[Math.floor(Math.random()*allTeams.length)];
-    usedNames.add(t.name);
-    return t;
+
+  // Build standings for all 4 teams
+  const standings = groupTeams.map(t=>({...t, pts:0, gf:0, ga:0, gd:0, isMe:t.name==='LegendsPick'}));
+
+  function simGroupMatch(a, b) {
+    const res = simMatch(a.rating, b.rating);
+    a.gf+=res.myG; a.ga+=res.oppG; a.gd+=res.myG-res.oppG;
+    b.gf+=res.oppG; b.ga+=res.myG; b.gd+=res.oppG-res.myG;
+    if(res.myG>res.oppG){ a.pts+=3; }
+    else if(res.myG===res.oppG){ a.pts+=1; b.pts+=1; }
+    else { b.pts+=3; }
+    return res;
   }
-  const knockoutOpps = [
-    pickKnockoutOpp(68,80), // R32
-    pickKnockoutOpp(72,84), // QF
-    pickKnockoutOpp(78,88), // SF
-    pickKnockoutOpp(80,90), // Final
-  ];
-  const allOpponents = [...groupOpponents, ...knockoutOpps];
-  const roundNames = [
-    `Fase de Grupos (J1) · Grupo ${chosenGroupKey}`,
-    `Fase de Grupos (J2) · Grupo ${chosenGroupKey}`,
-    `Fase de Grupos (J3) · Grupo ${chosenGroupKey}`,
-    'Oitavos de Final','Quartos de Final','Meia-Final','Final'
-  ];
 
-  for(let r=0;r<7;r++){
-    await new Promise(res=>setTimeout(res,750));
-    const opp=allOpponents[r]; const oppR=opp.rating||opp.avg||75; const res=simMatch(myRating,oppR);
-    totalGoals+=res.myG;
+  // Simulate ALL 6 group matches but only show MY 3 live
+  const myGroupGames = [];
+  const allGroupPairs = [];
+  for(let i=0;i<standings.length;i++){
+    for(let j=i+1;j<standings.length;j++){
+      allGroupPairs.push([i,j]);
+    }
+  }
 
-    // Generate goalscorers
-    const myScorers = res.myG > 0 ? generateScorers(res.myG, squad) : [];
-    // Tally goals
-    myScorers.forEach(s => { goalTally[s.name] = (goalTally[s.name]||0) + 1; });
-    const oppScorers = res.oppG > 0 ? generateOppScorers(res.oppG, opp) : [];
+  for(const [i,j] of allGroupPairs){
+    const a=standings[i], b=standings[j];
+    const res=simGroupMatch(a,b);
+    if(a.isMe||b.isMe){
+      const myG=a.isMe?res.myG:res.oppG;
+      const oppG=a.isMe?res.oppG:res.myG;
+      const oppTeam=a.isMe?{...b}:{...a};
+      myGroupGames.push({opp:oppTeam, myGoals:myG, oppGoals:oppG, won:myG>oppG, drew:myG===oppG, res});
+      totalGoals+=myG;
+      if(myG>0){ const sc=generateScorers(myG,squad); sc.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;}); }
+    }
+  }
 
-    let cls,txt;
-    if(r<3){
-      if(res.won){wins++;groupPts+=3;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG} (+3 pts)`;}
-      else if(res.drew){draws++;groupPts+=1;cls='result-draw';txt=`Empate ${res.myG}-${res.myG} (+1 pt)`;}
-      else{losses++;cls='result-loss';txt=`Derrota ${res.myG}-${res.oppG} (+0 pts)`;}
-    } else {
-      if(res.won){wins++;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG}`;}
-      else if(res.drew){
+  // Show my 3 group games live with scorers
+  for(let g=0;g<myGroupGames.length;g++){
+    await new Promise(res=>setTimeout(res,700));
+    const game=myGroupGames[g];
+    const cls=game.won?'result-win':game.drew?'result-draw':'result-loss';
+    const txt=game.won?`Vitória ${game.myGoals}-${game.oppGoals}`:game.drew?`Empate ${game.myGoals}-${game.oppGoals}`:`Derrota ${game.myGoals}-${game.oppGoals}`;
+
+    // Regenerate scorers for display (same count, different names possible — just for show)
+    const myScorers=game.myGoals>0?generateScorers(game.myGoals,squad):[];
+    const oppScorers=game.oppGoals>0?generateOppScorers(game.oppGoals,game.opp):[];
+    const myGH=myScorers.map(s=>`<span class="sim-goal"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
+    const oppGH=oppScorers.map(s=>`<span class="sim-goal-opp"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
+    const scHtml=(myGH||oppGH)?`<div class="sim-goals">${myGH}${oppGH?`<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>${oppGH}`:''}</div>`:'';
+
+    log.innerHTML+=`<div class="sim-match"><div class="sim-round">Fase de Grupos (J${g+1}) · Grupo ${chosenGroupKey}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${game.opp.flag} ${game.opp.name} (${game.opp.rating})</span> — <span class="${cls}">${txt}</span>${scHtml}</div>`;
+    log.scrollTop=log.scrollHeight;
+  }
+
+  await new Promise(res=>setTimeout(res,500));
+
+  // Sort standings: pts, gd, gf
+  standings.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
+  const myStanding=standings.find(t=>t.isMe);
+  const myPos=standings.indexOf(myStanding)+1;
+
+  // Update counts
+  wins=myGroupGames.filter(g=>g.won).length;
+  draws=myGroupGames.filter(g=>g.drew).length;
+  losses=myGroupGames.filter(g=>!g.won&&!g.drew).length;
+  groupPts=myStanding.pts;
+
+  // Render group table
+  const tableRows=standings.map((t,i)=>{
+    const qualifies=i<2;
+    const style=t.isMe?'background:rgba(201,168,76,0.07);':'';
+    const posColor=qualifies?'color:#4A9E6F':'color:#9E4A4A';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);${style}font-size:13px">
+      <span style="width:16px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:16px;${posColor}">${i+1}</span>
+      <span style="font-size:16px">${t.flag}</span>
+      <span style="flex:1;font-weight:${t.isMe?'600':'400'};color:${t.isMe?'var(--gold)':'var(--text)'}">${t.name}</span>
+      <span style="width:28px;text-align:center;color:var(--text2);font-weight:500">${t.pts}</span>
+      <span style="width:44px;text-align:center;color:var(--text3);font-size:11px">${t.gf}:${t.ga}</span>
+      <span style="width:32px;text-align:center;color:var(--text3);font-size:11px">${t.gd>0?'+':''}${t.gd}</span>
+    </div>`;
+  }).join('');
+
+  log.innerHTML+=`<div class="sim-match" style="padding:0;overflow:hidden">
+    <div style="display:flex;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--dark3)">
+      <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);flex:1;padding-left:26px">Grupo ${chosenGroupKey} — Classificação Final</span>
+      <span style="width:28px;text-align:center;font-size:10px;color:var(--text3)">PTS</span>
+      <span style="width:44px;text-align:center;font-size:10px;color:var(--text3)">GM</span>
+      <span style="width:32px;text-align:center;font-size:10px;color:var(--text3)">DG</span>
+    </div>
+    ${tableRows}
+  </div>`;
+  log.scrollTop=log.scrollHeight;
+  await new Promise(res=>setTimeout(res,400));
+
+  if(myPos>2){
+    log.innerHTML+=`<div class="sim-match"><span class="result-loss">Eliminado na fase de grupos — ${myPos}º lugar com ${groupPts} pts.</span></div>`;
+    eliminated=true;
+  } else {
+    log.innerHTML+=`<div class="sim-match"><span class="result-win">✓ Classificado em ${myPos}º lugar do Grupo ${chosenGroupKey}!</span></div>`;
+  }
+  log.scrollTop=log.scrollHeight;
+  await new Promise(res=>setTimeout(res,400));
+
+  // --- KNOCKOUT STAGE ---
+  if(!eliminated){
+    const allTeams=Object.values(WC2026_GROUPS).flat();
+    const usedNames=new Set([...groupTeams.map(t=>t.name),'LegendsPick']);
+    function pickKO(minR,maxR){
+      const pool=allTeams.filter(t=>!usedNames.has(t.name)&&t.rating>=minR&&t.rating<=maxR);
+      const t=pool.length?pool[Math.floor(Math.random()*pool.length)]:allTeams.filter(t=>!usedNames.has(t.name))[0]||allTeams[0];
+      usedNames.add(t.name); return t;
+    }
+    const koOpps=[pickKO(68,80),pickKO(72,84),pickKO(78,88),pickKO(80,90)];
+    const koNames=['Oitavos de Final','Quartos de Final','Meia-Final','Final'];
+
+    for(let r=0;r<4;r++){
+      if(eliminated) break;
+      await new Promise(res=>setTimeout(res,750));
+      const opp=koOpps[r]; const oppR=opp.rating||75; const res=simMatch(myRating,oppR);
+      totalGoals+=res.myG;
+      const myScorers=res.myG>0?generateScorers(res.myG,squad):[];
+      myScorers.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});
+      const oppScorers=res.oppG>0?generateOppScorers(res.oppG,opp):[];
+      let cls,txt;
+      if(res.myG>res.oppG){wins++;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG}`;}
+      else if(res.myG===res.oppG){
         const pen=Math.random()<(0.4+(myRating-oppR)*0.01);
-        if(pen){wins++;cls='result-draw';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✓ Passa`;}
+        if(pen){wins++;cls='result-draw';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✓`;}
         else{eliminated=true;cls='result-loss';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✗ Eliminado`;}
       } else{eliminated=true;cls='result-loss';txt=`Derrota ${res.myG}-${res.oppG} — Eliminado`;}
+      const myGH=myScorers.map(s=>`<span class="sim-goal"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
+      const oppGH=oppScorers.map(s=>`<span class="sim-goal-opp"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
+      const scHtml=(myGH||oppGH)?`<div class="sim-goals">${myGH}${oppGH?`<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>${oppGH}`:''}</div>`:'';
+      log.innerHTML+=`<div class="sim-match"><div class="sim-round">${koNames[r]}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${opp.flag} ${opp.name} (${oppR})</span> — <span class="${cls}">${txt}</span>${scHtml}</div>`;
+      log.scrollTop=log.scrollHeight;
     }
-
-    // Build goalscorer lines
-    const myGoalHtml = myScorers.map(s =>
-      `<span class="sim-goal"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`
-    ).join('');
-    const oppGoalHtml = oppScorers.map(s =>
-      `<span class="sim-goal-opp"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`
-    ).join('');
-    const scorersHtml = (myGoalHtml || oppGoalHtml)
-      ? `<div class="sim-goals">${myGoalHtml}${oppGoalHtml ? `<span style="color:var(--text3);font-size:10px;margin:0 4px;align-self:center">|</span>${oppGoalHtml}` : ''}</div>`
-      : '';
-
-    log.innerHTML+=`<div class="sim-match"><div class="sim-round">${roundNames[r]}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${opp.flag} ${opp.name} (${oppR})</span> — <span class="${cls}">${txt}</span>${scorersHtml}</div>`;
-    log.scrollTop=log.scrollHeight;
-    if(r===2&&groupPts<3){
-      await new Promise(res=>setTimeout(res,400));
-      log.innerHTML+=`<div class="sim-match"><span style="color:var(--text3)">Eliminado na fase de grupos com ${groupPts} pontos.</span></div>`;
-      eliminated=true;
-    }
-    if(eliminated) break;
   }
   await new Promise(res=>setTimeout(res,600));
   const champion=!eliminated&&wins>=4;
