@@ -137,6 +137,11 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .sim-log::-webkit-scrollbar-thumb { background:var(--border); }
 .sim-match { margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border); }
 .sim-match:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.sim-goals { margin-top:5px; display:flex; flex-wrap:wrap; gap:4px; }
+.sim-goal { font-size:11px; color:var(--text3); }
+.sim-goal .goal-icon { color:var(--gold); margin-right:2px; }
+.sim-goal-opp { font-size:11px; color:#6A4040; }
+.sim-goal-opp .goal-icon { margin-right:2px; }
 .sim-round { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); margin-bottom:2px; }
 .result-win { color:#4A9E6F; font-weight:600; }
 .result-loss { color:#9E4A4A; font-weight:600; }
@@ -275,37 +280,37 @@ const POS_LABELS={GR:'Guarda-redes',DEF:'Defesa',MED:'Médio',AVA:'Avançado'};
 const RC=r=>r>=90?'#C9A84C':r>=80?'#4A9E6F':r>=70?'#9E8A4A':'#9E4A4A';
 
 const SELS=[
-  {id:'bra70',name:'Brasil 1970',flag:'🇧🇷',players:[{name:'Félix',pos:'GR',rating:72},{name:'Carlos Alberto',pos:'DEF',rating:91},{name:'Brito',pos:'DEF',rating:76},{name:'Piazza',pos:'DEF',rating:75},{name:'Everaldo',pos:'DEF',rating:77},{name:'Clodoaldo',pos:'MED',rating:82},{name:'Gérson',pos:'MED',rating:88},{name:'Rivelino',pos:'MED',rating:90},{name:'Jairzinho',pos:'AVA',rating:92},{name:'Tostão',pos:'AVA',rating:88},{name:'Pelé',pos:'AVA',rating:99}]},
-  {id:'ger74',name:'Alemanha 1974',flag:'🇩🇪',players:[{name:'Maier',pos:'GR',rating:93},{name:'Vogts',pos:'DEF',rating:85},{name:'Schwarzenbeck',pos:'DEF',rating:82},{name:'Beckenbauer',pos:'DEF',rating:97},{name:'Breitner',pos:'DEF',rating:87},{name:'Bonhof',pos:'MED',rating:80},{name:'Hoeness',pos:'MED',rating:83},{name:'Overath',pos:'MED',rating:86},{name:'Grabowski',pos:'AVA',rating:81},{name:'Müller G.',pos:'AVA',rating:96},{name:'Holzenbein',pos:'AVA',rating:79}]},
-  {id:'arg86',name:'Argentina 1986',flag:'🇦🇷',players:[{name:'Pumpido',pos:'GR',rating:80},{name:'Cuciuffo',pos:'DEF',rating:74},{name:'Brown',pos:'DEF',rating:78},{name:'Ruggeri',pos:'DEF',rating:82},{name:'Olarticoechea',pos:'DEF',rating:75},{name:'Batista',pos:'MED',rating:77},{name:'Giusti',pos:'MED',rating:76},{name:'Burruchaga',pos:'MED',rating:85},{name:'Valdano',pos:'AVA',rating:84},{name:'Enrique',pos:'AVA',rating:79},{name:'Maradona',pos:'AVA',rating:99}]},
-  {id:'fra98',name:'França 1998',flag:'🇫🇷',players:[{name:'Barthez',pos:'GR',rating:88},{name:'Thuram',pos:'DEF',rating:89},{name:'Leboeuf',pos:'DEF',rating:80},{name:'Desailly',pos:'DEF',rating:88},{name:'Lizarazu',pos:'DEF',rating:85},{name:'Deschamps',pos:'MED',rating:85},{name:'Petit',pos:'MED',rating:82},{name:'Zidane',pos:'MED',rating:97},{name:'Djorkaeff',pos:'AVA',rating:84},{name:"Guivarc'h",pos:'AVA',rating:72},{name:'Dugarry',pos:'AVA',rating:79}]},
-  {id:'bra02',name:'Brasil 2002',flag:'🇧🇷',players:[{name:'Marcos',pos:'GR',rating:82},{name:'Lúcio',pos:'DEF',rating:86},{name:'Edmílson',pos:'DEF',rating:79},{name:'Roque Júnior',pos:'DEF',rating:77},{name:'Roberto Carlos',pos:'DEF',rating:93},{name:'Cafu',pos:'DEF',rating:90},{name:'Gilberto Silva',pos:'MED',rating:83},{name:'Kléberson',pos:'MED',rating:76},{name:'Ronaldinho',pos:'MED',rating:93},{name:'Rivaldo',pos:'AVA',rating:91},{name:'Ronaldo',pos:'AVA',rating:97}]},
-  {id:'ita06',name:'Itália 2006',flag:'🇮🇹',players:[{name:'Buffon',pos:'GR',rating:95},{name:'Zambrotta',pos:'DEF',rating:84},{name:'Cannavaro',pos:'DEF',rating:93},{name:'Materazzi',pos:'DEF',rating:79},{name:'Grosso',pos:'DEF',rating:78},{name:'Pirlo',pos:'MED',rating:92},{name:'Gattuso',pos:'MED',rating:84},{name:'Perrotta',pos:'MED',rating:78},{name:'Camoranesi',pos:'MED',rating:79},{name:'Totti',pos:'AVA',rating:87},{name:'Toni',pos:'AVA',rating:81}]},
-  {id:'esp10',name:'Espanha 2010',flag:'🇪🇸',players:[{name:'Casillas',pos:'GR',rating:93},{name:'Sergio Ramos',pos:'DEF',rating:90},{name:'Piqué',pos:'DEF',rating:86},{name:'Puyol',pos:'DEF',rating:88},{name:'Capdevila',pos:'DEF',rating:78},{name:'Alonso',pos:'MED',rating:90},{name:'Busquets',pos:'MED',rating:87},{name:'Iniesta',pos:'MED',rating:95},{name:'Silva',pos:'MED',rating:88},{name:'Villa',pos:'AVA',rating:88},{name:'Torres',pos:'AVA',rating:83}]},
-  {id:'ger14',name:'Alemanha 2014',flag:'🇩🇪',players:[{name:'Neuer',pos:'GR',rating:96},{name:'Lahm',pos:'DEF',rating:92},{name:'Boateng',pos:'DEF',rating:87},{name:'Hummels',pos:'DEF',rating:88},{name:'Höwedes',pos:'DEF',rating:79},{name:'Schweinsteiger',pos:'MED',rating:88},{name:'Kroos',pos:'MED',rating:91},{name:'Özil',pos:'MED',rating:88},{name:'Müller T.',pos:'AVA',rating:90},{name:'Klose',pos:'AVA',rating:87},{name:'Götze',pos:'AVA',rating:83}]},
-  {id:'fra18',name:'França 2018',flag:'🇫🇷',players:[{name:'Lloris',pos:'GR',rating:88},{name:'Pavard',pos:'DEF',rating:80},{name:'Varane',pos:'DEF',rating:88},{name:'Umtiti',pos:'DEF',rating:82},{name:'Hernández',pos:'DEF',rating:81},{name:'Kanté',pos:'MED',rating:92},{name:'Pogba',pos:'MED',rating:87},{name:'Tolisso',pos:'MED',rating:78},{name:'Griezmann',pos:'AVA',rating:90},{name:'Mbappé',pos:'AVA',rating:95},{name:'Giroud',pos:'AVA',rating:81}]},
-  {id:'arg22',name:'Argentina 2022',flag:'🇦🇷',players:[{name:'E. Martínez',pos:'GR',rating:91},{name:'Molina',pos:'DEF',rating:82},{name:'Otamendi',pos:'DEF',rating:84},{name:'Romero',pos:'DEF',rating:85},{name:'Tagliafico',pos:'DEF',rating:79},{name:'De Paul',pos:'MED',rating:85},{name:'Mac Allister',pos:'MED',rating:83},{name:'Enzo F.',pos:'MED',rating:84},{name:'Di María',pos:'AVA',rating:87},{name:'Álvarez',pos:'AVA',rating:83},{name:'Messi',pos:'AVA',rating:99}]},
+  {id:'bra70',name:'Brasil 1970',rarity:'legendary',flag:'🇧🇷',players:[{name:'Félix',pos:'GR',rating:72},{name:'Carlos Alberto',pos:'DEF',rating:91},{name:'Brito',pos:'DEF',rating:76},{name:'Piazza',pos:'DEF',rating:75},{name:'Everaldo',pos:'DEF',rating:77},{name:'Clodoaldo',pos:'MED',rating:82},{name:'Gérson',pos:'MED',rating:88},{name:'Rivelino',pos:'MED',rating:90},{name:'Jairzinho',pos:'AVA',rating:92},{name:'Tostão',pos:'AVA',rating:88},{name:'Pelé',pos:'AVA',rating:99}]},
+  {id:'ger74',name:'Alemanha 1974',rarity:'epic',flag:'🇩🇪',players:[{name:'Maier',pos:'GR',rating:93},{name:'Vogts',pos:'DEF',rating:85},{name:'Schwarzenbeck',pos:'DEF',rating:82},{name:'Beckenbauer',pos:'DEF',rating:97},{name:'Breitner',pos:'DEF',rating:87},{name:'Bonhof',pos:'MED',rating:80},{name:'Hoeness',pos:'MED',rating:83},{name:'Overath',pos:'MED',rating:86},{name:'Grabowski',pos:'AVA',rating:81},{name:'Müller G.',pos:'AVA',rating:96},{name:'Holzenbein',pos:'AVA',rating:79}]},
+  {id:'arg86',name:'Argentina 1986',rarity:'legendary',flag:'🇦🇷',players:[{name:'Pumpido',pos:'GR',rating:80},{name:'Cuciuffo',pos:'DEF',rating:74},{name:'Brown',pos:'DEF',rating:78},{name:'Ruggeri',pos:'DEF',rating:82},{name:'Olarticoechea',pos:'DEF',rating:75},{name:'Batista',pos:'MED',rating:77},{name:'Giusti',pos:'MED',rating:76},{name:'Burruchaga',pos:'MED',rating:85},{name:'Valdano',pos:'AVA',rating:84},{name:'Enrique',pos:'AVA',rating:79},{name:'Maradona',pos:'AVA',rating:99}]},
+  {id:'fra98',name:'França 1998',rarity:'epic',flag:'🇫🇷',players:[{name:'Barthez',pos:'GR',rating:88},{name:'Thuram',pos:'DEF',rating:89},{name:'Leboeuf',pos:'DEF',rating:80},{name:'Desailly',pos:'DEF',rating:88},{name:'Lizarazu',pos:'DEF',rating:85},{name:'Deschamps',pos:'MED',rating:85},{name:'Petit',pos:'MED',rating:82},{name:'Zidane',pos:'MED',rating:97},{name:'Djorkaeff',pos:'AVA',rating:84},{name:"Guivarc'h",pos:'AVA',rating:72},{name:'Dugarry',pos:'AVA',rating:79}]},
+  {id:'bra02',name:'Brasil 2002',rarity:'epic',flag:'🇧🇷',players:[{name:'Marcos',pos:'GR',rating:82},{name:'Lúcio',pos:'DEF',rating:86},{name:'Edmílson',pos:'DEF',rating:79},{name:'Roque Júnior',pos:'DEF',rating:77},{name:'Roberto Carlos',pos:'DEF',rating:93},{name:'Cafu',pos:'DEF',rating:90},{name:'Gilberto Silva',pos:'MED',rating:83},{name:'Kléberson',pos:'MED',rating:76},{name:'Ronaldinho',pos:'MED',rating:93},{name:'Rivaldo',pos:'AVA',rating:91},{name:'Ronaldo',pos:'AVA',rating:97}]},
+  {id:'ita06',name:'Itália 2006',rarity:'epic',flag:'🇮🇹',players:[{name:'Buffon',pos:'GR',rating:95},{name:'Zambrotta',pos:'DEF',rating:84},{name:'Cannavaro',pos:'DEF',rating:93},{name:'Materazzi',pos:'DEF',rating:79},{name:'Grosso',pos:'DEF',rating:78},{name:'Pirlo',pos:'MED',rating:92},{name:'Gattuso',pos:'MED',rating:84},{name:'Perrotta',pos:'MED',rating:78},{name:'Camoranesi',pos:'MED',rating:79},{name:'Totti',pos:'AVA',rating:87},{name:'Toni',pos:'AVA',rating:81}]},
+  {id:'esp10',name:'Espanha 2010',rarity:'legendary',flag:'🇪🇸',players:[{name:'Casillas',pos:'GR',rating:93},{name:'Sergio Ramos',pos:'DEF',rating:90},{name:'Piqué',pos:'DEF',rating:86},{name:'Puyol',pos:'DEF',rating:88},{name:'Capdevila',pos:'DEF',rating:78},{name:'Alonso',pos:'MED',rating:90},{name:'Busquets',pos:'MED',rating:87},{name:'Iniesta',pos:'MED',rating:95},{name:'Silva',pos:'MED',rating:88},{name:'Villa',pos:'AVA',rating:88},{name:'Torres',pos:'AVA',rating:83}]},
+  {id:'ger14',name:'Alemanha 2014',rarity:'epic',flag:'🇩🇪',players:[{name:'Neuer',pos:'GR',rating:96},{name:'Lahm',pos:'DEF',rating:92},{name:'Boateng',pos:'DEF',rating:87},{name:'Hummels',pos:'DEF',rating:88},{name:'Höwedes',pos:'DEF',rating:79},{name:'Schweinsteiger',pos:'MED',rating:88},{name:'Kroos',pos:'MED',rating:91},{name:'Özil',pos:'MED',rating:88},{name:'Müller T.',pos:'AVA',rating:90},{name:'Klose',pos:'AVA',rating:87},{name:'Götze',pos:'AVA',rating:83}]},
+  {id:'fra18',name:'França 2018',rarity:'rare',flag:'🇫🇷',players:[{name:'Lloris',pos:'GR',rating:88},{name:'Pavard',pos:'DEF',rating:80},{name:'Varane',pos:'DEF',rating:88},{name:'Umtiti',pos:'DEF',rating:82},{name:'Hernández',pos:'DEF',rating:81},{name:'Kanté',pos:'MED',rating:92},{name:'Pogba',pos:'MED',rating:87},{name:'Tolisso',pos:'MED',rating:78},{name:'Griezmann',pos:'AVA',rating:90},{name:'Mbappé',pos:'AVA',rating:95},{name:'Giroud',pos:'AVA',rating:81}]},
+  {id:'arg22',name:'Argentina 2022',rarity:'epic',flag:'🇦🇷',players:[{name:'E. Martínez',pos:'GR',rating:91},{name:'Molina',pos:'DEF',rating:82},{name:'Otamendi',pos:'DEF',rating:84},{name:'Romero',pos:'DEF',rating:85},{name:'Tagliafico',pos:'DEF',rating:79},{name:'De Paul',pos:'MED',rating:85},{name:'Mac Allister',pos:'MED',rating:83},{name:'Enzo F.',pos:'MED',rating:84},{name:'Di María',pos:'AVA',rating:87},{name:'Álvarez',pos:'AVA',rating:83},{name:'Messi',pos:'AVA',rating:99}]},
   {id:'ned74',name:'Holanda 1974',flag:'🇳🇱',players:[{name:'Jongbloed',pos:'GR',rating:78},{name:'Suurbier',pos:'DEF',rating:80},{name:'Rijsbergen',pos:'DEF',rating:77},{name:'Haan',pos:'DEF',rating:79},{name:'Krol',pos:'DEF',rating:88},{name:'Jansen',pos:'MED',rating:81},{name:'Van Hanegem',pos:'MED',rating:87},{name:'Neeskens',pos:'MED',rating:91},{name:'Rep',pos:'AVA',rating:84},{name:'Cruyff',pos:'AVA',rating:99},{name:'Rensenbrink',pos:'AVA',rating:84}]},
-  {id:'eng66',name:'Inglaterra 1966',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',players:[{name:'Banks',pos:'GR',rating:92},{name:'Cohen',pos:'DEF',rating:79},{name:'Charlton J.',pos:'DEF',rating:84},{name:'Moore',pos:'DEF',rating:95},{name:'Wilson',pos:'DEF',rating:78},{name:'Ball',pos:'MED',rating:83},{name:'Stiles',pos:'MED',rating:80},{name:'Charlton B.',pos:'MED',rating:93},{name:'Peters',pos:'AVA',rating:82},{name:'Hurst',pos:'AVA',rating:88},{name:'Hunt',pos:'AVA',rating:78}]},
-  {id:'por66',name:'Portugal 1966',flag:'🇵🇹',players:[{name:'Pereira',pos:'GR',rating:78},{name:'Festa',pos:'DEF',rating:74},{name:'Vicente',pos:'DEF',rating:75},{name:'Hilário',pos:'DEF',rating:76},{name:'Baptista',pos:'DEF',rating:73},{name:'Graça',pos:'MED',rating:78},{name:'Coluna',pos:'MED',rating:87},{name:'Augusto',pos:'MED',rating:82},{name:'Torres',pos:'AVA',rating:83},{name:'Eusébio',pos:'AVA',rating:97},{name:'Simões',pos:'AVA',rating:81}]},
-  {id:'bra94',name:'Brasil 1994',flag:'🇧🇷',players:[{name:'Taffarel',pos:'GR',rating:86},{name:'Cafu',pos:'DEF',rating:89},{name:'Aldair',pos:'DEF',rating:83},{name:'Marcio Santos',pos:'DEF',rating:80},{name:'Branco',pos:'DEF',rating:81},{name:'Mauro Silva',pos:'MED',rating:77},{name:'Mazinho',pos:'MED',rating:78},{name:'Zinho',pos:'MED',rating:82},{name:'Rai',pos:'MED',rating:80},{name:'Romário',pos:'AVA',rating:97},{name:'Bebeto',pos:'AVA',rating:92}]},
-  {id:'uru30',name:'Uruguai 1930',flag:'🇺🇾',players:[{name:'Ballesteros',pos:'GR',rating:74},{name:'Nasazzi',pos:'DEF',rating:84},{name:'Mascheroni',pos:'DEF',rating:77},{name:'Andrade',pos:'DEF',rating:85},{name:'Gestido',pos:'DEF',rating:78},{name:'Álvarez',pos:'MED',rating:76},{name:'Fernández',pos:'MED',rating:82},{name:'Castro',pos:'AVA',rating:79},{name:'Cea',pos:'AVA',rating:83},{name:'Scarone',pos:'AVA',rating:86},{name:'Iriarte',pos:'AVA',rating:78}]},
-  {id:'bul94',name:'Bulgária 1994',flag:'🇧🇬',players:[{name:'Mikhailov',pos:'GR',rating:78},{name:'Hubchev',pos:'DEF',rating:73},{name:'Ivanov',pos:'DEF',rating:74},{name:'Lechkov',pos:'DEF',rating:72},{name:'Kiriakov',pos:'DEF',rating:72},{name:'Letchkov',pos:'MED',rating:83},{name:'Balakov',pos:'MED',rating:82},{name:'Yankov',pos:'MED',rating:75},{name:'Kostadinov',pos:'AVA',rating:79},{name:'Sirakov',pos:'AVA',rating:74},{name:'Stoichkov',pos:'AVA',rating:92}]},
-  {id:'rom94',name:'Roménia 1994',flag:'🇷🇴',players:[{name:'Stelea',pos:'GR',rating:78},{name:'Belodedici',pos:'DEF',rating:79},{name:'Popescu',pos:'DEF',rating:82},{name:'Petrescu',pos:'DEF',rating:80},{name:'Selymes',pos:'DEF',rating:72},{name:'Lupescu',pos:'MED',rating:76},{name:'Munteanu',pos:'MED',rating:78},{name:'Dumitrescu',pos:'MED',rating:84},{name:'Hagi',pos:'MED',rating:91},{name:'Lacatus',pos:'AVA',rating:77},{name:'Raducioiu',pos:'AVA',rating:82}]},
-  {id:'cro98',name:'Croácia 1998',flag:'🇭🇷',players:[{name:'Ladić',pos:'GR',rating:81},{name:'Bilić',pos:'DEF',rating:83},{name:'Jarni',pos:'DEF',rating:82},{name:'Štimac',pos:'DEF',rating:80},{name:'Tudor',pos:'DEF',rating:78},{name:'Boban',pos:'MED',rating:88},{name:'Prosinečki',pos:'MED',rating:84},{name:'Asanović',pos:'MED',rating:79},{name:'Soldo',pos:'MED',rating:76},{name:'Šuker',pos:'AVA',rating:91},{name:'Vlović',pos:'AVA',rating:74}]},
-  {id:'hun54',name:'Hungria 1954',flag:'🇭🇺',players:[{name:'Grosics',pos:'GR',rating:85},{name:'Buzánszky',pos:'DEF',rating:78},{name:'Lóránt',pos:'DEF',rating:80},{name:'Lantos',pos:'DEF',rating:79},{name:'Tóth',pos:'DEF',rating:74},{name:'Bozsik',pos:'MED',rating:88},{name:'Hidegkuti',pos:'MED',rating:89},{name:'Budai',pos:'MED',rating:76},{name:'Czibor',pos:'AVA',rating:85},{name:'Kocsis',pos:'AVA',rating:92},{name:'Puskás',pos:'AVA',rating:96}]},
-  {id:'den92',name:'Dinamarca 1992',flag:'🇩🇰',players:[{name:'Schmeichel',pos:'GR',rating:93},{name:'Olsen',pos:'DEF',rating:78},{name:'Nielsen',pos:'DEF',rating:76},{name:'Sivebæk',pos:'DEF',rating:75},{name:'Piechnik',pos:'DEF',rating:72},{name:'Jensen',pos:'MED',rating:80},{name:'Vilfort',pos:'MED',rating:79},{name:'Christofte',pos:'MED',rating:74},{name:'Laudrup B.',pos:'MED',rating:87},{name:'Povlsen',pos:'AVA',rating:78},{name:'Laudrup M.',pos:'AVA',rating:91}]},
-  {id:'tur02',name:'Turquia 2002',flag:'🇹🇷',players:[{name:'Rüştü',pos:'GR',rating:85},{name:'Alpay',pos:'DEF',rating:79},{name:'Bülent',pos:'DEF',rating:76},{name:'Fatih',pos:'DEF',rating:74},{name:'Yıldıray',pos:'DEF',rating:73},{name:'Emre',pos:'MED',rating:83},{name:'Davala',pos:'MED',rating:80},{name:'Okan',pos:'MED',rating:77},{name:'Ergun',pos:'MED',rating:72},{name:'Hasan Şaş',pos:'AVA',rating:81},{name:'Şükür',pos:'AVA',rating:86}]},
-  {id:'kor02',name:'Coreia do Sul 2002',flag:'🇰🇷',players:[{name:'Lee Woon-jae',pos:'GR',rating:80},{name:'Choi Jin-cheul',pos:'DEF',rating:78},{name:'Lee Young-pyo',pos:'DEF',rating:82},{name:'Hong Myung-bo',pos:'DEF',rating:84},{name:'Kim Tae-young',pos:'DEF',rating:74},{name:'Park Ji-sung',pos:'MED',rating:85},{name:'Yoo Sang-chul',pos:'MED',rating:79},{name:'Kim Nam-il',pos:'MED',rating:77},{name:'Song Chong-gug',pos:'MED',rating:75},{name:'Ahn Jung-hwan',pos:'AVA',rating:84},{name:'Choi Yong-soo',pos:'AVA',rating:76}]},
-  {id:'cze96',name:'Rep. Checa 1996',flag:'🇨🇿',players:[{name:'Kouba',pos:'GR',rating:79},{name:'Kadlec',pos:'DEF',rating:78},{name:'Horňák',pos:'DEF',rating:74},{name:'Rada',pos:'DEF',rating:75},{name:'Novák',pos:'DEF',rating:73},{name:'Nedvěd',pos:'MED',rating:86},{name:'Poborský',pos:'MED',rating:85},{name:'Berger',pos:'MED',rating:84},{name:'Frýdek',pos:'MED',rating:72},{name:'Šmicer',pos:'AVA',rating:80},{name:'Kuka',pos:'AVA',rating:82}]},
+  {id:'eng66',name:'Inglaterra 1966',rarity:'epic',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',players:[{name:'Banks',pos:'GR',rating:92},{name:'Cohen',pos:'DEF',rating:79},{name:'Charlton J.',pos:'DEF',rating:84},{name:'Moore',pos:'DEF',rating:95},{name:'Wilson',pos:'DEF',rating:78},{name:'Ball',pos:'MED',rating:83},{name:'Stiles',pos:'MED',rating:80},{name:'Charlton B.',pos:'MED',rating:93},{name:'Peters',pos:'AVA',rating:82},{name:'Hurst',pos:'AVA',rating:88},{name:'Hunt',pos:'AVA',rating:78}]},
+  {id:'por66',name:'Portugal 1966',rarity:'rare',flag:'🇵🇹',players:[{name:'Pereira',pos:'GR',rating:78},{name:'Festa',pos:'DEF',rating:74},{name:'Vicente',pos:'DEF',rating:75},{name:'Hilário',pos:'DEF',rating:76},{name:'Baptista',pos:'DEF',rating:73},{name:'Graça',pos:'MED',rating:78},{name:'Coluna',pos:'MED',rating:87},{name:'Augusto',pos:'MED',rating:82},{name:'Torres',pos:'AVA',rating:83},{name:'Eusébio',pos:'AVA',rating:97},{name:'Simões',pos:'AVA',rating:81}]},
+  {id:'bra94',name:'Brasil 1994',rarity:'rare',flag:'🇧🇷',players:[{name:'Taffarel',pos:'GR',rating:86},{name:'Cafu',pos:'DEF',rating:89},{name:'Aldair',pos:'DEF',rating:83},{name:'Marcio Santos',pos:'DEF',rating:80},{name:'Branco',pos:'DEF',rating:81},{name:'Mauro Silva',pos:'MED',rating:77},{name:'Mazinho',pos:'MED',rating:78},{name:'Zinho',pos:'MED',rating:82},{name:'Rai',pos:'MED',rating:80},{name:'Romário',pos:'AVA',rating:97},{name:'Bebeto',pos:'AVA',rating:92}]},
+  {id:'uru30',name:'Uruguai 1930',rarity:'rare',flag:'🇺🇾',players:[{name:'Ballesteros',pos:'GR',rating:74},{name:'Nasazzi',pos:'DEF',rating:84},{name:'Mascheroni',pos:'DEF',rating:77},{name:'Andrade',pos:'DEF',rating:85},{name:'Gestido',pos:'DEF',rating:78},{name:'Álvarez',pos:'MED',rating:76},{name:'Fernández',pos:'MED',rating:82},{name:'Castro',pos:'AVA',rating:79},{name:'Cea',pos:'AVA',rating:83},{name:'Scarone',pos:'AVA',rating:86},{name:'Iriarte',pos:'AVA',rating:78}]},
+  {id:'bul94',name:'Bulgária 1994',rarity:'common',flag:'🇧🇬',players:[{name:'Mikhailov',pos:'GR',rating:78},{name:'Hubchev',pos:'DEF',rating:73},{name:'Ivanov',pos:'DEF',rating:74},{name:'Lechkov',pos:'DEF',rating:72},{name:'Kiriakov',pos:'DEF',rating:72},{name:'Letchkov',pos:'MED',rating:83},{name:'Balakov',pos:'MED',rating:82},{name:'Yankov',pos:'MED',rating:75},{name:'Kostadinov',pos:'AVA',rating:79},{name:'Sirakov',pos:'AVA',rating:74},{name:'Stoichkov',pos:'AVA',rating:92}]},
+  {id:'rom94',name:'Roménia 1994',rarity:'common',flag:'🇷🇴',players:[{name:'Stelea',pos:'GR',rating:78},{name:'Belodedici',pos:'DEF',rating:79},{name:'Popescu',pos:'DEF',rating:82},{name:'Petrescu',pos:'DEF',rating:80},{name:'Selymes',pos:'DEF',rating:72},{name:'Lupescu',pos:'MED',rating:76},{name:'Munteanu',pos:'MED',rating:78},{name:'Dumitrescu',pos:'MED',rating:84},{name:'Hagi',pos:'MED',rating:91},{name:'Lacatus',pos:'AVA',rating:77},{name:'Raducioiu',pos:'AVA',rating:82}]},
+  {id:'cro98',name:'Croácia 1998',rarity:'rare',flag:'🇭🇷',players:[{name:'Ladić',pos:'GR',rating:81},{name:'Bilić',pos:'DEF',rating:83},{name:'Jarni',pos:'DEF',rating:82},{name:'Štimac',pos:'DEF',rating:80},{name:'Tudor',pos:'DEF',rating:78},{name:'Boban',pos:'MED',rating:88},{name:'Prosinečki',pos:'MED',rating:84},{name:'Asanović',pos:'MED',rating:79},{name:'Soldo',pos:'MED',rating:76},{name:'Šuker',pos:'AVA',rating:91},{name:'Vlović',pos:'AVA',rating:74}]},
+  {id:'hun54',name:'Hungria 1954',rarity:'legendary',flag:'🇭🇺',players:[{name:'Grosics',pos:'GR',rating:85},{name:'Buzánszky',pos:'DEF',rating:78},{name:'Lóránt',pos:'DEF',rating:80},{name:'Lantos',pos:'DEF',rating:79},{name:'Tóth',pos:'DEF',rating:74},{name:'Bozsik',pos:'MED',rating:88},{name:'Hidegkuti',pos:'MED',rating:89},{name:'Budai',pos:'MED',rating:76},{name:'Czibor',pos:'AVA',rating:85},{name:'Kocsis',pos:'AVA',rating:92},{name:'Puskás',pos:'AVA',rating:96}]},
+  {id:'den92',name:'Dinamarca 1992',rarity:'rare',flag:'🇩🇰',players:[{name:'Schmeichel',pos:'GR',rating:93},{name:'Olsen',pos:'DEF',rating:78},{name:'Nielsen',pos:'DEF',rating:76},{name:'Sivebæk',pos:'DEF',rating:75},{name:'Piechnik',pos:'DEF',rating:72},{name:'Jensen',pos:'MED',rating:80},{name:'Vilfort',pos:'MED',rating:79},{name:'Christofte',pos:'MED',rating:74},{name:'Laudrup B.',pos:'MED',rating:87},{name:'Povlsen',pos:'AVA',rating:78},{name:'Laudrup M.',pos:'AVA',rating:91}]},
+  {id:'tur02',name:'Turquia 2002',rarity:'rare',flag:'🇹🇷',players:[{name:'Rüştü',pos:'GR',rating:85},{name:'Alpay',pos:'DEF',rating:79},{name:'Bülent',pos:'DEF',rating:76},{name:'Fatih',pos:'DEF',rating:74},{name:'Yıldıray',pos:'DEF',rating:73},{name:'Emre',pos:'MED',rating:83},{name:'Davala',pos:'MED',rating:80},{name:'Okan',pos:'MED',rating:77},{name:'Ergun',pos:'MED',rating:72},{name:'Hasan Şaş',pos:'AVA',rating:81},{name:'Şükür',pos:'AVA',rating:86}]},
+  {id:'kor02',name:'Coreia do Sul 2002',rarity:'common',flag:'🇰🇷',players:[{name:'Lee Woon-jae',pos:'GR',rating:80},{name:'Choi Jin-cheul',pos:'DEF',rating:78},{name:'Lee Young-pyo',pos:'DEF',rating:82},{name:'Hong Myung-bo',pos:'DEF',rating:84},{name:'Kim Tae-young',pos:'DEF',rating:74},{name:'Park Ji-sung',pos:'MED',rating:85},{name:'Yoo Sang-chul',pos:'MED',rating:79},{name:'Kim Nam-il',pos:'MED',rating:77},{name:'Song Chong-gug',pos:'MED',rating:75},{name:'Ahn Jung-hwan',pos:'AVA',rating:84},{name:'Choi Yong-soo',pos:'AVA',rating:76}]},
+  {id:'cze96',name:'Rep. Checa 1996',rarity:'common',flag:'🇨🇿',players:[{name:'Kouba',pos:'GR',rating:79},{name:'Kadlec',pos:'DEF',rating:78},{name:'Horňák',pos:'DEF',rating:74},{name:'Rada',pos:'DEF',rating:75},{name:'Novák',pos:'DEF',rating:73},{name:'Nedvěd',pos:'MED',rating:86},{name:'Poborský',pos:'MED',rating:85},{name:'Berger',pos:'MED',rating:84},{name:'Frýdek',pos:'MED',rating:72},{name:'Šmicer',pos:'AVA',rating:80},{name:'Kuka',pos:'AVA',rating:82}]},
 
-{id:'por16',name:'Portugal 2016',flag:'🇵🇹',players:[{name:'Rui Patrício',pos:'GR',rating:84},{name:'Cédric',pos:'DEF',rating:76},{name:'Pepe',pos:'DEF',rating:85},{name:'Fonte',pos:'DEF',rating:80},{name:'Guerreiro',pos:'DEF',rating:79},{name:'Moutinho',pos:'MED',rating:84},{name:'Adrien Silva',pos:'MED',rating:76},{name:'William Carvalho',pos:'MED',rating:78},{name:'Quaresma',pos:'AVA',rating:82},{name:'Nani',pos:'AVA',rating:81},{name:'Ronaldo',pos:'AVA',rating:95}]},
-  {id:'sen02',name:'Senegal 2002',flag:'🇸🇳',players:[{name:'Diallo',pos:'GR',rating:78},{name:'Cissé',pos:'DEF',rating:76},{name:'Diatta',pos:'DEF',rating:75},{name:'Daf',pos:'DEF',rating:74},{name:'Coly',pos:'DEF',rating:73},{name:'Diop',pos:'MED',rating:80},{name:'Fadiga',pos:'MED',rating:79},{name:'Camara',pos:'MED',rating:77},{name:'Thiaw',pos:'DEF',rating:72},{name:'Henri Camara',pos:'AVA',rating:82},{name:'Diouf',pos:'AVA',rating:88}]},
-  {id:'alg14',name:'Argélia 2014',flag:'🇩🇿',players:[{name:"M'Bolhi",pos:'GR',rating:82},{name:'Halliche',pos:'DEF',rating:75},{name:'Bougherra',pos:'DEF',rating:78},{name:'Gaouaoui',pos:'DEF',rating:73},{name:'Ghoulam',pos:'DEF',rating:79},{name:'Taider',pos:'MED',rating:77},{name:'Bentaleb',pos:'MED',rating:78},{name:'Brahimi',pos:'MED',rating:84},{name:'Feghouli',pos:'AVA',rating:82},{name:'Soudani',pos:'AVA',rating:76},{name:'Slimani',pos:'AVA',rating:83}]},
-  {id:'mar22',name:'Marrocos 2022',flag:'🇲🇦',players:[{name:'Bono',pos:'GR',rating:87},{name:'Hakimi',pos:'DEF',rating:87},{name:'Saïss',pos:'DEF',rating:83},{name:'Aguerd',pos:'DEF',rating:81},{name:'Mazraoui',pos:'DEF',rating:82},{name:'Amrabat',pos:'MED',rating:86},{name:'Ounahi',pos:'MED',rating:80},{name:'Dari',pos:'DEF',rating:76},{name:'Ziyech',pos:'AVA',rating:84},{name:'En-Nesyri',pos:'AVA',rating:83},{name:'Boufal',pos:'AVA',rating:80}]},
-  {id:'gha10',name:'Gana 2010',flag:'🇬🇭',players:[{name:'Kingson',pos:'GR',rating:79},{name:'Pantsil',pos:'DEF',rating:74},{name:'Mensah',pos:'DEF',rating:78},{name:'Inkoom',pos:'DEF',rating:73},{name:'Asamoah',pos:'MED',rating:82},{name:'Muntari',pos:'MED',rating:83},{name:'Annan',pos:'MED',rating:76},{name:'Boateng K.',pos:'MED',rating:80},{name:'Ayew A.',pos:'AVA',rating:79},{name:'Dede Ayew',pos:'AVA',rating:76},{name:'Gyan',pos:'AVA',rating:87}]},
-  {id:'usa26',name:'EUA 2026',flag:'🇺🇸',players:[{name:'Turner',pos:'GR',rating:80},{name:'Dest',pos:'DEF',rating:79},{name:'Zimmerman',pos:'DEF',rating:78},{name:'Richards',pos:'DEF',rating:77},{name:'Robinson',pos:'DEF',rating:78},{name:'McKennie',pos:'MED',rating:82},{name:'Adams',pos:'MED',rating:84},{name:'Musah',pos:'MED',rating:81},{name:'Reyna',pos:'AVA',rating:80},{name:'Weah',pos:'AVA',rating:78},{name:'Pulisic',pos:'AVA',rating:87}]},
-  {id:'jpn22',name:'Japão 2022',flag:'🇯🇵',players:[{name:'Gonda',pos:'GR',rating:79},{name:'Yamane',pos:'DEF',rating:78},{name:'Yoshida',pos:'DEF',rating:82},{name:'Itakura',pos:'DEF',rating:80},{name:'Nagatomo',pos:'DEF',rating:77},{name:'Endo',pos:'MED',rating:84},{name:'Tanaka',pos:'MED',rating:81},{name:'Kamada',pos:'MED',rating:82},{name:'Doan',pos:'AVA',rating:80},{name:'Asano',pos:'AVA',rating:79},{name:'Mitoma',pos:'AVA',rating:83}]}
+  {id:'por16',name:'Portugal 2016',rarity:'common',flag:'🇵🇹',players:[{name:'Rui Patrício',pos:'GR',rating:84},{name:'Cédric',pos:'DEF',rating:76},{name:'Pepe',pos:'DEF',rating:85},{name:'Fonte',pos:'DEF',rating:80},{name:'Guerreiro',pos:'DEF',rating:79},{name:'Moutinho',pos:'MED',rating:84},{name:'Adrien Silva',pos:'MED',rating:76},{name:'William Carvalho',pos:'MED',rating:78},{name:'Quaresma',pos:'AVA',rating:82},{name:'Nani',pos:'AVA',rating:81},{name:'Ronaldo',pos:'AVA',rating:95}]},
+  {id:'sen02',name:'Senegal 2002',rarity:'common',flag:'🇸🇳',players:[{name:'Diallo',pos:'GR',rating:78},{name:'Cissé',pos:'DEF',rating:76},{name:'Diatta',pos:'DEF',rating:75},{name:'Daf',pos:'DEF',rating:74},{name:'Coly',pos:'DEF',rating:73},{name:'Diop',pos:'MED',rating:80},{name:'Fadiga',pos:'MED',rating:79},{name:'Camara',pos:'MED',rating:77},{name:'Thiaw',pos:'DEF',rating:72},{name:'Henri Camara',pos:'AVA',rating:82},{name:'Diouf',pos:'AVA',rating:88}]},
+  {id:'alg14',name:'Argélia 2014',rarity:'common',flag:'🇩🇿',players:[{name:"M'Bolhi",pos:'GR',rating:82},{name:'Halliche',pos:'DEF',rating:75},{name:'Bougherra',pos:'DEF',rating:78},{name:'Gaouaoui',pos:'DEF',rating:73},{name:'Ghoulam',pos:'DEF',rating:79},{name:'Taider',pos:'MED',rating:77},{name:'Bentaleb',pos:'MED',rating:78},{name:'Brahimi',pos:'MED',rating:84},{name:'Feghouli',pos:'AVA',rating:82},{name:'Soudani',pos:'AVA',rating:76},{name:'Slimani',pos:'AVA',rating:83}]},
+  {id:'mar22',name:'Marrocos 2022',rarity:'rare',flag:'🇲🇦',players:[{name:'Bono',pos:'GR',rating:87},{name:'Hakimi',pos:'DEF',rating:87},{name:'Saïss',pos:'DEF',rating:83},{name:'Aguerd',pos:'DEF',rating:81},{name:'Mazraoui',pos:'DEF',rating:82},{name:'Amrabat',pos:'MED',rating:86},{name:'Ounahi',pos:'MED',rating:80},{name:'Dari',pos:'DEF',rating:76},{name:'Ziyech',pos:'AVA',rating:84},{name:'En-Nesyri',pos:'AVA',rating:83},{name:'Boufal',pos:'AVA',rating:80}]},
+  {id:'gha10',name:'Gana 2010',rarity:'common',flag:'🇬🇭',players:[{name:'Kingson',pos:'GR',rating:79},{name:'Pantsil',pos:'DEF',rating:74},{name:'Mensah',pos:'DEF',rating:78},{name:'Inkoom',pos:'DEF',rating:73},{name:'Asamoah',pos:'MED',rating:82},{name:'Muntari',pos:'MED',rating:83},{name:'Annan',pos:'MED',rating:76},{name:'Boateng K.',pos:'MED',rating:80},{name:'Ayew A.',pos:'AVA',rating:79},{name:'Dede Ayew',pos:'AVA',rating:76},{name:'Gyan',pos:'AVA',rating:87}]},
+  {id:'usa26',name:'EUA 2026',rarity:'common',flag:'🇺🇸',players:[{name:'Turner',pos:'GR',rating:80},{name:'Dest',pos:'DEF',rating:79},{name:'Zimmerman',pos:'DEF',rating:78},{name:'Richards',pos:'DEF',rating:77},{name:'Robinson',pos:'DEF',rating:78},{name:'McKennie',pos:'MED',rating:82},{name:'Adams',pos:'MED',rating:84},{name:'Musah',pos:'MED',rating:81},{name:'Reyna',pos:'AVA',rating:80},{name:'Weah',pos:'AVA',rating:78},{name:'Pulisic',pos:'AVA',rating:87}]},
+  {id:'jpn22',name:'Japão 2022',rarity:'common',flag:'🇯🇵',players:[{name:'Gonda',pos:'GR',rating:79},{name:'Yamane',pos:'DEF',rating:78},{name:'Yoshida',pos:'DEF',rating:82},{name:'Itakura',pos:'DEF',rating:80},{name:'Nagatomo',pos:'DEF',rating:77},{name:'Endo',pos:'MED',rating:84},{name:'Tanaka',pos:'MED',rating:81},{name:'Kamada',pos:'MED',rating:82},{name:'Doan',pos:'AVA',rating:80},{name:'Asano',pos:'AVA',rating:79},{name:'Mitoma',pos:'AVA',rating:83}]}
 ];
 
 function selAvgRating(sel){ return Math.round(sel.players.reduce((s,p)=>s+p.rating,0)/sel.players.length); }
@@ -360,11 +365,22 @@ function confirmTactic(){
 }
 
 function pickSelection(){
-  // Never repeat a selection already used in this draft
   const fresh=SELS.filter(s=>!usedSelectionIds.includes(s.id));
-  // Fallback if somehow all used (11 picks, 15 sels — shouldn't happen)
   const pool=fresh.length>0 ? fresh : SELS.filter(s=>s.id!==(currentSelection&&currentSelection.id));
-  return pool[Math.floor(Math.random()*pool.length)];
+
+  const roll=Math.random()*100;
+  let target='common';
+  if(roll<5) target='legendary';
+  else if(roll<20) target='epic';
+  else if(roll<45) target='rare';
+
+  let candidates=pool.filter(s=>s.rarity===target);
+
+  if(candidates.length===0){
+    candidates=pool;
+  }
+
+  return candidates[Math.floor(Math.random()*candidates.length)];
 }
 
 function loadRound(){
@@ -503,9 +519,52 @@ function buildTournament(){
   return opponents;
 }
 
+// Pick a random goalscorer from squad, weighted by rating, preferring AVA > MED > DEF
+function pickScorer(squadData) {
+  // Weight: AVA=3x, MED=1.5x, DEF/GR=0.3x, scaled by rating
+  const weighted = squadData.map(p => {
+    const posW = p.pos==='AVA' ? 3 : p.pos==='MED' ? 1.5 : 0.3;
+    return { p, w: posW * (p.rating / 100) };
+  });
+  const total = weighted.reduce((s,x) => s+x.w, 0);
+  let r = Math.random() * total;
+  for (const {p, w} of weighted) {
+    r -= w;
+    if (r <= 0) return p;
+  }
+  return weighted[weighted.length-1].p;
+}
+
+// Generate scorers for N goals from my squad
+function generateScorers(n, squadData) {
+  const scorers = [];
+  for (let i=0; i<n; i++) {
+    const p = pickScorer(squadData);
+    // Random minute 1-90, grouped by half roughly
+    const min = Math.floor(Math.random()*90)+1;
+    scorers.push({ name: p.name, min });
+  }
+  return scorers.sort((a,b) => a.min - b.min);
+}
+
+// Generate opponent scorers (generic names based on selection)
+function generateOppScorers(n, oppSel) {
+  const scorers = [];
+  // Use actual players from the opponent selection if available
+  const attackers = oppSel.players ? oppSel.players.filter(p => p.pos==='AVA' || p.pos==='MED') : [];
+  for (let i=0; i<n; i++) {
+    const min = Math.floor(Math.random()*90)+1;
+    const name = attackers.length
+      ? attackers[Math.floor(Math.random()*attackers.length)].name
+      : 'Desconhecido';
+    scorers.push({ name, min });
+  }
+  return scorers.sort((a,b) => a.min - b.min);
+}
+
 function simMatch(myR,oppR){
   const diff=myR-oppR;
-  const winProb=Math.min(0.85,Math.max(0.15,0.5+diff*0.025));
+  const winProb=Math.min(0.85,Math.max(0.15,0.5+diff*0.015));
   const myExp=Math.max(0.3,1.2+(diff/100)*1.5);
   const oppExp=Math.max(0.3,1.2-(diff/100)*1.5);
   function rg(e){ const p=Math.random(); if(p<0.18)return 0; if(p<0.18+e*0.22)return 1; if(p<0.18+e*0.22+e*0.28)return 2; if(p<0.18+e*0.22+e*0.28+e*0.18)return 3; return 4; }
@@ -531,6 +590,11 @@ async function startSimulation(){
     await new Promise(res=>setTimeout(res,750));
     const opp=opponents[r]; const oppR=opp.avg; const res=simMatch(myRating,oppR);
     totalGoals+=res.myG;
+
+    // Generate goalscorers
+    const myScorers = res.myG > 0 ? generateScorers(res.myG, squad) : [];
+    const oppScorers = res.oppG > 0 ? generateOppScorers(res.oppG, opp) : [];
+
     let cls,txt;
     if(r<3){
       if(res.won){wins++;groupPts+=3;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG} (+3 pts)`;}
@@ -544,7 +608,19 @@ async function startSimulation(){
         else{eliminated=true;cls='result-loss';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✗ Eliminado`;}
       } else{eliminated=true;cls='result-loss';txt=`Derrota ${res.myG}-${res.oppG} — Eliminado`;}
     }
-    log.innerHTML+=`<div class="sim-match"><div class="sim-round">${ROUNDS[r]}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${opp.flag} ${opp.name} (${oppR})</span> — <span class="${cls}">${txt}</span></div>`;
+
+    // Build goalscorer lines
+    const myGoalHtml = myScorers.map(s =>
+      `<span class="sim-goal"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`
+    ).join('');
+    const oppGoalHtml = oppScorers.map(s =>
+      `<span class="sim-goal-opp"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`
+    ).join('');
+    const scorersHtml = (myGoalHtml || oppGoalHtml)
+      ? `<div class="sim-goals">${myGoalHtml}${oppGoalHtml ? `<span style="color:var(--text3);font-size:10px;margin:0 4px;align-self:center">|</span>${oppGoalHtml}` : ''}</div>`
+      : '';
+
+    log.innerHTML+=`<div class="sim-match"><div class="sim-round">${ROUNDS[r]}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${opp.flag} ${opp.name} (${oppR})</span> — <span class="${cls}">${txt}</span>${scorersHtml}</div>`;
     log.scrollTop=log.scrollHeight;
     if(r===2&&groupPts<3){
       await new Promise(res=>setTimeout(res,400));
