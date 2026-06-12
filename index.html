@@ -944,308 +944,280 @@ const WC2026_GROUPS = {
   ]
 };
 
-// BRACKET STATE
-let bracketData = {
-  r32: {home:null, away:null, result:null},
-  qf:  {home:null, away:null, result:null},
-  sf:  {home:null, away:null, result:null},
-  fin: {home:null, away:null, result:null},
-  champion: null
-};
+// FULL TOURNAMENT BRACKET STATE
+let fullBracket = null;
 
-function initBracket(myTeam, groupOpp1, groupOpp2, groupOpp3) {
-  bracketData = {
-    group: [
-      {home:{...myTeam,isMe:true}, away:groupOpp1, result:null},
-      {home:{...myTeam,isMe:true}, away:groupOpp2, result:null},
-      {home:{...myTeam,isMe:true}, away:groupOpp3, result:null},
-    ],
-    r32:  {home:{...myTeam,isMe:true}, away:null, result:null},
-    qf:   {home:{...myTeam,isMe:true}, away:null, result:null},
-    sf:   {home:{...myTeam,isMe:true}, away:null, result:null},
-    fin:  {home:{...myTeam,isMe:true}, away:null, result:null},
-    champion: null
-  };
+function simTeamMatch(a, b) {
+  const diff = a.rating - b.rating;
+  const winProb = Math.min(0.85, Math.max(0.15, 0.5 + diff * 0.015));
+  const myExp = Math.max(0.3, 1.2 + (diff/100)*1.5);
+  const oppExp = Math.max(0.3, 1.2 - (diff/100)*1.5);
+  function rg(e){ const p=Math.random(); if(p<0.18)return 0; if(p<0.18+e*0.22)return 1; if(p<0.18+e*0.22+e*0.28)return 2; if(p<0.18+e*0.22+e*0.28+e*0.18)return 3; return 4; }
+  let aG=rg(myExp), bG=rg(oppExp);
+  const r=Math.random();
+  if(r<winProb && aG<=bG){ aG=bG+1; }
+  else if(r>=winProb && aG>bG){ bG=aG+Math.floor(Math.random()*2)+1; }
+  return {aG, bG, aWon: aG>bG, drew: aG===bG};
 }
 
-function renderBracket() {
+function simGroupFull(teams) {
+  const st = teams.map(t=>({...t, pts:0, gf:0, ga:0, gd:0}));
+  for(let i=0;i<st.length;i++){
+    for(let j=i+1;j<st.length;j++){
+      const res = simTeamMatch(st[i], st[j]);
+      st[i].gf+=res.aG; st[i].ga+=res.bG; st[i].gd+=res.aG-res.bG;
+      st[j].gf+=res.bG; st[j].ga+=res.aG; st[j].gd+=res.bG-res.aG;
+      if(res.aWon){st[i].pts+=3;}
+      else if(res.drew){st[i].pts+=1; st[j].pts+=1;}
+      else{st[j].pts+=3;}
+    }
+  }
+  st.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
+  return st;
+}
+
+function simKnockoutMatch(a, b) {
+  if(!a||!b) return null;
+  const res = simTeamMatch(a, b);
+  let aWon = res.aWon;
+  let aG = res.aG, bG = res.bG;
+  if(res.drew){ aWon = Math.random()<0.5; }
+  return {a:{...a,score:aG}, b:{...b,score:bG}, result:{aWon}};
+}
+
+function getWinner(m) {
+  if(!m||!m.result) return null;
+  return m.result.aWon ? {...m.a} : {...m.b};
+}
+
+function sName(t) {
+  if(!t) return '?';
+  const s = t.shortName || t.name;
+  return s.length > 11 ? s.substring(0,10)+'…' : s;
+}
+
+function renderFullBracketHTML() {
   const el = document.getElementById('bracket-display');
-  if(!el) return;
+  if(!el || !fullBracket) return;
 
-  function teamEl(t, isWinner, isLoser) {
-    if(!t) return `<div class="bracket-team tbd"><span class="bt-flag">·</span><span class="bt-name">A definir</span></div>`;
-    const cls = [
-      'bracket-team',
-      t.isMe ? 'me' : '',
-      isWinner ? 'winner' : '',
-      isLoser ? 'loser' : ''
-    ].filter(Boolean).join(' ');
-    const score = isWinner||isLoser ? `<span class="bt-score">${t.score??''}</span>` : '';
-    return `<div class="${cls}"><span class="bt-flag">${t.flag||'⭐'}</span><span class="bt-name">${t.name}</span>${score}</div>`;
+  function tbd() { return '<div class="b-team tbd"><span class="bf">·</span><span class="bn">A definir</span></div>'; }
+  function teamEl(t, won, lost) {
+    if(!t) return tbd();
+    const cls = ['b-team', t.isMe?'me':'', won?'winner':'', lost?'loser':''].filter(Boolean).join(' ');
+    const scoreHtml = (won||lost) ? '<span class="bs">'+(t.score!==undefined?t.score:'')+'</span>' : '';
+    return '<div class="'+cls+'"><span class="bf">'+(t.flag||'⭐')+'</span><span class="bn">'+sName(t)+'</span>'+scoreHtml+'</div>';
+  }
+  function matchEl(m) {
+    if(!m||!m.a) return '<div class="b-match">'+tbd()+tbd()+'</div>';
+    const aWon = m.result&&m.result.aWon;
+    const bWon = m.result&&!m.result.aWon;
+    return '<div class="b-match">'+teamEl(m.a,aWon,m.result&&bWon)+teamEl(m.b,bWon,m.result&&aWon)+'</div>';
   }
 
-  function matchEl(match, roundLabel) {
-    if(!match) return '';
-    const r = match.result;
-    const homeWin = r && r.homeWon;
-    const awayWin = r && !r.homeWon;
-    return `<div class="bracket-match">
-      ${teamEl(match.home, homeWin, r&&awayWin)}
-      ${teamEl(match.away, awayWin, r&&homeWin)}
-    </div>`;
+  const groupKeys = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  let groupsHtml = '<div class="groups-grid">';
+  for(const gk of groupKeys){
+    const st = fullBracket.groups[gk];
+    if(!st){ groupsHtml += '<div class="group-mini"><div class="group-mini-title">Grupo '+gk+'</div><div style="color:var(--text3);font-size:10px;padding:4px 0">...</div></div>'; continue; }
+    groupsHtml += '<div class="group-mini"><div class="group-mini-title">Grupo '+gk+'</div>';
+    st.forEach((t,i)=>{
+      const cls = 'group-mini-team '+(t.isMe?'me':i<2?'qualified':'eliminated');
+      groupsHtml += '<div class="'+cls+'"><span class="gmt-pos">'+(i+1)+'</span><span style="font-size:11px">'+t.flag+'</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">'+sName(t)+'</span><span class="gmt-pts">'+t.pts+'</span></div>';
+    });
+    groupsHtml += '</div>';
   }
+  groupsHtml += '</div>';
 
-  // Build 5 columns: Group(3 games), R32, QF, SF, Final + Champion
-  const bd = bracketData;
+  const r32a = fullBracket.r32.slice(0,6).map(matchEl).join('');
+  const r32b = fullBracket.r32.slice(6,12).map(matchEl).join('');
+  const qfa  = fullBracket.qf.slice(0,4).map(matchEl).join('');
+  const qfb  = fullBracket.qf.slice(4,8).map(matchEl).join('');
+  const sfH  = fullBracket.sf.slice(0,4).map(matchEl).join('');
+  const finH = fullBracket.fin.slice(0,2).map(matchEl).join('');
+  const champH = fullBracket.champion
+    ? '<div class="b-champion"><div class="bc-trophy">🏆</div><div class="bc-flag">'+fullBracket.champion.flag+'</div><div class="bc-name">'+sName(fullBracket.champion)+'</div></div>'
+    : '<div class="b-champion"><div class="bc-tbd">Campeão</div></div>';
 
-  const groupCol = `<div class="bracket-col">
-    <div class="bracket-col-title">Grupos</div>
-    ${(bd.group||[]).map(m=>matchEl(m)).join('')}
-  </div>`;
-
-  const r32Col = `<div class="bracket-col">
-    <div class="bracket-col-title">Oitavos</div>
-    <div style="flex:1;display:flex;align-items:center">${matchEl(bd.r32)}</div>
-  </div>`;
-
-  const qfCol = `<div class="bracket-col">
-    <div class="bracket-col-title">Quartos</div>
-    <div style="flex:1;display:flex;align-items:center">${matchEl(bd.qf)}</div>
-  </div>`;
-
-  const sfCol = `<div class="bracket-col">
-    <div class="bracket-col-title">Meias</div>
-    <div style="flex:1;display:flex;align-items:center">${matchEl(bd.sf)}</div>
-  </div>`;
-
-  const finCol = `<div class="bracket-col">
-    <div class="bracket-col-title">Final</div>
-    <div style="flex:1;display:flex;align-items:center;flex-direction:column;gap:8px">
-      ${matchEl(bd.fin)}
-      ${bd.champion
-        ? `<div class="bracket-champion"><div class="bc-trophy">🏆</div><div class="bc-name">${bd.champion.flag} ${bd.champion.name}</div></div>`
-        : `<div class="bracket-champion"><div class="bc-tbd">Campeão</div></div>`
-      }
-    </div>
-  </div>`;
-
-  el.innerHTML = groupCol + r32Col + qfCol + sfCol + finCol;
-}
-
-function launchConfetti() {
-  const colors = ['#C9A84C','#E8C96A','#A78BFA','#60A5FA','#fff','#F472B6','#34D399'];
-  const count = 120;
-  for(let i=0; i<count; i++){
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'confetti-piece';
-      el.style.cssText = `
-        left:${Math.random()*100}vw;
-        background:${colors[Math.floor(Math.random()*colors.length)]};
-        width:${6+Math.random()*6}px;
-        height:${6+Math.random()*6}px;
-        border-radius:${Math.random()>0.5?'50%':'2px'};
-        animation-duration:${2+Math.random()*2}s;
-        animation-delay:${Math.random()*0.5}s;
-      `;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 4000);
-    }, i * 20);
-  }
+  el.innerHTML = groupsHtml +
+    '<div class="bracket-grid">' +
+    '<div class="bracket-col"><div class="bracket-col-title">Oitavos A</div><div class="b-round">'+r32a+'</div></div>' +
+    '<div class="bracket-col"><div class="bracket-col-title">Oitavos B</div><div class="b-round">'+r32b+'</div></div>' +
+    '<div class="bracket-col"><div class="bracket-col-title">Quartos A</div><div class="b-round">'+qfa+'</div></div>' +
+    '<div class="bracket-col"><div class="bracket-col-title">Quartos B</div><div class="b-round">'+qfb+'</div></div>' +
+    '<div class="bracket-col"><div class="bracket-col-title">Meias</div><div class="b-round">'+sfH+'</div></div>' +
+    '<div class="bracket-col"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>' +
+    '</div>';
 }
 
 async function startSimulation(){
-  const myRating=squadRating();
-
-  // Pick a random group and replace a random team with the player's squad
-  const groupKeys = Object.keys(WC2026_GROUPS);
+  const myRating = squadRating();
+  const groupKeys = ['A','B','C','D','E','F','G','H','I','J','K','L'];
   const chosenGroupKey = groupKeys[Math.floor(Math.random()*groupKeys.length)];
-  const groupTeams = [...WC2026_GROUPS[chosenGroupKey]];
-  const replacedIdx = Math.floor(Math.random()*groupTeams.length);
-  const replacedTeam = groupTeams[replacedIdx];
-  const myTeam = {name:'LegendsPick', flag:'⭐', rating:Math.round(myRating)};
-  groupTeams[replacedIdx] = myTeam;
+  const groupTeamsList = WC2026_GROUPS[chosenGroupKey].map(t=>({...t}));
+  const replacedIdx = Math.floor(Math.random()*groupTeamsList.length);
+  const replacedTeam = {...groupTeamsList[replacedIdx]};
+  const myTeam = {name:'LegendsPick', shortName:'LP ⭐', flag:'⭐', rating:Math.round(myRating), isMe:true, players:squad.map(p=>p.name)};
+  groupTeamsList[replacedIdx] = myTeam;
 
-  document.getElementById('sim-subtitle').textContent=
-    `Grupo ${chosenGroupKey} · Substituíste ${replacedTeam.flag} ${replacedTeam.name} · Nota ${Math.round(myRating)}`;
+  document.getElementById('sim-subtitle').textContent =
+    'Grupo '+chosenGroupKey+' · Substituíste '+replacedTeam.flag+' '+replacedTeam.name+' · Nota '+Math.round(myRating);
   showScreen('screen-sim');
-  const log=document.getElementById('sim-log');
-  document.getElementById('sim-result').style.display='none';
+  const log = document.getElementById('sim-log');
+  const simResultEl = document.getElementById('sim-result');
+  simResultEl.style.display='block';
+  document.getElementById('result-banner').style.display='none';
+  document.getElementById('final-stats').innerHTML='';
+  // Clear previous MVP if any
+  const prevMvp = simResultEl.querySelector('.mvp-card');
+  if(prevMvp) prevMvp.remove();
+  const prevTs = simResultEl.querySelector('.top-scorers');
+  if(prevTs) prevTs.remove();
   log.innerHTML='';
 
-  // Init bracket with group opponents
-  const groupOpps = groupTeams.filter(t=>t.name!=='LegendsPick');
-  initBracket(
-    {name:'LegendsPick', flag:'⭐', rating:Math.round(myRating), isMe:true},
-    groupOpps[0]||{name:'?',flag:'',rating:70},
-    groupOpps[1]||{name:'?',flag:'',rating:70},
-    groupOpps[2]||{name:'?',flag:'',rating:70}
-  );
+  fullBracket = {
+    groups:{}, r32:Array(12).fill(null),
+    qf:Array(8).fill(null), sf:Array(4).fill(null),
+    fin:Array(2).fill(null), champion:null
+  };
+  renderFullBracketHTML();
 
-  // Show group draw
-  log.innerHTML+=`<div class="sim-match" style="background:rgba(201,168,76,0.05);border-left:2px solid var(--gold);padding-left:12px">
-    <div class="sim-round">Grupo ${chosenGroupKey} — O teu grupo</div>
-    ${groupTeams.map(t=>`<span style="margin-right:12px;font-size:13px">${t.flag} ${t.name} <span style="color:var(--text3)">(${t.rating})</span></span>`).join('')}
-  </div>`;
-  await new Promise(res=>setTimeout(res,600));
+  log.innerHTML+='<div class="sim-match" style="background:rgba(201,168,76,0.05);border-left:2px solid var(--gold);padding-left:12px"><div class="sim-round">Grupo '+chosenGroupKey+' — O teu grupo</div>'+
+    groupTeamsList.map(t=>'<span style="margin-right:12px;font-size:13px">'+t.flag+' '+t.name+' <span style="color:var(--text3)">('+t.rating+')</span></span>').join('')+'</div>';
+  log.scrollTop=log.scrollHeight;
 
-  let wins=0,losses=0,draws=0,totalGoals=0,groupPts=0,eliminated=false;
-  const goalTally={}; // track goals per player name
-  // --- GROUP STAGE: show each of my 3 games live, then final table ---
-  const groupOpponents = groupTeams.filter(t=>t.name!=='LegendsPick');
+  let wins=0, losses=0, draws=0, totalGoals=0, groupPts=0, eliminated=false;
+  const goalTally={};
 
-  // Build standings for all 4 teams
-  const standings = groupTeams.map(t=>({...t, pts:0, gf:0, ga:0, gd:0, isMe:t.name==='LegendsPick'}));
-
-  function simGroupMatch(a, b) {
-    const res = simMatch(a.rating, b.rating);
-    a.gf+=res.myG; a.ga+=res.oppG; a.gd+=res.myG-res.oppG;
-    b.gf+=res.oppG; b.ga+=res.myG; b.gd+=res.oppG-res.myG;
-    if(res.myG>res.oppG){ a.pts+=3; }
-    else if(res.myG===res.oppG){ a.pts+=1; b.pts+=1; }
-    else { b.pts+=3; }
-    return res;
+  // Simulate all 12 groups
+  log.innerHTML+='<div class="sim-match"><div class="sim-round">A simular fase de grupos completa...</div></div>';
+  await new Promise(res=>setTimeout(res,300));
+  const groupStandings={};
+  for(const gk of groupKeys){
+    await new Promise(res=>setTimeout(res,60));
+    const teams = gk===chosenGroupKey ? groupTeamsList.map(t=>({...t})) : WC2026_GROUPS[gk].map(t=>({...t}));
+    groupStandings[gk] = simGroupFull(teams);
+    fullBracket.groups[gk] = groupStandings[gk];
+    renderFullBracketHTML();
   }
+  await new Promise(res=>setTimeout(res,200));
 
-  // Simulate ALL 6 group matches but only show MY 3 live
-  const myGroupGames = [];
-  const allGroupPairs = [];
-  for(let i=0;i<standings.length;i++){
-    for(let j=i+1;j<standings.length;j++){
-      allGroupPairs.push([i,j]);
-    }
-  }
-
-  for(const [i,j] of allGroupPairs){
-    const a=standings[i], b=standings[j];
-    const res=simGroupMatch(a,b);
-    if(a.isMe||b.isMe){
-      const myG=a.isMe?res.myG:res.oppG;
-      const oppG=a.isMe?res.oppG:res.myG;
-      const oppTeam=a.isMe?{...b}:{...a};
-      myGroupGames.push({opp:oppTeam, myGoals:myG, oppGoals:oppG, won:myG>oppG, drew:myG===oppG, res});
-      totalGoals+=myG;
-      if(myG>0){ const sc=generateScorers(myG,squad); sc.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;}); }
-    }
-  }
-
-  // Show my 3 group games live with scorers
-  for(let g=0;g<myGroupGames.length;g++){
-    await new Promise(res=>setTimeout(res,700));
-    const game=myGroupGames[g];
-    const cls=game.won?'result-win':game.drew?'result-draw':'result-loss';
-    const txt=game.won?`Vitória ${game.myGoals}-${game.oppGoals}`:game.drew?`Empate ${game.myGoals}-${game.oppGoals}`:`Derrota ${game.myGoals}-${game.oppGoals}`;
-
-    // Regenerate scorers for display (same count, different names possible — just for show)
-    const myScorers=game.myGoals>0?generateScorers(game.myGoals,squad):[];
-    const oppScorers=game.oppGoals>0?generateOppScorers(game.oppGoals,game.opp):[];
-    const myGH=myScorers.map(s=>`<span class="sim-goal"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
-    const oppGH=oppScorers.map(s=>`<span class="sim-goal-opp"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
-    const scHtml=(myGH||oppGH)?`<div class="sim-goals">${myGH}${oppGH?`<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>${oppGH}`:''}</div>`:'';
-
-    // Update bracket group game
-    bracketData.group[g].result = {homeWon: game.won};
-    bracketData.group[g].home.score = game.myGoals;
-    bracketData.group[g].away.score = game.oppGoals;
-
-    log.innerHTML+=`<div class="sim-match"><div class="sim-round">Fase de Grupos (J${g+1}) · Grupo ${chosenGroupKey}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${game.opp.flag} ${game.opp.name} (${game.opp.rating})</span> — <span class="${cls}">${txt}</span>${scHtml}</div>`;
+  // Show my 3 group games live
+  const myGroupOpps = groupTeamsList.filter(t=>!t.isMe);
+  for(let g=0;g<myGroupOpps.length;g++){
+    await new Promise(res=>setTimeout(res,650));
+    const opp=myGroupOpps[g];
+    const res=simTeamMatch(myTeam,opp);
+    const myG=res.aG, oppG=res.bG;
+    totalGoals+=myG;
+    if(res.aWon) wins++; else if(res.drew) draws++; else losses++;
+    if(myG>0){const sc=generateScorers(myG,squad);sc.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});}
+    const cls=res.aWon?'result-win':res.drew?'result-draw':'result-loss';
+    const txt=res.aWon?'Vitória '+myG+'-'+oppG:res.drew?'Empate '+myG+'-'+oppG:'Derrota '+myG+'-'+oppG;
+    const myScorers=myG>0?generateScorers(myG,squad):[];
+    const oppScorers=oppG>0?generateOppScorers(oppG,opp):[];
+    const myGH=myScorers.map(s=>'<span class="sim-goal"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
+    const oppGH=oppScorers.map(s=>'<span class="sim-goal-opp"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
+    const scHtml=(myGH||oppGH)?'<div class="sim-goals">'+myGH+(oppGH?'<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>'+oppGH:'')+'</div>':'';
+    log.innerHTML+='<div class="sim-match"><div class="sim-round">Fase de Grupos (J'+(g+1)+') · Grupo '+chosenGroupKey+'</div><span style="font-weight:500">LegendsPick ('+Math.round(myRating)+') vs '+opp.flag+' '+opp.name+' ('+opp.rating+')</span> — <span class="'+cls+'">'+txt+'</span>'+scHtml+'</div>';
     log.scrollTop=log.scrollHeight;
   }
 
-  await new Promise(res=>setTimeout(res,500));
+  const myGroupSt = groupStandings[chosenGroupKey];
+  const myStPos = myGroupSt.findIndex(t=>t.isMe)+1;
+  groupPts = myGroupSt.find(t=>t.isMe)?.pts||0;
+  await new Promise(res=>setTimeout(res,300));
 
-  // Sort standings: pts, gd, gf
-  standings.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
-  const myStanding=standings.find(t=>t.isMe);
-  const myPos=standings.indexOf(myStanding)+1;
-
-  // Update counts
-  wins=myGroupGames.filter(g=>g.won).length;
-  draws=myGroupGames.filter(g=>g.drew).length;
-  losses=myGroupGames.filter(g=>!g.won&&!g.drew).length;
-  groupPts=myStanding.pts;
-
-  // Render group table
-  const tableRows=standings.map((t,i)=>{
-    const qualifies=i<2;
-    const style=t.isMe?'background:rgba(201,168,76,0.07);':'';
-    const posColor=qualifies?'color:#4A9E6F':'color:#9E4A4A';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);${style}font-size:13px">
-      <span style="width:16px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:16px;${posColor}">${i+1}</span>
-      <span style="font-size:16px">${t.flag}</span>
-      <span style="flex:1;font-weight:${t.isMe?'600':'400'};color:${t.isMe?'var(--gold)':'var(--text)'}">${t.name}</span>
-      <span style="width:28px;text-align:center;color:var(--text2);font-weight:500">${t.pts}</span>
-      <span style="width:44px;text-align:center;color:var(--text3);font-size:11px">${t.gf}:${t.ga}</span>
-      <span style="width:32px;text-align:center;color:var(--text3);font-size:11px">${t.gd>0?'+':''}${t.gd}</span>
-    </div>`;
-  }).join('');
-
-  log.innerHTML+=`<div class="sim-match" style="padding:0;overflow:hidden">
-    <div style="display:flex;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--dark3)">
-      <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);flex:1;padding-left:26px">Grupo ${chosenGroupKey} — Classificação Final</span>
-      <span style="width:28px;text-align:center;font-size:10px;color:var(--text3)">PTS</span>
-      <span style="width:44px;text-align:center;font-size:10px;color:var(--text3)">GM</span>
-      <span style="width:32px;text-align:center;font-size:10px;color:var(--text3)">DG</span>
-    </div>
-    ${tableRows}
-  </div>`;
-  log.scrollTop=log.scrollHeight;
-  await new Promise(res=>setTimeout(res,400));
-
-  if(myPos>2){
-    log.innerHTML+=`<div class="sim-match"><span class="result-loss">Eliminado na fase de grupos — ${myPos}º lugar com ${groupPts} pts.</span></div>`;
+  if(myStPos>2){
+    log.innerHTML+='<div class="sim-match"><span class="result-loss">Eliminado na fase de grupos — '+myStPos+'º lugar com '+groupPts+' pts.</span></div>';
     eliminated=true;
   } else {
-    log.innerHTML+=`<div class="sim-match"><span class="result-win">✓ Classificado em ${myPos}º lugar do Grupo ${chosenGroupKey}!</span></div>`;
+    log.innerHTML+='<div class="sim-match"><span class="result-win">✓ Classificado em '+myStPos+'º lugar do Grupo '+chosenGroupKey+'!</span></div>';
   }
   log.scrollTop=log.scrollHeight;
-  await new Promise(res=>setTimeout(res,400));
+  await new Promise(res=>setTimeout(res,300));
 
-  // --- KNOCKOUT STAGE ---
-  if(!eliminated){
-    const allTeams=Object.values(WC2026_GROUPS).flat();
-    const usedNames=new Set([...groupTeams.map(t=>t.name),'LegendsPick']);
-    function pickKO(minR,maxR){
-      const pool=allTeams.filter(t=>!usedNames.has(t.name)&&t.rating>=minR&&t.rating<=maxR);
-      const t=pool.length?pool[Math.floor(Math.random()*pool.length)]:allTeams.filter(t=>!usedNames.has(t.name))[0]||allTeams[0];
-      usedNames.add(t.name); return t;
+  // Build R32 from real WC2026 bracket pairings
+  const pairings=[['A',0,'B',1],['C',0,'D',1],['E',0,'F',1],['G',0,'H',1],['I',0,'J',1],['K',0,'L',1],['B',0,'A',1],['D',0,'C',1],['F',0,'E',1],['H',0,'G',1],['J',0,'I',1],['L',0,'K',1]];
+  fullBracket.r32 = pairings.map(([g1,p1,g2,p2])=>({a:groupStandings[g1][p1],b:groupStandings[g2][p2],result:null}));
+  renderFullBracketHTML();
+  await new Promise(res=>setTimeout(res,300));
+
+  // Knockout rounds
+  const roundDefs=[
+    {key:'r32',name:'Oitavos de Final'},
+    {key:'qf', name:'Quartos de Final'},
+    {key:'sf', name:'Meias-Finais'},
+    {key:'fin',name:'Final'}
+  ];
+  let prevWinners=null;
+
+  for(let ri=0;ri<4;ri++){
+    if(eliminated) break;
+    const {key,name}=roundDefs[ri];
+    log.innerHTML+='<div class="sim-match" style="border-left:2px solid var(--border);padding-left:10px"><div class="sim-round">'+name+'</div></div>';
+    log.scrollTop=log.scrollHeight;
+
+    let curMatches;
+    if(ri===0){ curMatches=fullBracket.r32; }
+    else {
+      const w=prevWinners;
+      const ms=[];
+      for(let i=0;i<w.length;i+=2) ms.push({a:w[i]||null,b:w[i+1]||null,result:null});
+      if(ri===1) fullBracket.qf=ms;
+      else if(ri===2) fullBracket.sf=ms;
+      else fullBracket.fin=ms;
+      curMatches=ms;
+      renderFullBracketHTML();
+      await new Promise(res=>setTimeout(res,150));
     }
-    const koOpps=[pickKO(68,80),pickKO(72,84),pickKO(78,88),pickKO(80,90)];
-    const koNames=['Oitavos de Final','Quartos de Final','Meia-Final','Final'];
 
-    for(let r=0;r<4;r++){
-      if(eliminated) break;
-      await new Promise(res=>setTimeout(res,750));
-      const opp=koOpps[r]; const oppR=opp.rating||75; const res=simMatch(myRating,oppR);
-      totalGoals+=res.myG;
-      const myScorers=res.myG>0?generateScorers(res.myG,squad):[];
-      myScorers.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});
-      const oppScorers=res.oppG>0?generateOppScorers(res.oppG,opp):[];
-      let cls,txt;
-      if(res.myG>res.oppG){wins++;cls='result-win';txt=`Vitória ${res.myG}-${res.oppG}`;}
-      else if(res.myG===res.oppG){
-        const pen=Math.random()<(0.4+(myRating-oppR)*0.01);
-        if(pen){wins++;cls='result-draw';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✓`;}
-        else{eliminated=true;cls='result-loss';txt=`Empate ${res.myG}-${res.myG} → Penáltis ✗ Eliminado`;}
-      } else{eliminated=true;cls='result-loss';txt=`Derrota ${res.myG}-${res.oppG} — Eliminado`;}
-      const myGH=myScorers.map(s=>`<span class="sim-goal"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
-      const oppGH=oppScorers.map(s=>`<span class="sim-goal-opp"><span class="goal-icon">⚽</span>${s.name} ${s.min}'</span>`).join('');
-      const scHtml=(myGH||oppGH)?`<div class="sim-goals">${myGH}${oppGH?`<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>${oppGH}`:''}</div>`:'';
-      // Update bracket
-      const koKey = ['r32','qf','sf','fin'][r];
-      bracketData[koKey].away = opp;
-      bracketData[koKey].home.score = res.myG;
-      bracketData[koKey].away.score = res.oppG;
-      bracketData[koKey].result = {homeWon: res.myG > res.oppG || (res.myG===res.oppG && !eliminated)};
-      if(r===3 && !eliminated) bracketData.champion = {name:'LegendsPick', flag:'⭐'};
+    const roundWins=[];
+    for(let i=0;i<curMatches.length;i++){
+      const m=curMatches[i];
+      if(!m||!m.a||!m.b){roundWins.push(null);continue;}
+      await new Promise(res=>setTimeout(res,ri===0?80:180));
+      const result=simKnockoutMatch(m.a,m.b);
+      curMatches[i]=result;
+      if(ri===0) fullBracket.r32[i]=result;
+      else if(ri===1) fullBracket.qf[i]=result;
+      else if(ri===2) fullBracket.sf[i]=result;
+      else fullBracket.fin[i]=result;
+      renderFullBracketHTML();
+      const winner=getWinner(result);
+      roundWins.push(winner);
 
-      log.innerHTML+=`<div class="sim-match"><div class="sim-round">${koNames[r]}</div><span style="font-weight:500">LegendsPick (${Math.round(myRating)}) vs ${opp.flag} ${opp.name} (${oppR})</span> — <span class="${cls}">${txt}</span>${scHtml}</div>`;
-      log.scrollTop=log.scrollHeight;
+      const isMyMatch=m.a.isMe||m.b.isMe;
+      if(isMyMatch){
+        const myIsA=m.a.isMe;
+        const myG=myIsA?result.a.score:result.b.score;
+        const oppT=myIsA?result.b:result.a;
+        const oppG=myIsA?result.b.score:result.a.score;
+        const iWon=result.result.aWon===myIsA;
+        totalGoals+=myG;
+        const myScorers=myG>0?generateScorers(myG,squad):[];
+        myScorers.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});
+        const oppScorers=oppG>0?generateOppScorers(oppG,oppT):[];
+        let cls,txt;
+        if(iWon){wins++;cls='result-win';txt='Vitória '+myG+'-'+oppG;}
+        else{eliminated=true;cls='result-loss';txt='Derrota '+myG+'-'+oppG+' — Eliminado';}
+        const myGH=myScorers.map(s=>'<span class="sim-goal"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
+        const oppGH=oppScorers.map(s=>'<span class="sim-goal-opp"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
+        const scHtml=(myGH||oppGH)?'<div class="sim-goals">'+myGH+(oppGH?'<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>'+oppGH:'')+'</div>':'';
+        log.innerHTML+='<div class="sim-match"><div class="sim-round">'+name+'</div><span style="font-weight:500">LegendsPick ('+Math.round(myRating)+') vs '+oppT.flag+' '+oppT.name+' ('+(oppT.rating||'?')+')</span> — <span class="'+cls+'">'+txt+'</span>'+scHtml+'</div>';
+        log.scrollTop=log.scrollHeight;
+        await new Promise(res=>setTimeout(res,250));
+      }
     }
+    prevWinners=roundWins;
+    if(ri===3 && prevWinners.length){ fullBracket.champion=prevWinners[0]; renderFullBracketHTML(); }
   }
-  await new Promise(res=>setTimeout(res,600));
-  const champion=!eliminated&&wins>=4;
+
+  if(!eliminated){ fullBracket.champion=myTeam; renderFullBracketHTML(); }
+  await new Promise(res=>setTimeout(res,500));
+  const champion=!eliminated&&wins>=4
+
   if(champion) launchConfetti();
+  document.getElementById('result-banner').style.display='';
   document.getElementById('result-banner').innerHTML=champion
     ?`<span class="result-trophy">🏆</span><span class="result-title">Campeão do Mundo</span><span class="result-sub">O teu ${chosenTactic.name} conquistou a Copa do Mundo</span>`
     :`<span class="result-trophy">⚽</span><span class="result-title">Torneio Terminado</span><span class="result-sub">${wins} vitórias · ${draws} empates · ${losses} derrotas</span>`;
