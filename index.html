@@ -22,10 +22,42 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .logo span { color:var(--text); }
 .tagline { font-size:11px; color:var(--text3); letter-spacing:0.1em; text-transform:uppercase; margin-top:2px; }
 .screen { display:none; padding:40px 0 60px; }
-.screen.active { display:block; }
+.screen.active { display:block; animation:screenFadeIn 0.4s ease both; }
+@keyframes screenFadeIn {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
 /* HERO */
-.hero { padding:64px 0 48px; text-align:center; }
+.hero { padding:64px 0 48px; text-align:center; position:relative; overflow:hidden; }
+.hero-bg {
+  position:absolute; inset:-40px;
+  pointer-events:none; z-index:0;
+  overflow:hidden;
+}
+.hero-flag {
+  position:absolute; opacity:0; border-radius:2px;
+  animation: heroFloat linear infinite;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+@keyframes heroFloat {
+  0%   { transform:translateY(110vh) translateX(0) rotate(0deg); opacity:0; }
+  8%   { opacity:0.55; }
+  92%  { opacity:0.55; }
+  100% { transform:translateY(-30vh) translateX(var(--drift,0px)) rotate(var(--spin,8deg)); opacity:0; }
+}
+.hero-spotlight {
+  position:absolute; top:-20%; left:50%; transform:translateX(-50%);
+  width:140%; height:70%;
+  background:radial-gradient(ellipse 50% 50% at 50% 0%, rgba(201,168,76,0.10) 0%, transparent 65%);
+  pointer-events:none; z-index:0;
+  animation: spotlightPulse 6s ease-in-out infinite;
+}
+@keyframes spotlightPulse {
+  0%,100% { opacity:0.6; }
+  50% { opacity:1; }
+}
+.hero-content { position:relative; z-index:2; }
 .hero-eyebrow { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; }
 .hero h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(52px,10vw,96px); line-height:0.95; letter-spacing:2px; margin-bottom:24px; }
 .hero h1 em { color:var(--gold); font-style:normal; }
@@ -618,6 +650,9 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
   <!-- START -->
   <div id="screen-start" class="screen active">
     <div class="hero">
+      <div class="hero-spotlight"></div>
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="hero-content">
       <div class="hero-eyebrow">⚽ World Cup Fantasy Draft</div>
       <h1>Draft as<br><em>Lendas</em><br>do Futebol</h1>
       <p>Constrói o teu 11 com as maiores lendas de todas as Copas do Mundo. Escolhe a tática, faz o draft e conquista o mundo.</p>
@@ -627,6 +662,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
         <div class="hero-stat"><span class="num">11</span><span class="lbl">Titulares</span></div>
       </div>
       <button class="btn btn-gold" onclick="showScreen('screen-mode')">Começar Draft →</button>
+      </div>
     </div>
   </div>
 
@@ -749,6 +785,33 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
 
 <script>
 // Flag helper
+// Hero background flags
+const HERO_FLAGS = ['br','de','ar','fr','it','es','nl','pt','en','uy','hr','be','hu','mx','jp','us','ma','sn'].map(c=>c==='en'?'gb-eng':c);
+
+function setupHeroBackground(){
+  const bg = document.getElementById('hero-bg');
+  if(!bg) return;
+  bg.innerHTML='';
+  const count = 14;
+  for(let i=0;i<count;i++){
+    const iso = HERO_FLAGS[Math.floor(Math.random()*HERO_FLAGS.length)];
+    const el = document.createElement('img');
+    el.src = 'https://flagcdn.com/w40/'+iso+'.png';
+    el.className = 'hero-flag';
+    const size = 24 + Math.random()*28;
+    el.style.width = size+'px';
+    el.style.height = (size*0.75)+'px';
+    el.style.left = Math.random()*100+'%';
+    const duration = 14 + Math.random()*14;
+    const delay = -Math.random()*duration;
+    el.style.animationDuration = duration+'s';
+    el.style.animationDelay = delay+'s';
+    el.style.setProperty('--drift', (Math.random()*120-60)+'px');
+    el.style.setProperty('--spin', (Math.random()*60-30)+'deg');
+    bg.appendChild(el);
+  }
+}
+
 function flagImg(code, cls) {
   cls = cls || 'flag-img';
   if(!code || code==='star' || code==='\u2b50'){
@@ -1557,7 +1620,7 @@ async function startSimulation(){
     groupTeamsList.map(t=>'<span style="margin-right:12px;font-size:13px">'+flagImg(t.flag,'flag-img-sm')+' '+t.name+' <span style="color:var(--text3)">('+t.rating+')</span></span>').join('')+'</div>';
   log.scrollTop=log.scrollHeight;
 
-  let wins=0, losses=0, draws=0, totalGoals=0, groupPts=0, eliminated=false;
+  let wins=0, losses=0, draws=0, totalGoals=0, groupPts=0, eliminated=false, eliminationStage=null;
   const goalTally={};
 
   // Simulate all 12 groups
@@ -1618,6 +1681,7 @@ async function startSimulation(){
   if(!qualified){
     log.innerHTML+='<div class="sim-match"><span class="result-loss">Eliminado na fase de grupos — '+myStPos+'º lugar com '+groupPts+' pts.</span></div>';
     eliminated=true;
+    eliminationStage='Fase de Grupos';
   } else if(myStPos<=2){
     log.innerHTML+='<div class="sim-match"><span class="result-win">✓ Classificado em '+myStPos+'º lugar do Grupo '+chosenGroupKey+'!</span></div>';
   } else {
@@ -1725,7 +1789,7 @@ async function startSimulation(){
         const oppScorers=oppG>0?generateOppScorers(oppG,oppT):[];
         let cls,txt;
         if(iWon){wins++;cls='result-win';txt='Vitória '+myG+'-'+oppG;}
-        else{eliminated=true;cls='result-loss';txt='Derrota '+myG+'-'+oppG+' — Eliminado';}
+        else{eliminated=true;eliminationStage=name;cls='result-loss';txt='Derrota '+myG+'-'+oppG+' — Eliminado';}
 
         const hasPenalties = wasDraw;
         const penOutcome = hasPenalties
@@ -1817,6 +1881,7 @@ async function startSimulation(){
   renderFullPitch('sim-pitch-rows');
   document.getElementById('sim-result').style.display='block';
 }
+setupHeroBackground();
 </script>
 <div id="bonus-overlay" class="bonus-overlay">
   <div class="bonus-modal">
