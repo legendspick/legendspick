@@ -244,6 +244,36 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .scorer-bar-wrap { width:60px; height:3px; background:var(--dark4); border-radius:2px; margin-left:8px; }
 .scorer-bar { height:100%; background:var(--gold); border-radius:2px; }
 
+/* GAME MODE SELECTION */
+.mode-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:28px; }
+.mode-card { background:var(--dark2); padding:24px 22px; cursor:pointer; transition:background 0.15s; position:relative; }
+.mode-card:hover { background:var(--dark3); }
+.mode-card.selected { background:var(--dark3); }
+.mode-card.selected::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); }
+.mode-icon { font-size:32px; margin-bottom:10px; display:block; }
+.mode-name { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; color:var(--text); margin-bottom:6px; }
+.mode-desc { font-size:13px; color:var(--text3); line-height:1.6; }
+.mode-desc strong { color:var(--text2); }
+
+/* TEAM NAME INPUT */
+.team-name-section { margin-bottom: 24px; }
+.team-name-label {
+  font-size:11px; text-transform:uppercase; letter-spacing:0.1em;
+  color:var(--text3); margin-bottom:8px;
+}
+.team-name-input {
+  width:100%; max-width:320px;
+  background:var(--dark2); border:1px solid var(--border);
+  color:var(--text); font-family:'Bebas Neue',sans-serif;
+  font-size:22px; letter-spacing:1px;
+  padding:10px 14px; border-radius:2px;
+  transition:border-color 0.2s;
+}
+.team-name-input:focus {
+  outline:none; border-color:var(--gold);
+}
+.team-name-input::placeholder { color:var(--text3); font-family:'DM Sans',sans-serif; font-size:14px; letter-spacing:normal; }
+
 /* BONUS POPUP */
 .bonus-overlay {
   position:fixed; inset:0; z-index:998;
@@ -284,6 +314,57 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .bonus-btn.gold { border-color:rgba(201,168,76,0.5); }
 .bonus-btn.gold:hover { background:rgba(201,168,76,0.08); border-color:var(--gold); }
 .bonus-btn.gold .bonus-btn-title { color:var(--gold); }
+
+/* LIVE MATCH WIDGET */
+.live-match-card {
+  background:var(--dark2); border:1px solid var(--border);
+  padding:14px 16px; margin-bottom:10px;
+  animation:matchIn 0.3s ease both;
+}
+.lm-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.lm-round { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); }
+.lm-clock {
+  font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--gold);
+  background:rgba(201,168,76,0.1); padding:2px 10px; border-radius:2px;
+  border:1px solid rgba(201,168,76,0.3); letter-spacing:1px;
+}
+.lm-clock.live::before {
+  content:'●'; color:#E04B4B; margin-right:6px; font-size:9px;
+  animation:lmBlink 1s infinite;
+}
+@keyframes lmBlink { 0%,50%{opacity:1} 51%,100%{opacity:0.15} }
+.lm-teams { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+.lm-team { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; flex:1; min-width:0; }
+.lm-team.away { justify-content:flex-end; text-align:right; }
+.lm-team span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lm-score {
+  font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:2px;
+  padding:0 14px; flex-shrink:0; color:var(--text);
+}
+.lm-score span { display:inline-block; min-width:22px; text-align:center; }
+.lm-score span.bump { animation:lmBump 0.45s ease; }
+@keyframes lmBump { 0%{transform:scale(1);color:var(--text)} 40%{transform:scale(1.5);color:var(--gold)} 100%{transform:scale(1);color:var(--text)} }
+.lm-events { display:flex; flex-direction:column; gap:4px; min-height:2px; }
+.lm-event {
+  font-size:11px; display:flex; align-items:center; gap:6px;
+  animation:matchIn 0.3s ease both; color:var(--text2);
+}
+.lm-event .lm-min {
+  font-family:'Bebas Neue',sans-serif; color:var(--text3);
+  width:28px; flex-shrink:0; text-align:right;
+}
+.lm-event.me .lm-min { color:var(--gold); }
+.lm-event.opp { justify-content:flex-end; }
+.lm-event.opp .lm-min { order:2; text-align:left; }
+.lm-final-badge {
+  margin-top:10px; padding-top:10px; border-top:1px solid var(--border);
+  font-size:13px; font-weight:600; text-align:center;
+  animation:matchIn 0.3s ease both;
+}
+.lm-pens {
+  font-size:11px; color:var(--text3); text-align:center; margin-top:6px;
+  animation:matchIn 0.3s ease both;
+}
 
 /* CONFETTI */
 .confetti-piece {
@@ -545,11 +626,29 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
         <div class="hero-stat"><span class="num">1930</span><span class="lbl">Até 2026</span></div>
         <div class="hero-stat"><span class="num">11</span><span class="lbl">Titulares</span></div>
       </div>
-      <button class="btn btn-gold" onclick="showScreen('screen-tactics')">Começar Draft →</button>
+      <button class="btn btn-gold" onclick="showScreen('screen-mode')">Começar Draft →</button>
     </div>
   </div>
 
   <!-- TACTICS -->
+  <div id="screen-mode" class="screen">
+    <div class="section-title">Escolhe o Modo de Jogo</div>
+    <div class="section-sub">Como queres escolher os teus jogadores?</div>
+    <div class="mode-grid">
+      <div class="mode-card" id="mode-ratings" onclick="selectGameMode('ratings')">
+        <span class="mode-icon">📊</span>
+        <div class="mode-name">Ratings</div>
+        <div class="mode-desc">Vês a <strong>nota de cada jogador</strong> (0-100) antes de escolheres. Modo clássico — escolhe sempre o melhor.</div>
+      </div>
+      <div class="mode-card" id="mode-knowledge" onclick="selectGameMode('knowledge')">
+        <span class="mode-icon">🧠</span>
+        <div class="mode-name">Conhecimento</div>
+        <div class="mode-desc">As notas ficam <strong>escondidas (?)</strong> durante o draft. Confia no teu conhecimento de futebol! As notas reais só são reveladas quando o teu 11 estiver completo.</div>
+      </div>
+    </div>
+    <button class="btn" onclick="showScreen('screen-start')">← Voltar</button>
+  </div>
+
   <div id="screen-tactics" class="screen">
     <div class="section-title">Escolhe a Tática</div>
     <div class="section-sub">A formação define quantos defesas, médios e avançados podes recrutar no draft.</div>
@@ -594,6 +693,19 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
 
   <!-- SQUAD -->
   <div id="screen-squad" class="screen">
+    <div class="team-name-section" style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:180px">
+        <div class="team-name-label">Nome da tua seleção</div>
+        <input type="text" id="team-name-input" class="team-name-input" placeholder="Ex: Lendas FC" maxlength="20" value="LegendsPick">
+      </div>
+      <div style="width:100px">
+        <div class="team-name-label">Sigla (3 letras)</div>
+        <input type="text" id="team-nick-input" class="team-name-input" placeholder="LGP" maxlength="3" value="LGP" style="text-transform:uppercase;text-align:center">
+      </div>
+    </div>
+    <div id="knowledge-reveal-banner" style="display:none;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--gold);text-align:center">
+      🧠 Revelação! Eis as notas reais dos jogadores que escolheste:
+    </div>
     <div class="squad-header">
       <div class="section-title">O Teu 11</div>
       <span class="squad-avg" id="squad-avg">—</span>
@@ -617,7 +729,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
       <div class="final-stats" id="final-stats"></div>
       <!-- Squad display in result -->
       <div class="bracket-section">
-        <div class="bracket-title">🏆 Bracket do Torneio</div>
+        <div class="bracket-title"><svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;display:inline-block;vertical-align:-0.15em"><defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F0D878"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9C7A2E"/></linearGradient></defs><!-- Base --><rect x="30" y="105" width="40" height="10" rx="2" fill="url(#goldGrad)"/><rect x="38" y="95" width="24" height="12" rx="2" fill="url(#goldGrad)"/><!-- Stem --><path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#goldGrad)"/><!-- Cup body - spiraling bands like the real trophy --><path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#goldGrad)"/><path d="M30 15 C30 35 35 50 50 58 C65 50 70 35 70 15 C70 28 62 38 50 40 C38 38 30 28 30 15 Z" fill="url(#goldGrad)" opacity="0.85"/><!-- Top sphere --><circle cx="50" cy="14" r="13" fill="url(#goldGrad)"/><circle cx="46" cy="10" r="3" fill="#FCEFC0" opacity="0.6"/></svg> Bracket do Torneio</div>
         <div class="bracket" id="bracket-display"></div>
       </div>
 
@@ -639,7 +751,11 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
 // Flag helper
 function flagImg(code, cls) {
   cls = cls || 'flag-img';
-  if(!code || code==='\u2b50') return '<span style="font-size:16px">\u2b50</span>';
+  if(!code || code==='star' || code==='\u2b50'){
+    const sizeMap = {'flag-img':'16px','flag-img-sm':'13px','flag-img-lg':'22px','flag-img-xl':'40px'};
+    const size = sizeMap[cls] || '16px';
+    return '<span style="font-size:'+size+';line-height:1">\u2b50</span>';
+  }
   const iso = (code||'').toLowerCase().trim();
   return '<img class="'+cls+'" src="https://flagcdn.com/w40/'+iso+'.png" loading="lazy">';
 }
@@ -693,6 +809,9 @@ function selAvgRating(sel){ return Math.round(sel.players.reduce((s,p)=>s+p.rati
 // State
 let squad=[], currentRound=0, currentSelection=null, selectedPlayer=null;
 let bonusUsed=false, bonusActive=null; // bonusActive: null | 'legendary' | 'double'
+let teamName='LegendsPick';
+let teamNick='LGP';
+let gameMode='ratings'; // 'ratings' | 'knowledge'
 let rerollsLeft=3, chosenTactic=null, lastAdded=null;
 let usedSelectionIds=[]; // selections already shown this draft — never repeat
 
@@ -724,6 +843,13 @@ function renderTactics(){
       <div class="tac-badges"><span class="tac-badge">${t.quota.DEF} DEF</span><span class="tac-badge">${t.quota.MED} MED</span><span class="tac-badge">${t.quota.AVA} AVA</span></div>
     </div>`;
   }).join('');
+}
+
+function selectGameMode(mode){
+  gameMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mode-'+mode).classList.add('selected');
+  setTimeout(()=>showScreen('screen-tactics'), 200);
 }
 
 function selectTactic(id){
@@ -822,18 +948,23 @@ function renderPlayerGrid(){
     const lockMsg = locked
       ? `<div class="p-locked-msg">${squad.some(s=>s.name===p.name)?'Já no plantel':'Posição completa'}</div>`
       : '';
+    const ratingHtml = gameMode==='knowledge'
+      ? `<div class="p-rating-bar"><div class="p-rating-fill" style="width:100%;background:var(--dark4)"></div></div>
+         <div class="p-rating-num">Nota: <strong style="color:var(--text3)">?</strong></div>`
+      : `<div class="p-rating-bar"><div class="p-rating-fill" style="width:${p.rating}%;background:${RC(p.rating)}"></div></div>
+         <div class="p-rating-num">Nota: <strong style="color:${RC(p.rating)}">${p.rating}</strong></div>`;
     return `<div class="player-card${locked?' locked':''}" id="${sid}" ${locked?'':` onclick="selectPlayer(this,'${sname}')"`}>
       <div class="p-name">${p.name}</div>
       <div class="p-pos">${POS_LABELS[p.pos]}</div>
-      <div class="p-rating-bar"><div class="p-rating-fill" style="width:${p.rating}%;background:${RC(p.rating)}"></div></div>
-      <div class="p-rating-num">Nota: <strong style="color:${RC(p.rating)}">${p.rating}</strong></div>
+      ${ratingHtml}
       ${lockMsg}
     </div>`;
   }).join('');
 }
 
-function buildPitchRows(squadData, newPlayerName){
+function buildPitchRows(squadData, newPlayerName, revealRatings){
   const quota=chosenTactic.quota;
+  const hide = gameMode==='knowledge' && !revealRatings;
   return ['AVA','MED','DEF','GR'].map(pos=>{
     const total=quota[pos];
     const filled=squadData.filter(p=>p.pos===pos);
@@ -841,8 +972,9 @@ function buildPitchRows(squadData, newPlayerName){
     for(let i=0;i<total;i++){
       const p=filled[i]||null;
       const isNew=p&&p.name===newPlayerName;
+      const ratLabel = hide ? '?' : (p?p.rating:'');
       rowHtml+=p
-        ?`<div class="lp-slot filled rarity-${p.selRarity||'common'}${isNew?' just-added':''}"><div class="lp-avatar">${flagImg(p.flag,'flag-img-sm')}</div><div class="lp-name">${p.name}</div><div class="lp-rat">${p.rating}</div></div>`
+        ?`<div class="lp-slot filled rarity-${p.selRarity||'common'}${isNew?' just-added':''}"><div class="lp-avatar">${flagImg(p.flag,'flag-img-sm')}</div><div class="lp-name">${p.name}</div><div class="lp-rat">${ratLabel}</div></div>`
         :`<div class="lp-slot"><div class="lp-avatar">·</div><div class="lp-name">${POS_LABELS[pos]}</div><div class="lp-rat">&nbsp;</div></div>`;
     }
     return `<div class="lp-row">${rowHtml}</div>`;
@@ -850,9 +982,13 @@ function buildPitchRows(squadData, newPlayerName){
 }
 
 function renderLivePitch(newPlayerName){
-  document.getElementById('live-pitch').innerHTML=buildPitchRows(squad,newPlayerName);
-  const avg=squad.length?Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length):'—';
-  document.getElementById('lp-avg').textContent=avg;
+  document.getElementById('live-pitch').innerHTML=buildPitchRows(squad,newPlayerName,false);
+  if(gameMode==='knowledge'){
+    document.getElementById('lp-avg').textContent='?';
+  } else {
+    const avg=squad.length?Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length):'—';
+    document.getElementById('lp-avg').textContent=avg;
+  }
 }
 
 function selectPlayer(el,name){
@@ -925,6 +1061,7 @@ function showSquad(){
   const avg=Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length);
   document.getElementById('squad-avg').textContent=avg;
   document.getElementById('squad-tactic-label').textContent=`Tática: ${chosenTactic.name} · ${chosenTactic.label}`;
+  document.getElementById('knowledge-reveal-banner').style.display = gameMode==='knowledge' ? 'block' : 'none';
   renderFullPitch('pitch-rows');
   showScreen('screen-squad');
 }
@@ -1053,7 +1190,7 @@ function showRarityReveal(sel, callback) {
   document.getElementById('rv-name').textContent = sel.name;
 
   const avg = Math.round(sel.players.reduce((s,p)=>s+p.rating,0)/sel.players.length);
-  document.getElementById('rv-avg').textContent = `Nota média · ${avg}`;
+  document.getElementById('rv-avg').textContent = gameMode==='knowledge' ? 'Lendas em campo' : `Nota média · ${avg}`;
 
   el.className = `rarity-reveal rarity-${rarity}`;
   spawnParticles(rarity);
@@ -1196,6 +1333,72 @@ function launchConfetti() {
   }
 }
 
+// LIVE MATCH WIDGET — animates a 90' clock with goals appearing live
+async function playLiveMatch(opts){
+  const log = document.getElementById('sim-log');
+  const id = 'lm_'+Math.random().toString(36).slice(2,9);
+  const myFlagHtml = flagImg(opts.myFlag,'flag-img-sm');
+  const oppFlagHtml = flagImg(opts.oppFlag,'flag-img-sm');
+
+  log.innerHTML += '<div class="live-match-card" id="'+id+'">'+
+    '<div class="lm-header"><span class="lm-round">'+opts.roundLabel+'</span><span class="lm-clock live" id="'+id+'_clock">0&#39;</span></div>'+
+    '<div class="lm-teams">'+
+      '<div class="lm-team home">'+myFlagHtml+'<span>'+opts.myName+'</span></div>'+
+      '<div class="lm-score" id="'+id+'_score"><span id="'+id+'_s1">0</span> - <span id="'+id+'_s2">0</span></div>'+
+      '<div class="lm-team away"><span>'+opts.oppName+'</span>'+oppFlagHtml+'</div>'+
+    '</div>'+
+    '<div class="lm-events" id="'+id+'_events"></div>'+
+  '</div>';
+  log.scrollTop = log.scrollHeight;
+
+  const clockEl = document.getElementById(id+'_clock');
+  const s1El = document.getElementById(id+'_s1');
+  const s2El = document.getElementById(id+'_s2');
+  const eventsEl = document.getElementById(id+'_events');
+
+  // Build sorted timeline of goal events
+  const timeline = [];
+  (opts.myScorers||[]).forEach(s=>timeline.push({min:s.min, side:'me', name:s.name}));
+  (opts.oppScorers||[]).forEach(s=>timeline.push({min:s.min, side:'opp', name:s.name}));
+  timeline.sort((a,b)=>a.min-b.min);
+
+  let s1=0, s2=0, tIdx=0;
+  const stepMs = 55; // ~5s for 90 minutes
+
+  for(let min=1; min<=90; min++){
+    await new Promise(r=>setTimeout(r, stepMs));
+    clockEl.innerHTML = min+"&#39;";
+    while(tIdx<timeline.length && timeline[tIdx].min===min){
+      const ev = timeline[tIdx];
+      if(ev.side==='me'){
+        s1++; s1El.textContent=s1;
+        s1El.classList.remove('bump'); void s1El.offsetWidth; s1El.classList.add('bump');
+        eventsEl.innerHTML += '<div class="lm-event me"><span class="lm-min">'+ev.min+"&#39;</span><span>&#9917; "+ev.name+'</span></div>';
+      } else {
+        s2++; s2El.textContent=s2;
+        s2El.classList.remove('bump'); void s2El.offsetWidth; s2El.classList.add('bump');
+        eventsEl.innerHTML += '<div class="lm-event opp"><span>&#9917; '+ev.name+'</span><span class="lm-min">'+ev.min+"&#39;</span></div>";
+      }
+      log.scrollTop = log.scrollHeight;
+      tIdx++;
+    }
+  }
+  clockEl.innerHTML = "90&#39;";
+  clockEl.classList.remove('live');
+
+  if(opts.hasPenalties){
+    await new Promise(r=>setTimeout(r,350));
+    eventsEl.innerHTML += '<div class="lm-pens">⚖️ '+opts.penOutcome+'</div>';
+    log.scrollTop = log.scrollHeight;
+    await new Promise(r=>setTimeout(r,350));
+  }
+
+  document.getElementById(id).insertAdjacentHTML('beforeend',
+    '<div class="lm-final-badge '+opts.resultCls+'">'+opts.resultTxt+'</div>');
+  log.scrollTop = log.scrollHeight;
+  await new Promise(r=>setTimeout(r,200));
+}
+
 function toggleSquadPanel() {
   const panel = document.getElementById('squad-panel');
   const isHidden = panel.style.display === 'none';
@@ -1294,7 +1497,7 @@ function renderFullBracketHTML() {
   const sfH  = (fullBracket.sf||[]).slice(0,2).map(matchEl).join('');
   const finH = (fullBracket.fin||[]).slice(0,1).map(matchEl).join('');
   const champH = fullBracket.champion
-    ? '<div class="b-champion"><div class="bc-trophy">🏆</div><div class="bc-flag">'+flagImg(fullBracket.champion.flag,'flag-img-lg')+'</div><div class="bc-name">'+sName(fullBracket.champion)+'</div></div>'
+    ? '<div class="b-champion"><div class="bc-trophy"><svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="width:1em;height:1em;display:inline-block;vertical-align:-0.15em">  <defs>    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">      <stop offset="0%" stop-color="#F0D878"/>      <stop offset="50%" stop-color="#C9A84C"/>      <stop offset="100%" stop-color="#9C7A2E"/>    </linearGradient>  </defs>  <!-- Base -->  <rect x="30" y="105" width="40" height="10" rx="2" fill="url(#goldGrad)"/>  <rect x="38" y="95" width="24" height="12" rx="2" fill="url(#goldGrad)"/>  <!-- Stem -->  <path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#goldGrad)"/>  <!-- Cup body - spiraling bands like the real trophy -->  <path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#goldGrad)"/>  <path d="M30 15 C30 35 35 50 50 58 C65 50 70 35 70 15 C70 28 62 38 50 40 C38 38 30 28 30 15 Z" fill="url(#goldGrad)" opacity="0.85"/>  <!-- Top sphere -->  <circle cx="50" cy="14" r="13" fill="url(#goldGrad)"/>  <circle cx="46" cy="10" r="3" fill="#FCEFC0" opacity="0.6"/></svg></div><div class="bc-flag">'+flagImg(fullBracket.champion.flag,'flag-img-lg')+'</div><div class="bc-name">'+sName(fullBracket.champion)+'</div></div>'
     : '<div class="b-champion"><div class="bc-tbd">Campeão</div></div>';
 
   el.innerHTML = groupsHtml +
@@ -1309,13 +1512,19 @@ function renderFullBracketHTML() {
 }
 
 async function startSimulation(){
+  const nameInput = document.getElementById('team-name-input');
+  const nickInput = document.getElementById('team-nick-input');
+  teamName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim().substring(0,20) : 'LegendsPick';
+  teamNick = (nickInput && nickInput.value.trim()) ? nickInput.value.trim().toUpperCase().substring(0,3) : 'LGP';
+  if(teamNick.length < 2) teamNick = 'LGP';
+
   const myRating = squadRating();
   const groupKeys = ['A','B','C','D','E','F','G','H','I','J','K','L'];
   const chosenGroupKey = groupKeys[Math.floor(Math.random()*groupKeys.length)];
   const groupTeamsList = WC2026_GROUPS[chosenGroupKey].map(t=>({...t}));
   const replacedIdx = Math.floor(Math.random()*groupTeamsList.length);
   const replacedTeam = {...groupTeamsList[replacedIdx]};
-  const myTeam = {name:'LegendsPick', shortName:'LP ⭐', flag:'star', rating:Math.round(myRating), isMe:true, players:squad.map(p=>p.name)};
+  const myTeam = {name:teamName, shortName:teamNick, flag:'star', rating:Math.round(myRating), isMe:true, players:squad.map(p=>p.name)};
   groupTeamsList[replacedIdx] = myTeam;
 
   document.getElementById('sim-subtitle').innerHTML =
@@ -1369,7 +1578,6 @@ async function startSimulation(){
     .filter(m => m.a.isMe || m.b.isMe);
 
   for(let g=0;g<myGroupMatches.length;g++){
-    await new Promise(res=>setTimeout(res,650));
     const m = myGroupMatches[g];
     const myIsA = m.a.isMe;
     const myG = myIsA ? m.aG : m.bG;
@@ -1379,16 +1587,20 @@ async function startSimulation(){
     const drew = m.drew;
     totalGoals+=myG;
     if(won) wins++; else if(drew) draws++; else losses++;
-    if(myG>0){const sc=generateScorers(myG,squad);sc.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});}
+    const myScorers=myG>0?generateScorers(myG,squad):[];
+    myScorers.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});
+    const oppScorers=oppG>0?generateOppScorers(oppG,opp):[];
     const cls=won?'result-win':drew?'result-draw':'result-loss';
     const txt=won?'Vitória '+myG+'-'+oppG:drew?'Empate '+myG+'-'+oppG:'Derrota '+myG+'-'+oppG;
-    const myScorers=myG>0?generateScorers(myG,squad):[];
-    const oppScorers=oppG>0?generateOppScorers(oppG,opp):[];
-    const myGH=myScorers.map(s=>'<span class="sim-goal"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
-    const oppGH=oppScorers.map(s=>'<span class="sim-goal-opp"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
-    const scHtml=(myGH||oppGH)?'<div class="sim-goals">'+myGH+(oppGH?'<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>'+oppGH:'')+'</div>':'';
-    log.innerHTML+='<div class="sim-match"><div class="sim-round">Fase de Grupos (J'+(g+1)+') · Grupo '+chosenGroupKey+'</div><span style="font-weight:500">LegendsPick ('+Math.round(myRating)+') vs '+flagImg(opp.flag,'flag-img-sm')+' '+opp.name+' ('+opp.rating+')</span> — <span class="'+cls+'">'+txt+'</span>'+scHtml+'</div>';
-    log.scrollTop=log.scrollHeight;
+
+    await playLiveMatch({
+      roundLabel:'Fase de Grupos (J'+(g+1)+') · Grupo '+chosenGroupKey,
+      myFlag:'star', myName:teamName,
+      oppFlag:opp.flag, oppName:opp.name+' ('+opp.rating+')',
+      myScorers, oppScorers,
+      hasPenalties:false, penOutcome:'',
+      resultCls:cls, resultTxt:txt
+    });
   }
 
   const myGroupSt = groupStandings[chosenGroupKey];
@@ -1396,11 +1608,20 @@ async function startSimulation(){
   groupPts = myGroupSt.find(t=>t.isMe)?.pts||0;
   await new Promise(res=>setTimeout(res,300));
 
-  if(myStPos>2){
+  // Determine best 8 third-placed teams (real WC2026 rule)
+  const allThirdsForCheck = Object.entries(groupStandings).map(([gk,st])=>({...st[2],fromGroup:gk}));
+  allThirdsForCheck.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
+  const best8ThirdsKeys = allThirdsForCheck.slice(0,8).map(t=>t.fromGroup);
+  const qualifiedAsThird = myStPos===3 && best8ThirdsKeys.includes(chosenGroupKey);
+  const qualified = myStPos<=2 || qualifiedAsThird;
+
+  if(!qualified){
     log.innerHTML+='<div class="sim-match"><span class="result-loss">Eliminado na fase de grupos — '+myStPos+'º lugar com '+groupPts+' pts.</span></div>';
     eliminated=true;
-  } else {
+  } else if(myStPos<=2){
     log.innerHTML+='<div class="sim-match"><span class="result-win">✓ Classificado em '+myStPos+'º lugar do Grupo '+chosenGroupKey+'!</span></div>';
+  } else {
+    log.innerHTML+='<div class="sim-match"><span class="result-win">✓ Classificado como um dos melhores 3ºs lugares ('+myStPos+'º do Grupo '+chosenGroupKey+', '+groupPts+' pts)!</span></div>';
   }
   log.scrollTop=log.scrollHeight;
   await new Promise(res=>setTimeout(res,300));
@@ -1497,6 +1718,7 @@ async function startSimulation(){
         const oppT=myIsA?result.b:result.a;
         const oppG=myIsA?result.b.score:result.a.score;
         const iWon=myIsA ? result.result.aWon : !result.result.aWon;
+        const wasDraw = myG===oppG;
         totalGoals+=myG;
         const myScorers=myG>0?generateScorers(myG,squad):[];
         myScorers.forEach(s=>{goalTally[s.name]=(goalTally[s.name]||0)+1;});
@@ -1504,12 +1726,20 @@ async function startSimulation(){
         let cls,txt;
         if(iWon){wins++;cls='result-win';txt='Vitória '+myG+'-'+oppG;}
         else{eliminated=true;cls='result-loss';txt='Derrota '+myG+'-'+oppG+' — Eliminado';}
-        const myGH=myScorers.map(s=>'<span class="sim-goal"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
-        const oppGH=oppScorers.map(s=>'<span class="sim-goal-opp"><span class="goal-icon">⚽</span>'+s.name+' '+s.min+"'</span>").join('');
-        const scHtml=(myGH||oppGH)?'<div class="sim-goals">'+myGH+(oppGH?'<span style="color:var(--text3);font-size:10px;margin:0 4px">|</span>'+oppGH:'')+'</div>':'';
-        log.innerHTML+='<div class="sim-match"><div class="sim-round">'+name+'</div><span style="font-weight:500">LegendsPick ('+Math.round(myRating)+') vs '+flagImg(oppT.flag,'flag-img-sm')+' '+oppT.name+' ('+(oppT.rating||'?')+')</span> — <span class="'+cls+'">'+txt+'</span>'+scHtml+'</div>';
-        log.scrollTop=log.scrollHeight;
-        await new Promise(res=>setTimeout(res,250));
+
+        const hasPenalties = wasDraw;
+        const penOutcome = hasPenalties
+          ? (iWon ? teamName+' venceu nos penáltis' : oppT.name+' venceu nos penáltis')
+          : '';
+
+        await playLiveMatch({
+          roundLabel:name,
+          myFlag:'star', myName:teamName,
+          oppFlag:oppT.flag, oppName:oppT.name+' ('+(oppT.rating||'?')+')',
+          myScorers, oppScorers,
+          hasPenalties, penOutcome,
+          resultCls:cls, resultTxt:txt
+        });
       }
     }
     prevWinners=roundWins;
@@ -1528,7 +1758,7 @@ async function startSimulation(){
   if(champion) launchConfetti();
   document.getElementById('result-banner').style.display='';
   document.getElementById('result-banner').innerHTML=champion
-    ?`<span class="result-trophy">🏆</span><span class="result-title">Campeão do Mundo</span><span class="result-sub">O teu ${chosenTactic.name} conquistou a Copa do Mundo</span>`
+    ?`<span class="result-trophy"><svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="width:1em;height:1em;display:inline-block;vertical-align:-0.15em"><defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F0D878"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9C7A2E"/></linearGradient></defs><rect x="30" y="105" width="40" height="10" rx="2" fill="url(#goldGrad)"/><rect x="38" y="95" width="24" height="12" rx="2" fill="url(#goldGrad)"/><path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#goldGrad)"/><path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#goldGrad)"/><path d="M30 15 C30 35 35 50 50 58 C65 50 70 35 70 15 C70 28 62 38 50 40 C38 38 30 28 30 15 Z" fill="url(#goldGrad)" opacity="0.85"/><circle cx="50" cy="14" r="13" fill="url(#goldGrad)"/><circle cx="46" cy="10" r="3" fill="#FCEFC0" opacity="0.6"/></svg></span><span class="result-title">Campeão do Mundo</span><span class="result-sub">O teu ${chosenTactic.name} conquistou a Copa do Mundo</span>`
     :`<span class="result-trophy">⚽</span><span class="result-title">Torneio Terminado</span><span class="result-sub">${wins} vitórias · ${draws} empates · ${losses} derrotas</span>`;
 
   // Build MVP & top scorers
