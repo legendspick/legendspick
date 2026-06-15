@@ -276,6 +276,34 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .scorer-bar-wrap { width:60px; height:3px; background:var(--dark4); border-radius:2px; margin-left:8px; }
 .scorer-bar { height:100%; background:var(--gold); border-radius:2px; }
 
+/* SHARE MODAL */
+.share-overlay {
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.85);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+  padding:20px;
+}
+.share-overlay.show { opacity:1; pointer-events:all; }
+.share-modal {
+  background:var(--dark2); border:1px solid var(--border);
+  max-width:420px; width:100%; padding:20px;
+  text-align:center;
+  transform:scale(0.92); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  max-height:90vh; overflow-y:auto;
+}
+.share-overlay.show .share-modal { transform:scale(1); }
+.share-modal-title {
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px;
+  color:var(--text); margin-bottom:12px;
+}
+#share-canvas-preview {
+  width:100%; max-width:340px; border-radius:2px; margin-bottom:16px;
+  border:1px solid var(--border);
+}
+.share-modal-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.share-loading { padding:60px 20px; color:var(--text3); font-size:13px; }
+
 /* GAME MODE SELECTION */
 .mode-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:28px; }
 .mode-card { background:var(--dark2); padding:24px 22px; cursor:pointer; transition:background 0.15s; position:relative; }
@@ -772,6 +800,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
         <button class="btn btn-gold" onclick="showScreen('screen-tactics')">Jogar Novamente →</button>
         <button class="btn" onclick="toggleSquadPanel()">📋 Ver o meu plantel</button>
+        <button class="btn" onclick="openShareModal()">📸 Partilhar Resultado</button>
       </div>
       <div id="squad-panel" style="display:none">
         <div class="sim-squad-title">O Plantel que jogou</div>
@@ -875,6 +904,7 @@ let bonusUsed=false, bonusActive=null; // bonusActive: null | 'legendary' | 'dou
 let teamName='LegendsPick';
 let teamNick='LGP';
 let gameMode='ratings'; // 'ratings' | 'knowledge'
+let lastResult = null;
 let rerollsLeft=3, chosenTactic=null, lastAdded=null;
 let usedSelectionIds=[]; // selections already shown this draft — never repeat
 
@@ -1462,6 +1492,287 @@ async function playLiveMatch(opts){
   await new Promise(r=>setTimeout(r,200));
 }
 
+// SHARE IMAGE GENERATION
+let shareImageDataUrl = null;
+
+function openShareModal(){
+  document.getElementById('share-overlay').classList.add('show');
+  document.getElementById('share-download-btn').style.display='none';
+  document.getElementById('share-content').innerHTML = '<div class="share-loading">A gerar imagem...</div>';
+  generateShareImage();
+}
+
+function closeShareModal(){
+  document.getElementById('share-overlay').classList.remove('show');
+}
+
+function downloadShareImage(){
+  if(!shareImageDataUrl) return;
+  const a = document.createElement('a');
+  a.href = shareImageDataUrl;
+  a.download = (lastResult.teamNick||'LGP')+'-legendspick.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function loadImg(src){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = ()=>resolve(img);
+    img.onerror = ()=>resolve(null);
+    img.src = src;
+  });
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+async function generateShareImage(){
+  if(!lastResult) return;
+  const W=1080, H=1350;
+  const canvas=document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle='#0E0E10';
+  ctx.fillRect(0,0,W,H);
+
+  // Subtle pitch stripes
+  ctx.save();
+  ctx.globalAlpha=0.04;
+  ctx.fillStyle='#ffffff';
+  for(let i=0;i<H;i+=80){
+    if((i/80)%2===0) ctx.fillRect(0,i,W,80);
+  }
+  ctx.restore();
+
+  // Gold glow top
+  const grad = ctx.createRadialGradient(W/2,0,0,W/2,0,W*0.8);
+  grad.addColorStop(0,'rgba(201,168,76,0.18)');
+  grad.addColorStop(1,'rgba(201,168,76,0)');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H*0.6);
+
+  // Wordmark
+  ctx.textAlign='left';
+  ctx.font='600 36px Arial';
+  ctx.fillStyle='#FFFFFF';
+  ctx.fillText('LEGENDS', 60, 90);
+  const lw = ctx.measureText('LEGENDS').width;
+  ctx.fillStyle='#C9A84C';
+  ctx.fillText('PICK', 60+lw, 90);
+  ctx.font='400 18px Arial';
+  ctx.fillStyle='#8A8680';
+  ctx.fillText('WORLD CUP FANTASY DRAFT', 60, 122);
+
+  let y = 230;
+
+  // Trophy or ball icon
+  ctx.save();
+  ctx.translate(W/2, y);
+  if(lastResult.champion){
+    // Draw gold trophy shape
+    const g2 = ctx.createLinearGradient(-60,-60,60,60);
+    g2.addColorStop(0,'#F0D878'); g2.addColorStop(0.5,'#C9A84C'); g2.addColorStop(1,'#9C7A2E');
+    ctx.fillStyle=g2;
+    // base
+    roundRect(ctx,-40,60,80,22,4); ctx.fill();
+    roundRect(ctx,-28,38,56,26,4); ctx.fill();
+    // stem
+    ctx.beginPath();
+    ctx.moveTo(-12,-20); ctx.lineTo(-22,38); ctx.lineTo(22,38); ctx.lineTo(12,-20); ctx.closePath(); ctx.fill();
+    // cup body
+    ctx.beginPath();
+    ctx.moveTo(-55,-60);
+    ctx.bezierCurveTo(-55,-15,-65,15,0,30);
+    ctx.bezierCurveTo(65,15,55,-15,55,-60);
+    ctx.bezierCurveTo(55,-25,30,-10,0,-5);
+    ctx.bezierCurveTo(-30,-10,-55,-25,-55,-60);
+    ctx.closePath(); ctx.fill();
+    // sphere
+    ctx.beginPath();
+    ctx.arc(0,-70,30,0,Math.PI*2);
+    ctx.fill();
+  } else {
+    // Ball emoji-style circle
+    ctx.fillStyle='#FFFFFF';
+    ctx.beginPath(); ctx.arc(0,0,55,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#1a1a1a';
+    ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=4;
+    for(let a=0;a<6;a++){
+      const ang=a*Math.PI/3;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(ang)*18, Math.sin(ang)*18);
+      ctx.lineTo(Math.cos(ang)*55, Math.sin(ang)*55);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+
+  y += 130;
+
+  // Headline
+  ctx.textAlign='center';
+  ctx.font='700 56px Arial';
+  if(lastResult.champion){
+    ctx.fillStyle='#C9A84C';
+    ctx.fillText('CAMPEÃO DO MUNDO!', W/2, y);
+  } else {
+    ctx.fillStyle='#E5E1D8';
+    const stage = lastResult.eliminationStage || 'Fase de Grupos';
+    ctx.fillText('Eliminado em', W/2, y);
+    y += 64;
+    ctx.fillStyle='#C9A84C';
+    ctx.fillText(stage.toUpperCase(), W/2, y);
+  }
+
+  y += 80;
+
+  // Team name + nick badge
+  ctx.font='700 44px Arial';
+  ctx.fillStyle='#FFFFFF';
+  ctx.fillText(lastResult.teamName, W/2, y);
+
+  y += 70;
+
+  // Stats row card
+  const statsY = y;
+  const statW = (W-120)/4;
+  const stats = [
+    {label:'NOTA', value:String(lastResult.rating)},
+    {label:'TÁTICA', value:lastResult.tactic},
+    {label:'VITÓRIAS', value:String(lastResult.wins)},
+    {label:'GOLOS', value:String(lastResult.totalGoals)}
+  ];
+  ctx.fillStyle='#18181B';
+  roundRect(ctx,60,statsY,W-120,110,4); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+  roundRect(ctx,60,statsY,W-120,110,4); ctx.stroke();
+
+  stats.forEach((s,i)=>{
+    const cx = 60 + statW*i + statW/2;
+    ctx.font='700 38px Arial';
+    ctx.fillStyle = i===0 ? '#C9A84C' : '#FFFFFF';
+    ctx.fillText(s.value, cx, statsY+58);
+    ctx.font='400 16px Arial';
+    ctx.fillStyle='#8A8680';
+    ctx.fillText(s.label, cx, statsY+86);
+    if(i>0){
+      ctx.strokeStyle='rgba(255,255,255,0.08)';
+      ctx.beginPath();
+      ctx.moveTo(60+statW*i, statsY+20);
+      ctx.lineTo(60+statW*i, statsY+90);
+      ctx.stroke();
+    }
+  });
+
+  y = statsY + 150;
+
+  // MVP card
+  if(lastResult.mvp){
+    const mvp = lastResult.mvp;
+    ctx.fillStyle='#18181B';
+    roundRect(ctx,60,y,W-120,130,4); ctx.fill();
+    ctx.strokeStyle='rgba(201,168,76,0.25)'; ctx.lineWidth=1;
+    roundRect(ctx,60,y,W-120,130,4); ctx.stroke();
+
+    // Flag
+    if(mvp.flagCode && mvp.flagCode!=='star'){
+      const flagImgEl = await loadImg('https://flagcdn.com/w80/'+mvp.flagCode.toLowerCase()+'.png');
+      if(flagImgEl) ctx.drawImage(flagImgEl, 90, y+45, 60, 40);
+    } else {
+      ctx.font='40px Arial';
+      ctx.textAlign='left';
+      ctx.fillStyle='#C9A84C';
+      ctx.fillText('⭐', 90, y+85);
+    }
+
+    ctx.textAlign='left';
+    ctx.font='400 18px Arial';
+    ctx.fillStyle='#C9A84C';
+    ctx.fillText('MVP DO TORNEIO', 175, y+45);
+    ctx.font='700 36px Arial';
+    ctx.fillStyle='#FFFFFF';
+    ctx.fillText(mvp.name, 175, y+85);
+
+    // Goals badge
+    ctx.textAlign='right';
+    ctx.font='700 56px Arial';
+    ctx.fillStyle='#C9A84C';
+    ctx.fillText(String(mvp.goals), W-90, y+75);
+    ctx.font='400 16px Arial';
+    ctx.fillStyle='#8A8680';
+    ctx.fillText('GOLOS', W-90, y+100);
+
+    y += 170;
+  } else {
+    y += 30;
+  }
+
+  // Top scorers (up to 3)
+  if(lastResult.topScorers && lastResult.topScorers.length>1){
+    ctx.textAlign='left';
+    ctx.font='400 18px Arial';
+    ctx.fillStyle='#8A8680';
+    ctx.fillText('MELHORES MARCADORES', 60, y);
+    y += 30;
+
+    const top3 = lastResult.topScorers.slice(0,3);
+    for(const s of top3){
+      ctx.fillStyle='#18181B';
+      roundRect(ctx,60,y,W-120,60,4); ctx.fill();
+
+      let fx = 85;
+      if(s.flagCode && s.flagCode!=='star'){
+        const fimg = await loadImg('https://flagcdn.com/w40/'+s.flagCode.toLowerCase()+'.png');
+        if(fimg) ctx.drawImage(fimg, fx, y+18, 30, 22);
+      } else {
+        ctx.font='22px Arial';
+        ctx.fillStyle='#C9A84C';
+        ctx.fillText('⭐', fx, y+38);
+      }
+
+      ctx.font='600 26px Arial';
+      ctx.fillStyle='#E5E1D8';
+      ctx.fillText(s.name, 135, y+38);
+
+      ctx.textAlign='right';
+      ctx.font='700 28px Arial';
+      ctx.fillStyle='#C9A84C';
+      ctx.fillText(s.goals+' ⚽', W-90, y+38);
+      ctx.textAlign='left';
+
+      y += 70;
+    }
+  }
+
+  // Footer
+  ctx.textAlign='center';
+  ctx.font='400 18px Arial';
+  ctx.fillStyle='#5A5650';
+  ctx.fillText('legendspick.github.io/legendspick', W/2, H-50);
+  ctx.font='600 20px Arial';
+  ctx.fillStyle='#8A8680';
+  ctx.fillText('LEGENDSPICK', W/2, H-80);
+
+  // Render to modal
+  shareImageDataUrl = canvas.toDataURL('image/png');
+  document.getElementById('share-content').innerHTML =
+    '<img id="share-canvas-preview" src="'+shareImageDataUrl+'" alt="Resultado">';
+  document.getElementById('share-download-btn').style.display='inline-block';
+}
+
 function toggleSquadPanel() {
   const panel = document.getElementById('squad-panel');
   const isHidden = panel.style.display === 'none';
@@ -1469,13 +1780,21 @@ function toggleSquadPanel() {
   if(isHidden) renderFullPitch('sim-pitch-rows');
 }
 
+function poissonSample(lambda){
+  // Knuth's algorithm for Poisson-distributed goal counts
+  const L=Math.exp(-lambda);
+  let k=0, p=1;
+  do{ k++; p*=Math.random(); } while(p>L);
+  return k-1;
+}
+
 function simTeamMatch(a, b) {
   const diff = a.rating - b.rating;
   const winProb = Math.min(0.88, Math.max(0.12, 0.5 + diff * 0.02));
-  const myExp = Math.max(0.3, 1.2 + (diff/100)*1.5);
-  const oppExp = Math.max(0.3, 1.2 - (diff/100)*1.5);
-  function rg(e){ const p=Math.random(); if(p<0.18)return 0; if(p<0.18+e*0.22)return 1; if(p<0.18+e*0.22+e*0.28)return 2; if(p<0.18+e*0.22+e*0.28+e*0.18)return 3; return 4; }
-  let aG=rg(myExp), bG=rg(oppExp);
+  const base = 1.35; // average goals per team in football
+  const myExp = Math.max(0.35, base + diff*0.025);
+  const oppExp = Math.max(0.35, base - diff*0.025);
+  let aG=poissonSample(myExp), bG=poissonSample(oppExp);
   const r=Math.random();
   if(r<winProb && aG<=bG){ aG=bG+1; }
   else if(r>=winProb && aG>bG){ bG=aG+Math.floor(Math.random()*2)+1; }
@@ -1878,11 +2197,35 @@ async function startSimulation(){
   const statsEl = document.getElementById('final-stats');
   statsEl.insertAdjacentHTML('beforebegin', mvpHtml + topScorersHtml);
 
+  // Save result data for share image
+  lastResult = {
+    teamName, teamNick,
+    rating: Math.round(myRating),
+    tactic: chosenTactic.name,
+    champion, eliminationStage,
+    wins, draws, losses, totalGoals,
+    mvp, topScorers,
+    groupKey: chosenGroupKey
+  };
+
   renderFullPitch('sim-pitch-rows');
   document.getElementById('sim-result').style.display='block';
 }
 setupHeroBackground();
 </script>
+<div id="share-overlay" class="share-overlay">
+  <div class="share-modal">
+    <div class="share-modal-title">📸 Partilhar Resultado</div>
+    <div id="share-content">
+      <div class="share-loading">A gerar imagem...</div>
+    </div>
+    <div class="share-modal-actions">
+      <button class="btn btn-gold" id="share-download-btn" style="display:none" onclick="downloadShareImage()">⬇️ Descarregar</button>
+      <button class="btn" onclick="closeShareModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div id="bonus-overlay" class="bonus-overlay">
   <div class="bonus-modal">
     <span class="bonus-icon">🎁</span>
