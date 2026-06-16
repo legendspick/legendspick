@@ -718,8 +718,8 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
     <div class="section-sub">A formação define quantos defesas, médios e avançados podes recrutar no draft.</div>
     <div id="tactic-grid" class="tactic-grid"></div>
     <div style="display:flex;gap:10px">
-      <button class="btn btn-gold" id="btn-tactic-confirm" onclick="confirmTactic()" disabled>Confirmar e Começar Draft →</button>
       <button class="btn" onclick="showScreen('screen-start')">← Voltar</button>
+      <button class="btn btn-gold" id="btn-tactic-confirm" onclick="confirmTactic()" disabled>Confirmar e Começar Draft →</button>
     </div>
   </div>
 
@@ -857,7 +857,9 @@ const TACTICS=[
   {id:'433',name:'4-3-3',label:'Ataque total',desc:'Três avançados dinâmicos. Alta pressão, ofensivo e direto.',quota:{GR:1,DEF:4,MED:3,AVA:3}},
   {id:'532',name:'5-3-2',label:'Fortaleza',desc:'Cinco defesas, bloco baixo, contra-ataque letal.',quota:{GR:1,DEF:5,MED:3,AVA:2}},
   {id:'352',name:'3-5-2',label:'Posse',desc:'Cinco médios controlam o jogo. Três defesas cobrem o espaço.',quota:{GR:1,DEF:3,MED:5,AVA:2}},
-  {id:'451',name:'4-5-1',label:'Pressing',desc:'Um avançado de referência. Meio-campo overload, pressing intenso.',quota:{GR:1,DEF:4,MED:5,AVA:1}}
+  {id:'451',name:'4-5-1',label:'Pressing',desc:'Um avançado de referência. Meio-campo overload, pressing intenso.',quota:{GR:1,DEF:4,MED:5,AVA:1}},
+  {id:'343',name:'3-4-3',label:'Ofensivo',desc:'Apenas três defesas, linha avançada de três pontas. Risco e espetáculo.',quota:{GR:1,DEF:3,MED:4,AVA:3}},
+  {id:'334',name:'3-3-4',label:'Tudo ao ataque',desc:'Defesa mínima, quatro avançados. Máxima ousadia, zero cautela.',quota:{GR:1,DEF:3,MED:3,AVA:4}}
 ];
 const POS_LABELS={GR:'Guarda-redes',DEF:'Defesa',MED:'Médio',AVA:'Avançado'};
 const RC=r=>r>=95?'#C9A84C':r>=85?'#A78BFA':r>=80?'#4A9E6F':'#9A9690';
@@ -1978,7 +1980,7 @@ async function startSimulation(){
     await playLiveMatch({
       roundLabel:'Fase de Grupos (J'+(g+1)+') · Grupo '+chosenGroupKey,
       myFlag:'star', myName:teamName,
-      oppFlag:opp.flag, oppName:opp.name+' ('+opp.rating+')',
+      oppFlag:opp.flag, oppName:opp.name+' ('+opp.rating+')', oppTeam:opp,
       myScorers, oppScorers,
       hasPenalties:false, penOutcome:'',
       resultCls:cls, resultTxt:txt
