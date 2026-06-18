@@ -276,6 +276,68 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .scorer-bar-wrap { width:60px; height:3px; background:var(--dark4); border-radius:2px; margin-left:8px; }
 .scorer-bar { height:100%; background:var(--gold); border-radius:2px; }
 
+/* LINEUP POPUP */
+.lineup-overlay {
+  position:fixed; inset:0; z-index:990;
+  background:rgba(0,0,0,0.92);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+  padding:16px;
+}
+.lineup-overlay.show { opacity:1; pointer-events:all; }
+.lineup-modal {
+  background:#0f1f0f;
+  border:1px solid rgba(255,255,255,0.08);
+  width:100%; max-width:560px; max-height:90vh; overflow-y:auto;
+  transform:scale(0.92); transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative;
+}
+.lineup-overlay.show .lineup-modal { transform:scale(1); }
+.lineup-header {
+  background:rgba(0,0,0,0.4); padding:14px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  text-align:center;
+}
+.lineup-round { font-size:10px; text-transform:uppercase; letter-spacing:0.15em; color:var(--text3); margin-bottom:4px; }
+.lineup-teams-header {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.lineup-team-name { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:var(--text); }
+.lineup-team-rating { font-size:12px; color:var(--text3); margin-top:2px; }
+.lineup-vs { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--text3); }
+.lineup-pitch {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:0; position:relative;
+  background:repeating-linear-gradient(180deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 28px, transparent 28px, transparent 56px);
+}
+.lineup-pitch::after {
+  content:''; position:absolute; left:50%; top:10%; bottom:10%;
+  width:1px; background:rgba(255,255,255,0.06); pointer-events:none;
+}
+.lineup-col { padding:12px 10px; }
+.lineup-col.away { text-align:right; }
+.lineup-player {
+  display:flex; align-items:center; gap:8px; padding:5px 8px;
+  border-radius:2px; margin-bottom:2px; transition:background 0.15s;
+}
+.lineup-col.away .lineup-player { flex-direction:row-reverse; }
+.lineup-player-flag { flex-shrink:0; }
+.lineup-player-info { flex:1; min-width:0; }
+.lineup-player-name { font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text2); }
+.lineup-col.away .lineup-player-name { text-align:right; }
+.lineup-player-pos { font-size:10px; color:var(--text3); }
+.lineup-col.away .lineup-player-pos { text-align:right; }
+.lineup-player-rating {
+  font-family:'Bebas Neue',sans-serif; font-size:16px; flex-shrink:0;
+}
+.lineup-pos-group { font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.2); padding:4px 8px 2px; }
+.lineup-footer {
+  padding:16px 20px; text-align:center;
+  border-top:1px solid rgba(255,255,255,0.06);
+  background:rgba(0,0,0,0.3);
+}
+
 /* SHARE MODAL */
 .share-overlay {
   position:fixed; inset:0; z-index:1000;
@@ -375,7 +437,138 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .bonus-btn.gold:hover { background:rgba(201,168,76,0.08); border-color:var(--gold); }
 .bonus-btn.gold .bonus-btn-title { color:var(--gold); }
 
-/* LIVE MATCH WIDGET */
+/* LIVE MATCH VISUAL FIELD */
+.lmv-overlay {
+  position:fixed; inset:0; z-index:980;
+  background:rgba(0,0,0,0.96);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+  padding:12px;
+}
+.lmv-overlay.show { opacity:1; pointer-events:all; }
+.lmv-modal {
+  width:100%; max-width:620px;
+  transform:scale(0.95); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.lmv-overlay.show .lmv-modal { transform:scale(1); }
+
+/* Top bar */
+.lmv-topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  background:#111; padding:8px 14px; margin-bottom:4px;
+  border:1px solid rgba(255,255,255,0.07);
+}
+.lmv-tactic-label { font-size:10px; color:var(--text3); letter-spacing:0.08em; text-transform:uppercase; }
+.lmv-round-label { font-size:10px; color:var(--text3); letter-spacing:0.06em; text-align:center; flex:1; }
+
+/* Scoreboard */
+.lmv-scoreboard {
+  display:flex; align-items:center; justify-content:space-between;
+  background:#0a0a0a; border:1px solid rgba(255,255,255,0.07);
+  padding:10px 14px; margin-bottom:4px; gap:8px;
+}
+.lmv-team-info { flex:1; min-width:0; }
+.lmv-team-info.away { text-align:right; }
+.lmv-team-nm { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lmv-team-rt { font-size:10px; color:var(--text3); }
+.lmv-score-box { text-align:center; flex-shrink:0; }
+.lmv-score-main { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:4px; color:#fff; line-height:1; }
+.lmv-score-main span.bump { animation:lmBump 0.45s ease; }
+.lmv-clock-box { font-size:11px; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:4px; }
+.lmv-clock-dot { width:7px; height:7px; border-radius:50%; background:#E04B4B; animation:lmBlink 1s infinite; }
+
+/* Main field */
+.lmv-field-wrap {
+  display:grid; grid-template-columns:1fr 140px 1fr;
+  gap:0; background:#1a3d1a; border:1px solid rgba(255,255,255,0.06);
+  position:relative; overflow:hidden;
+  min-height:340px;
+}
+/* Grass stripes */
+.lmv-field-wrap::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 24px, transparent 24px, transparent 48px);
+}
+/* Centre line */
+.lmv-field-wrap::after {
+  content:''; position:absolute; top:0; bottom:0; left:50%; width:1px;
+  background:rgba(255,255,255,0.08); pointer-events:none;
+}
+
+/* Team columns */
+.lmv-team-col {
+  display:flex; flex-direction:column; justify-content:space-around;
+  padding:10px 6px; position:relative; z-index:1;
+}
+.lmv-team-col.away { flex-direction:column; }
+.lmv-pos-row { display:flex; justify-content:space-around; align-items:center; padding:4px 0; }
+.lmv-player {
+  display:flex; flex-direction:column; align-items:center;
+  width:54px; text-align:center;
+}
+.lmv-player-shirt {
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; margin-bottom:3px;
+  border:1px solid rgba(255,255,255,0.15);
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+.lmv-player-shirt.home { background:rgba(201,168,76,0.25); border-color:rgba(201,168,76,0.5); }
+.lmv-player-shirt.away { background:rgba(60,100,180,0.3); border-color:rgba(60,120,200,0.5); }
+.lmv-player-shirt.scored { animation:shirtGoal 0.6s ease; }
+@keyframes shirtGoal { 0%{transform:scale(1)} 40%{transform:scale(1.4);background:rgba(201,168,76,0.6)} 100%{transform:scale(1)} }
+.lmv-player-name { font-size:8px; color:rgba(255,255,255,0.7); line-height:1.2; max-width:54px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lmv-player-rat { font-size:8px; color:var(--text3); }
+
+/* Centre panel */
+.lmv-centre {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:space-between; padding:10px 4px;
+  position:relative; z-index:2; gap:6px;
+}
+/* Centre circle */
+.lmv-centre-circle {
+  width:60px; height:60px; border-radius:50%;
+  border:1px solid rgba(255,255,255,0.08);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+
+/* Events list */
+.lmv-events-list { width:100%; overflow-y:auto; max-height:100px; }
+.lmv-ev {
+  font-size:9px; color:rgba(255,255,255,0.65); padding:2px 4px;
+  animation:matchIn 0.3s ease both;
+  display:flex; gap:3px; align-items:center;
+}
+.lmv-ev.home { color:#C9A84C; }
+.lmv-ev.away { color:#60A5FA; justify-content:flex-end; }
+
+/* Stats bar at bottom */
+.lmv-stats {
+  background:#0a0a0a; border:1px solid rgba(255,255,255,0.06);
+  border-top:none; padding:8px 14px;
+  display:grid; grid-template-columns:1fr auto 1fr; gap:2px 10px;
+}
+.lmv-stat-row { display:contents; }
+.lmv-stat-home { font-family:'Bebas Neue',sans-serif; font-size:15px; color:#C9A84C; text-align:right; }
+.lmv-stat-label { font-size:9px; color:var(--text3); text-align:center; text-transform:uppercase; letter-spacing:0.06em; align-self:center; }
+.lmv-stat-away { font-family:'Bebas Neue',sans-serif; font-size:15px; color:#60A5FA; }
+
+/* Final result badge inside field */
+.lmv-result-badge {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.65); z-index:10;
+  opacity:0; pointer-events:none; transition:opacity 0.4s;
+}
+.lmv-result-badge.show { opacity:1; }
+.lmv-result-inner {
+  text-align:center; padding:16px 28px;
+  background:var(--dark2); border:1px solid var(--border);
+  animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* LIVE MATCH WIDGET (legacy) */
 .live-match-card {
   background:var(--dark2); border:1px solid var(--border);
   padding:14px 16px; margin-bottom:10px;
@@ -1311,76 +1504,76 @@ function dismissReveal() {
 // WORLD CUP 2026 REAL GROUPS
 const WC2026_GROUPS = {
   A: [
-    {name:'México',flag:'mx',rating:78,players:['Ochoa','Sánchez','Araujo','Álvarez','Lozano','Antuna','Giménez']},
-    {name:'Czechia',flag:'cz',rating:74,players:['Vaclík','Kúdela','Holeš','Souček','Schick','Barák','Jankto']},
-    {name:'Coreia do Sul',flag:'kr',rating:76,players:['Kim S.','Kim M.','Lee J.','Hwang H.','Son H.','Lee K.','Hwang U.']},
-    {name:'África do Sul',flag:'za',rating:64,players:['Williams','Tau','Zwane','Dolly','Mothiba','Lakay','Foster']}
+    {name:'México',flag:'mx',rating:78,players:['Ochoa','Sánchez','Araujo','Álvarez','Lozano','Antuna','Giménez','Gallardo','Álvarez','Romo','Flores']},
+    {name:'Czechia',flag:'cz',rating:74,players:['Vaclík','Kúdela','Holeš','Souček','Schick','Barák','Jankto','Krejci','Jirka','Lingr','Vlkanova']},
+    {name:'Coreia do Sul',flag:'kr',rating:76,players:['Kim S.','Kim M.','Lee J.','Hwang H.','Son H.','Lee K.','Hwang U.','Jung W.','Cho G.','Oh S.','Na S.']},
+    {name:'África do Sul',flag:'za',rating:64,players:['Williams','Tau','Zwane','Dolly','Mothiba','Lakay','Foster','Mobbie','Hlanti','Mudau','Lorch']}
   ],
   B: [
-    {name:'Canadá',flag:'ca',rating:74,players:['Borjan','Johnston','Buchanan','Eustáquio','David','Davies','Laryea']},
-    {name:'Suíça',flag:'ch',rating:77,players:['Sommer','Akanji','Rodríguez','Freuler','Shaqiri','Embolo','Vargas']},
-    {name:'Bósnia-Herzegovina',flag:'ba',rating:68,players:['Sehic','Civic','Kolasinac','Pjanic','Dzeko','Prevljak','Krunic']},
-    {name:'Qatar',flag:'qa',rating:62,players:['Al Sheeb','Khoukhi','Hassan','Ali','Almoez','Afif','Boudiaf']}
+    {name:'Canadá',flag:'ca',rating:74,players:['Borjan','Johnston','Buchanan','Eustáquio','David','Davies','Laryea','Waterman','Adekugbe','Hoilett','Cyle Larin']},
+    {name:'Suíça',flag:'ch',rating:77,players:['Sommer','Akanji','Rodríguez','Freuler','Shaqiri','Embolo','Vargas','Mvogo','Stergiou','Rieder','Steffen']},
+    {name:'Bósnia-Herzegovina',flag:'ba',rating:68,players:['Sehic','Civic','Kolasinac','Pjanic','Dzeko','Prevljak','Krunic','Sunjic','Ahmedhodzic','Demirovic','Piric']},
+    {name:'Qatar',flag:'qa',rating:62,players:['Al Sheeb','Khoukhi','Hassan','Ali','Almoez','Afif','Boudiaf','Salman','Ismail','Hatem','Hassan A.']}
   ],
   C: [
-    {name:'Brasil',flag:'br',rating:85,players:['Alisson','Militão','Marquinhos','Danilo','Rodrygo','Vinicius','Endrick']},
-    {name:'Marrocos',flag:'ma',rating:79,players:['Bono','Hakimi','Saïss','Amrabat','Ziyech','En-Nesyri','Boufal']},
-    {name:'Escócia',flag:'gb-sct',rating:70,players:['Gordon','Hendry','McTominay','McGinn','Adams','Christie','Robertson']},
-    {name:'Haiti',flag:'ht',rating:55,players:['Voltaire','Pierre','Herold','Chery','Borgella','Noel','Saintil']}
+    {name:'Brasil',flag:'br',rating:85,players:['Alisson','Militão','Marquinhos','Danilo','Rodrygo','Vinicius','Endrick','Gabigol','Savinho','Gerson','Lucas Paquetá']},
+    {name:'Marrocos',flag:'ma',rating:79,players:['Bono','Hakimi','Saïss','Amrabat','Ziyech','En-Nesyri','Boufal','Benoun','Ounahi','Sabiri','Louza']},
+    {name:'Escócia',flag:'gb-sct',rating:70,players:['Gordon','Hendry','McTominay','McGinn','Adams','Christie','Robertson','Tierney','Gilmour','Dykes','Patterson']},
+    {name:'Haiti',flag:'ht',rating:55,players:['Voltaire','Pierre','Herold','Chery','Borgella','Noel','Saintil','Joseph','Guerrier','Bazile','Pierre-Louis']}
   ],
   D: [
-    {name:'EUA',flag:'us',rating:76,players:['Turner','Dest','Zimmerman','Adams','Musah','McKennie','Pulisic']},
-    {name:'Paraguai',flag:'py',rating:68,players:['Silva','Alonso','Balbuena','Cubas','Bareiro','Sanabria','Romero']},
-    {name:'Turquia',flag:'tr',rating:75,players:['Çakır','Söyüncü','Kabak','Calhanoglu','Yazici','Yilmaz','Akturkoglu']},
-    {name:'Austrália',flag:'au',rating:71,players:['Ryan','Souttar','Rowles','Mooy','Irvine','Leckie','Duke']}
+    {name:'EUA',flag:'us',rating:76,players:['Turner','Dest','Zimmerman','Adams','Musah','McKennie','Pulisic','Aaronson','Weah','Reyna','Acosta']},
+    {name:'Paraguai',flag:'py',rating:68,players:['Silva','Alonso','Balbuena','Cubas','Bareiro','Sanabria','Romero','Gómez','Alderete','Enciso','Almirón']},
+    {name:'Turquia',flag:'tr',rating:75,players:['Çakır','Söyüncü','Kabak','Calhanoglu','Yazici','Yilmaz','Akturkoglu','Müldür','Demiral','Karaman','Ünder']},
+    {name:'Austrália',flag:'au',rating:71,players:['Ryan','Souttar','Rowles','Mooy','Irvine','Leckie','Duke','Degenek','Atkinson','McGree','Maclaren']}
   ],
   E: [
-    {name:'Alemanha',flag:'de',rating:84,players:['Neuer','Rüdiger','Schlotterbeck','Kimmich','Kroos','Musiala','Havertz']},
-    {name:'Equador',flag:'ec',rating:72,players:['Galíndez','Preciado','Hincapié','Gruezo','Caicedo','Plata','Valencia']},
-    {name:'Costa do Marfim',flag:'ci',rating:73,players:['Sangaré','Konaté','Fofana','Zaha','Pépé','Gradel','Haller']},
-    {name:'Curaçao',flag:'cw',rating:58,players:['Wilnis','Cijntje','Marchena','Do Rego','Martina','Bacuna','Vlijter']}
+    {name:'Alemanha',flag:'de',rating:84,players:['Neuer','Rüdiger','Schlotterbeck','Kimmich','Kroos','Musiala','Havertz','Mittelstädt','Tah','Wirtz','Gnabry']},
+    {name:'Equador',flag:'ec',rating:72,players:['Galíndez','Preciado','Hincapié','Gruezo','Caicedo','Plata','Valencia','Reasco','Estupiñán','Sarmiento','Ibarra']},
+    {name:'Costa do Marfim',flag:'ci',rating:73,players:['Sangaré','Konaté','Fofana','Zaha','Pépé','Gradel','Haller','Aurier','Diallo','Cornet','Kessié']},
+    {name:'Curaçao',flag:'cw',rating:58,players:['Wilnis','Cijntje','Marchena','Do Rego','Martina','Bacuna','Vlijter','Sulvaran','Angelok','Naar','Metgod']}
   ],
   F: [
-    {name:'Holanda',flag:'nl',rating:83,players:['Flekken','De Ligt','Dumfries','De Jong','Van Dijk','Gakpo','Depay']},
-    {name:'Japão',flag:'jp',rating:77,players:['Gonda','Yoshida','Itakura','Endo','Tanaka','Mitoma','Doan']},
-    {name:'Suécia',flag:'se',rating:76,players:['Olsen','Lindelöf','Danielson','Larsson','Ekdal','Isak','Kulusevski']},
-    {name:'Tunísia',flag:'tn',rating:67,players:['Dahmen','Meriah','Talbi','Skhiri','Ben Slimane','Msakni','Jebali']}
+    {name:'Holanda',flag:'nl',rating:83,players:['Flekken','De Ligt','Dumfries','De Jong','Van Dijk','Gakpo','Depay','Timber','Ake','Weghorst','Veerman']},
+    {name:'Japão',flag:'jp',rating:77,players:['Gonda','Yoshida','Itakura','Endo','Tanaka','Mitoma','Doan','Tomiyasu','Sugawara','Kamada','Ueda']},
+    {name:'Suécia',flag:'se',rating:76,players:['Olsen','Lindelöf','Danielson','Larsson','Ekdal','Isak','Kulusevski','Krafth','Augustinsson','Forsberg','Gyökeres']},
+    {name:'Tunísia',flag:'tn',rating:67,players:['Dahmen','Meriah','Talbi','Skhiri','Ben Slimane','Msakni','Jebali','Bronn','Sliti','Jaziri','Ben Romdhane']}
   ],
   G: [
-    {name:'Bélgica',flag:'be',rating:80,players:['Casteels','Alderweireld','Vertonghen','De Bruyne','Tielemans','Lukaku','Doku']},
-    {name:'Irão',flag:'ir',rating:70,players:['Beiranvand','Pouraliganji','Rezaeian','Ezatolahi','Hajsafi','Azmoun','Taremi']},
-    {name:'Egito',flag:'eg',rating:68,players:['El Shenawy','Hegazi','Farouk','Elneny','Trezeguet','Salah','Mostafa']},
-    {name:'Nova Zelândia',flag:'nz',rating:59,players:['Sail','Hogg','Boxall','Waine','Cacace','Wood','Just']}
+    {name:'Bélgica',flag:'be',rating:80,players:['Casteels','Alderweireld','Vertonghen','De Bruyne','Tielemans','Lukaku','Doku','Castagne','Faes','De Ketelaere','Openda']},
+    {name:'Irão',flag:'ir',rating:70,players:['Beiranvand','Pouraliganji','Rezaeian','Ezatolahi','Hajsafi','Azmoun','Taremi','Mohammadi','Hosseini','Jahanbakhsh','Ansarifard']},
+    {name:'Egito',flag:'eg',rating:68,players:['El Shenawy','Hegazi','Farouk','Elneny','Trezeguet','Salah','Mostafa','Hamdi','Ashour','Hassan','Marmoush']},
+    {name:'Nova Zelândia',flag:'nz',rating:59,players:['Sail','Hogg','Boxall','Waine','Cacace','Wood','Just','James','Payne','Bongos','Rawlins']}
   ],
   H: [
-    {name:'Espanha',flag:'es',rating:87,players:['Unai Simón','Carvajal','Laporte','Pedri','Gavi','Yamal','Morata']},
-    {name:'Uruguai',flag:'uy',rating:79,players:['Rochet','Godín','Araújo','Valverde','Bentancur','Núñez','Suárez']},
-    {name:'Arábia Saudita',flag:'sa',rating:70,players:['Al-Owais','Al-Bulaihi','Al-Tambakti','Al-Faraj','Al-Dawsari','Al-Shehri','Salem']},
-    {name:'Cabo Verde',flag:'cv',rating:63,players:['Vozinha','Júnior','Stopira','Andrade','Garry','Tavares','Ryan Mendes']}
+    {name:'Espanha',flag:'es',rating:87,players:['Unai Simón','Carvajal','Laporte','Pedri','Gavi','Yamal','Morata','Grimaldo','Le Normand','Torres','Williams N.']},
+    {name:'Uruguai',flag:'uy',rating:79,players:['Rochet','Godín','Araújo','Valverde','Bentancur','Núñez','Suárez','Olivera','Gimenez','Pellistri','Ugarte']},
+    {name:'Arábia Saudita',flag:'sa',rating:70,players:['Al-Owais','Al-Bulaihi','Al-Tambakti','Al-Faraj','Al-Dawsari','Al-Shehri','Salem','Al-Ghannam','Bahebri','Kanno','Abdulhamid']},
+    {name:'Cabo Verde',flag:'cv',rating:63,players:['Vozinha','Júnior','Stopira','Andrade','Garry','Tavares','Ryan Mendes','Fortes','Andrade L.','Leandro','Semedo']}
   ],
   I: [
-    {name:'França',flag:'fr',rating:86,players:['Maignan','Pavard','Upamecano','Tchouaméni','Camavinga','Mbappé','Dembélé']},
-    {name:'Noruega',flag:'no',rating:78,players:['Nyland','Hanche-Olsen','Ajer','Berge','Ødeegard','Haaland','Sorloth']},
-    {name:'Senegal',flag:'sn',rating:74,players:['Mendy','Koulibaly','Kouyaté','Gueye','Sarr','Mané','Diatta']},
-    {name:'Iraque',flag:'iq',rating:62,players:['Doham','Jasim','Tariq','Amjed','Mohanad','Aymen','Hussein']}
+    {name:'França',flag:'fr',rating:86,players:['Maignan','Pavard','Upamecano','Tchouaméni','Camavinga','Mbappé','Dembélé','Theo','Konate','Guendouzi','Thuram']},
+    {name:'Noruega',flag:'no',rating:78,players:['Nyland','Hanche-Olsen','Ajer','Berge','Ødeegard','Haaland','Sorloth','Pedersen','Ostigard','Thorstvedt','Brekalo']},
+    {name:'Senegal',flag:'sn',rating:74,players:['Mendy','Koulibaly','Kouyaté','Gueye','Sarr','Mané','Diatta','Ciss','Diallo','Ndiaye','Diedhiou']},
+    {name:'Iraque',flag:'iq',rating:62,players:['Doham','Jasim','Tariq','Amjed','Mohanad','Aymen','Hussein','Ali A.','Karrar','Ballas','Hassan S.']}
   ],
   J: [
-    {name:'Argentina',flag:'ar',rating:88,players:['E.Martínez','Romero','Otamendi','De Paul','Mac Allister','Álvarez','Messi']},
-    {name:'Argélia',flag:'dz',rating:73,players:["M'Bolhi",'Mandi','Benlamri','Bentaleb','Benrahma','Slimani','Mahrez']},
-    {name:'Áustria',flag:'at',rating:76,players:['Pentz','Posch','Lienhart','Grillitsch','Sabitzer','Arnautovic','Gregoritsch']},
-    {name:'Jordânia',flag:'jo',rating:60,players:['Shafi','Taha','Al-Rawabdeh','Bani Attiah','Bani Yaseen','Al-Tamari','Safawi']}
+    {name:'Argentina',flag:'ar',rating:88,players:['E.Martínez','Romero','Otamendi','De Paul','Mac Allister','Álvarez','Messi','Tagliafico','Lisandro','Lo Celso','Julián']},
+    {name:'Argélia',flag:'dz',rating:73,players:["M'Bolhi",'Mandi','Benlamri','Bentaleb','Benrahma','Slimani','Mahrez','Atal','Halaimia','Aouar','Bensebaini']},
+    {name:'Áustria',flag:'at',rating:76,players:['Pentz','Posch','Lienhart','Grillitsch','Sabitzer','Arnautovic','Gregoritsch','Wöber','Wimmer','Baumgartner','Entrup']},
+    {name:'Jordânia',flag:'jo',rating:60,players:['Shafi','Taha','Al-Rawabdeh','Bani Attiah','Bani Yaseen','Al-Tamari','Safawi','Shelbaieh','Hamed','Al-Naimat','Baha']}
   ],
   K: [
-    {name:'Portugal',flag:'pt',rating:85,players:['Rui Patrício','Cancelo','Pepe','Vitinha','Bernardo','Leão','Ronaldo']},
-    {name:'Colômbia',flag:'co',rating:79,players:['Vargas','Dávinson','Mina','Barrios','Cuadrado','James','Díaz']},
-    {name:'Congo RD',flag:'cd',rating:65,players:['Kiassumbua','Mpoku','Bokadi','Bope','Meschack','Mbokani','Kakuta']},
-    {name:'Uzbequistão',flag:'uz',rating:63,players:['Nesterov','Ashurmatov','Khamdamov','Tursunov','Shomurodov','Masharipov','Jaloliddinov']}
+    {name:'Portugal',flag:'pt',rating:85,players:['Rui Patrício','Cancelo','Pepe','Vitinha','Bernardo','Leão','Ronaldo','Dalot','Gonçalo Inácio','Pedro Neto','Gonçalo Ramos']},
+    {name:'Colômbia',flag:'co',rating:79,players:['Vargas','Dávinson','Mina','Barrios','Cuadrado','James','Díaz','Arias','Lucumí','Sinisterra','Córdoba']},
+    {name:'Congo RD',flag:'cd',rating:65,players:['Kiassumbua','Mpoku','Bokadi','Bope','Meschack','Mbokani','Kakuta','Kimwaki','Lualua','Kayembe','Muleka']},
+    {name:'Uzbequistão',flag:'uz',rating:63,players:['Nesterov','Ashurmatov','Khamdamov','Tursunov','Shomurodov','Masharipov','Jaloliddinov','Komilov','Iskanderov','Sidikov','Alijonov']}
   ],
   L: [
-    {name:'Inglaterra',flag:'gb-eng',rating:85,players:['Ramsdale','Walker','Maguire','Rice','Bellingham','Saka','Kane']},
-    {name:'Croácia',flag:'hr',rating:78,players:['Livakovic','Gvardiol','Erlic','Modric','Kovacic','Perisic','Kramaric']},
-    {name:'Gana',flag:'gh',rating:67,players:['Ati-Zigi','Salisu','Amartey','Partey','Kudus','Ayew','Sulemana']},
-    {name:'Panamá',flag:'pa',rating:62,players:['Penedo','Murillo','Miller','Godoy','Fajardo','Córdoba','Arroyo']}
+    {name:'Inglaterra',flag:'gb-eng',rating:85,players:['Ramsdale','Walker','Maguire','Rice','Bellingham','Saka','Kane','Trippier','Stones','Foden','Gordon']},
+    {name:'Croácia',flag:'hr',rating:78,players:['Livakovic','Gvardiol','Erlic','Modric','Kovacic','Perisic','Kramaric','Stanisic','Sutalo','Ivanusec','Budimir']},
+    {name:'Gana',flag:'gh',rating:67,players:['Ati-Zigi','Salisu','Amartey','Partey','Kudus','Ayew','Sulemana','Mensah','Djiku','Jordan','Afriyie']},
+    {name:'Panamá',flag:'pa',rating:62,players:['Penedo','Murillo','Miller','Godoy','Fajardo','Córdoba','Arroyo','Davis','Escobar','Blackman','Avilés']}
   ]
 };
 
@@ -1429,70 +1622,315 @@ function launchConfetti() {
 }
 
 // LIVE MATCH WIDGET — animates a 90' clock with goals appearing live
+// LINEUP POPUP
+function buildLineupPlayers(players, isMe) {
+  // Group by position
+  const order = ['GR','DEF','MED','AVA'];
+  const posLabel = {GR:'Guarda-Redes',DEF:'Defesas',MED:'Médios',AVA:'Avançados'};
+  let html = '';
+  for(const pos of order){
+    const group = players.filter(p=>p.pos===pos);
+    if(!group.length) continue;
+    html += '<div class="lineup-pos-group">'+posLabel[pos]+'</div>';
+    for(const p of group){
+      const ratColor = p.rating>=95?'#C9A84C':p.rating>=85?'#A78BFA':p.rating>=80?'#4A9E6F':'#9A9690';
+      const flagHtml = flagImg(p.flag||p.flagCode||'', 'flag-img-sm');
+      html += '<div class="lineup-player">'
+        + '<div class="lineup-player-flag">'+flagHtml+'</div>'
+        + '<div class="lineup-player-info">'
+          + '<div class="lineup-player-name">'+p.name+'</div>'
+          + '<div class="lineup-player-pos">'+pos+'</div>'
+        + '</div>'
+        + '<div class="lineup-player-rating" style="color:'+ratColor+'">'+p.rating+'</div>'
+        + '</div>';
+    }
+  }
+  return html;
+}
+
+function buildOppLineupPlayers(oppTeam) {
+  // Generate opponent players from their WC2026 data or SELS data
+  const names = (oppTeam.players||[]);
+  // Assign positions roughly: 1 GR, ~3-4 DEF, ~3-4 MED, rest AVA
+  const posDist = ['GR','DEF','DEF','DEF','DEF','MED','MED','MED','AVA','AVA','AVA'];
+  const posLabel = {GR:'Guarda-Redes',DEF:'Defesas',MED:'Médios',AVA:'Avançados'};
+  const order = ['GR','DEF','MED','AVA'];
+  const baseRating = oppTeam.rating || 75;
+
+  // Build player objects
+  const pool = names.slice(0,11);
+  while(pool.length < 11) pool.push('Jogador '+(pool.length+1));
+  const playerObjs = pool.map((name,i)=>{
+    const pos = posDist[i] || 'MED';
+    // Vary ratings a bit around team rating
+    const variation = Math.round((Math.random()-0.5)*16);
+    const rating = Math.max(55, Math.min(99, baseRating + variation));
+    return {name: typeof name==='string'?name:(name.name||'?'), pos, rating};
+  });
+
+  let html = '';
+  for(const pos of order){
+    const group = playerObjs.filter(p=>p.pos===pos);
+    if(!group.length) continue;
+    html += '<div class="lineup-pos-group">'+posLabel[pos]+'</div>';
+    for(const p of group){
+      const ratColor = p.rating>=95?'#C9A84C':p.rating>=85?'#A78BFA':p.rating>=80?'#4A9E6F':'#9A9690';
+      const flagHtml = flagImg(oppTeam.flag||'','flag-img-sm');
+      html += '<div class="lineup-player">'
+        + '<div class="lineup-player-flag">'+flagHtml+'</div>'
+        + '<div class="lineup-player-info">'
+          + '<div class="lineup-player-name">'+p.name+'</div>'
+          + '<div class="lineup-player-pos">'+pos+'</div>'
+        + '</div>'
+        + '<div class="lineup-player-rating" style="color:'+ratColor+'">'+p.rating+'</div>'
+        + '</div>';
+    }
+  }
+  return html;
+}
+
+function showLineupPopup(opts){
+  return new Promise(resolve=>{
+    const el = document.getElementById('lineup-overlay');
+    // Fill in data
+    document.getElementById('lu-round').textContent = opts.roundLabel;
+    document.getElementById('lu-my-name').textContent = opts.myName;
+    document.getElementById('lu-my-rating').textContent = 'Nota média: '+opts.myRating;
+    document.getElementById('lu-opp-name').textContent = opts.oppName;
+    document.getElementById('lu-opp-rating').textContent = 'Nota média: '+(opts.oppTeam.rating||'?');
+    document.getElementById('lu-my-players').innerHTML = buildLineupPlayers(squad,'home');
+    document.getElementById('lu-opp-players').innerHTML = buildOppLineupPlayers(opts.oppTeam);
+    el.classList.add('show');
+    // Scroll to top of modal
+    el.querySelector('.lineup-modal').scrollTop = 0;
+    // Wire button
+    const btn = document.getElementById('lu-start-btn');
+    const handler = ()=>{
+      btn.removeEventListener('click', handler);
+      el.classList.remove('show');
+      setTimeout(resolve, 300);
+    };
+    btn.addEventListener('click', handler);
+  });
+}
+
+// Build player rows from squad + tactic
+function buildFieldRows(squadData, side) {
+  const quota = chosenTactic ? chosenTactic.quota : {GR:1,DEF:4,MED:4,AVA:2};
+  const rows = [];
+  for(const pos of ['AVA','MED','DEF','GR']){
+    const players = squadData.filter(p=>p.pos===pos);
+    const count = quota[pos] || players.length;
+    rows.push({pos, players: players.slice(0,count)});
+  }
+  return rows;
+}
+
+function buildOppFieldRows(oppTeam) {
+  const names = (oppTeam.players||[]).slice(0,11);
+  while(names.length<11) names.push('?');
+  // 1 GR, 4 DEF, 4 MED, 2 AVA (standard 4-4-2)
+  const positions = ['GR','DEF','DEF','DEF','DEF','MED','MED','MED','MED','AVA','AVA'];
+  const players = names.map((n,i)=>({
+    name: typeof n==='string'?n:(n.name||'?'),
+    pos: positions[i],
+    flag: oppTeam.flag||'',
+    rating: Math.max(55, Math.min(99, (oppTeam.rating||75) + Math.round((Math.random()-0.5)*14)))
+  }));
+  const rows = [];
+  // Away col uses column-reverse so we reverse the order: GR→DEF→MED→AVA renders bottom to top
+  for(const pos of ['GR','DEF','MED','AVA']){
+    rows.push({pos, players: players.filter(p=>p.pos===pos)});
+  }
+  return rows;
+}
+
+function renderFieldCol(rows, side) {
+  return rows.map(row=>{
+    const playerHtml = row.players.map(p=>{
+      const rc = p.rating>=95?'#C9A84C':p.rating>=85?'#A78BFA':p.rating>=80?'#4A9E6F':'#9A9690';
+      const shortName = p.name.split(' ').pop().substring(0,9);
+      const pid = 'lmvp_'+(side==='home'?'h':'a')+'_'+p.name.replace(/[^a-zA-Z]/g,'');
+      return `<div class="lmv-player" id="${pid}">
+        <div class="lmv-player-shirt ${side}" id="${pid}_shirt">${flagImg(p.flag||'','flag-img-sm')}</div>
+        <div class="lmv-player-name">${shortName}</div>
+        <div class="lmv-player-rat" style="color:${rc}">${p.rating}</div>
+      </div>`;
+    }).join('');
+    return `<div class="lmv-pos-row">${playerHtml}</div>`;
+  }).join('');
+}
+
 async function playLiveMatch(opts){
-  const log = document.getElementById('sim-log');
-  const id = 'lm_'+Math.random().toString(36).slice(2,9);
-  const myFlagHtml = flagImg(opts.myFlag,'flag-img-sm');
-  const oppFlagHtml = flagImg(opts.oppFlag,'flag-img-sm');
+  // Show lineup popup first
+  await showLineupPopup({
+    roundLabel: opts.roundLabel,
+    myName: opts.myName,
+    myRating: Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length),
+    oppName: opts.oppName.split(' (')[0],
+    oppTeam: opts.oppTeam || {rating:75, players:[], flag:opts.oppFlag}
+  });
 
-  log.innerHTML += '<div class="live-match-card" id="'+id+'">'+
-    '<div class="lm-header"><span class="lm-round">'+opts.roundLabel+'</span><span class="lm-clock live" id="'+id+'_clock">0&#39;</span></div>'+
-    '<div class="lm-teams">'+
-      '<div class="lm-team home">'+myFlagHtml+'<span>'+opts.myName+'</span></div>'+
-      '<div class="lm-score" id="'+id+'_score"><span id="'+id+'_s1">0</span> - <span id="'+id+'_s2">0</span></div>'+
-      '<div class="lm-team away"><span>'+opts.oppName+'</span>'+oppFlagHtml+'</div>'+
-    '</div>'+
-    '<div class="lm-events" id="'+id+'_events"></div>'+
-  '</div>';
-  log.scrollTop = log.scrollHeight;
+  const oppTeam = opts.oppTeam || {rating:75, players:[], flag:opts.oppFlag, name:opts.oppName};
+  const homeRows = buildFieldRows(squad, 'home');
+  const awayRows = buildOppFieldRows(oppTeam);
+  const oppShortName = (oppTeam.name||opts.oppName).split(' (')[0];
 
-  const clockEl = document.getElementById(id+'_clock');
-  const s1El = document.getElementById(id+'_s1');
-  const s2El = document.getElementById(id+'_s2');
-  const eventsEl = document.getElementById(id+'_events');
+  // Build stats accumulators
+  let possession = 50;
+  let homeShotsOn=0, homeShots=0, awayShots=0, awayShotsOn=0;
+  let homeFouls=0, awayFouls=0;
 
-  // Build sorted timeline of goal events
+  // Build timeline
   const timeline = [];
-  (opts.myScorers||[]).forEach(s=>timeline.push({min:s.min, side:'me', name:s.name}));
-  (opts.oppScorers||[]).forEach(s=>timeline.push({min:s.min, side:'opp', name:s.name}));
+  (opts.myScorers||[]).forEach(s=>timeline.push({min:s.min,side:'home',name:s.name}));
+  (opts.oppScorers||[]).forEach(s=>timeline.push({min:s.min,side:'away',name:s.name}));
   timeline.sort((a,b)=>a.min-b.min);
 
+  // Pre-generate stats progression
+  const totalHomeShots = (opts.myScorers?.length||0) + Math.floor(Math.random()*6)+2;
+  const totalAwayShots = (opts.oppScorers?.length||0) + Math.floor(Math.random()*5)+1;
+  const shotMinutes = {home:[], away:[]};
+  for(let i=0;i<totalHomeShots;i++) shotMinutes.home.push(Math.floor(Math.random()*90)+1);
+  for(let i=0;i<totalAwayShots;i++) shotMinutes.away.push(Math.floor(Math.random()*90)+1);
+  const foulMinutes = {home:[], away:[]};
+  const totalFouls = Math.floor(Math.random()*6)+4;
+  for(let i=0;i<totalFouls;i++){
+    Math.random()>0.5 ? foulMinutes.home.push(Math.floor(Math.random()*90)+1)
+                      : foulMinutes.away.push(Math.floor(Math.random()*90)+1);
+  }
+
+  // Render modal
+  const overlay = document.getElementById('lmv-overlay');
+  const modal = document.getElementById('lmv-modal');
+  const tacticLabel = chosenTactic ? chosenTactic.name : '4-4-2';
+  const myAvg = Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length);
+  const oppAvg = oppTeam.rating||75;
+
+  modal.innerHTML = `
+    <div class="lmv-topbar">
+      <span class="lmv-tactic-label">${tacticLabel}</span>
+      <span class="lmv-round-label">${opts.roundLabel}</span>
+      <span class="lmv-tactic-label">4-4-2</span>
+    </div>
+    <div class="lmv-scoreboard">
+      <div class="lmv-team-info">
+        <div class="lmv-team-nm">${opts.myName}</div>
+        <div class="lmv-team-rt">Nota ${myAvg}</div>
+      </div>
+      <div class="lmv-score-box">
+        <div class="lmv-score-main"><span id="lmv_s1">0</span> - <span id="lmv_s2">0</span></div>
+        <div class="lmv-clock-box"><div class="lmv-clock-dot"></div><span id="lmv_clock">0'</span></div>
+      </div>
+      <div class="lmv-team-info away">
+        <div class="lmv-team-nm">${oppShortName}</div>
+        <div class="lmv-team-rt">Nota ${oppAvg}</div>
+      </div>
+    </div>
+    <div class="lmv-field-wrap">
+      <div class="lmv-team-col home" id="lmv_home_col">${renderFieldCol(homeRows,'home')}</div>
+      <div class="lmv-centre">
+        <div class="lmv-centre-circle"></div>
+        <div class="lmv-events-list" id="lmv_events"></div>
+        <div class="lmv-centre-circle" style="opacity:0.3"></div>
+      </div>
+      <div class="lmv-team-col away" id="lmv_away_col">${renderFieldCol(awayRows,'away')}</div>
+      <div class="lmv-result-badge" id="lmv_result"></div>
+    </div>
+    <div class="lmv-stats">
+      <div class="lmv-stat-home" id="lmv_poss_h">50%</div>
+      <div class="lmv-stat-label">posse</div>
+      <div class="lmv-stat-away" id="lmv_poss_a">50%</div>
+      <div class="lmv-stat-home" id="lmv_shots_h">0</div>
+      <div class="lmv-stat-label">remates</div>
+      <div class="lmv-stat-away" id="lmv_shots_a">0</div>
+      <div class="lmv-stat-home" id="lmv_fouls_h">0</div>
+      <div class="lmv-stat-label">faltas</div>
+      <div class="lmv-stat-away" id="lmv_fouls_a">0</div>
+    </div>
+  `;
+
+  overlay.classList.add('show');
+  await new Promise(r=>setTimeout(r, 200));
+
+  const s1El = document.getElementById('lmv_s1');
+  const s2El = document.getElementById('lmv_s2');
+  const clockEl = document.getElementById('lmv_clock');
+  const eventsEl = document.getElementById('lmv_events');
+
   let s1=0, s2=0, tIdx=0;
-  const stepMs = 55; // ~5s for 90 minutes
+  const stepMs = 55;
 
   for(let min=1; min<=90; min++){
     await new Promise(r=>setTimeout(r, stepMs));
-    clockEl.innerHTML = min+"&#39;";
+
+    clockEl.textContent = min+"'";
+
+    // Update possession drift
+    possession = Math.max(35, Math.min(65, possession + (Math.random()-0.48)*2));
+    document.getElementById('lmv_poss_h').textContent = Math.round(possession)+'%';
+    document.getElementById('lmv_poss_a').textContent = (100-Math.round(possession))+'%';
+
+    // Shots
+    if(shotMinutes.home.includes(min)){ homeShots++; if(Math.random()>0.4) homeShotsOn++; document.getElementById('lmv_shots_h').textContent=homeShots; }
+    if(shotMinutes.away.includes(min)){ awayShots++; if(Math.random()>0.4) awayShotsOn++; document.getElementById('lmv_shots_a').textContent=awayShots; }
+
+    // Fouls
+    if(foulMinutes.home.includes(min)){ homeFouls++; document.getElementById('lmv_fouls_h').textContent=homeFouls; }
+    if(foulMinutes.away.includes(min)){ awayFouls++; document.getElementById('lmv_fouls_a').textContent=awayFouls; }
+
+    // Goals
     while(tIdx<timeline.length && timeline[tIdx].min===min){
       const ev = timeline[tIdx];
-      if(ev.side==='me'){
-        s1++; s1El.textContent=s1;
+      if(ev.side==='home'){
+        s1++;
+        s1El.textContent=s1;
         s1El.classList.remove('bump'); void s1El.offsetWidth; s1El.classList.add('bump');
-        eventsEl.innerHTML += '<div class="lm-event me"><span class="lm-min">'+ev.min+"&#39;</span><span>&#9917; "+ev.name+'</span></div>';
+        eventsEl.innerHTML += `<div class="lmv-ev home">⚽ ${ev.name} ${min}'</div>`;
+        // Animate scorer shirt
+        const pid = 'lmvp_h_'+ev.name.replace(/[^a-zA-Z]/g,'')+'_shirt';
+        const shirt = document.getElementById(pid);
+        if(shirt){ shirt.classList.remove('scored'); void shirt.offsetWidth; shirt.classList.add('scored'); }
       } else {
-        s2++; s2El.textContent=s2;
+        s2++;
+        s2El.textContent=s2;
         s2El.classList.remove('bump'); void s2El.offsetWidth; s2El.classList.add('bump');
-        eventsEl.innerHTML += '<div class="lm-event opp"><span>&#9917; '+ev.name+'</span><span class="lm-min">'+ev.min+"&#39;</span></div>";
+        eventsEl.innerHTML += `<div class="lmv-ev away">${min}' ${ev.name} ⚽</div>`;
       }
-      log.scrollTop = log.scrollHeight;
+      eventsEl.scrollTop = eventsEl.scrollHeight;
       tIdx++;
     }
   }
-  clockEl.innerHTML = "90&#39;";
-  clockEl.classList.remove('live');
 
+  clockEl.textContent = "90'";
+
+  // Penalties
   if(opts.hasPenalties){
-    await new Promise(r=>setTimeout(r,350));
-    eventsEl.innerHTML += '<div class="lm-pens">⚖️ '+opts.penOutcome+'</div>';
-    log.scrollTop = log.scrollHeight;
-    await new Promise(r=>setTimeout(r,350));
+    await new Promise(r=>setTimeout(r,400));
+    eventsEl.innerHTML += `<div class="lmv-ev" style="color:var(--text3);text-align:center">⚖️ ${opts.penOutcome}</div>`;
+    await new Promise(r=>setTimeout(r,600));
   }
 
-  document.getElementById(id).insertAdjacentHTML('beforeend',
-    '<div class="lm-final-badge '+opts.resultCls+'">'+opts.resultTxt+'</div>');
+  // Show result badge
+  await new Promise(r=>setTimeout(r,300));
+  const resultEl = document.getElementById('lmv_result');
+  if(resultEl){
+    resultEl.innerHTML = `<div class="lmv-result-inner"><div class="sim-round" style="margin-bottom:6px">${opts.roundLabel}</div><div class="lm-final-badge ${opts.resultCls}" style="font-size:16px">${opts.resultTxt}</div></div>`;
+    resultEl.classList.add('show');
+  }
+  await new Promise(r=>setTimeout(r,1800));
+
+  // Close overlay
+  overlay.classList.remove('show');
+  await new Promise(r=>setTimeout(r,300));
+
+  // Log result in sim-log
+  const log = document.getElementById('sim-log');
+  log.innerHTML += `<div class="sim-match"><div class="sim-round">${opts.roundLabel}</div><span style="font-weight:500">${opts.myName} vs ${oppShortName}</span> — <span class="${opts.resultCls}">${opts.resultTxt}</span></div>`;
   log.scrollTop = log.scrollHeight;
   await new Promise(r=>setTimeout(r,200));
 }
+
 
 // SHARE IMAGE GENERATION
 let shareImageDataUrl = null;
@@ -2120,7 +2558,7 @@ async function startSimulation(){
         await playLiveMatch({
           roundLabel:name,
           myFlag:'star', myName:teamName,
-          oppFlag:oppT.flag, oppName:oppT.name+' ('+(oppT.rating||'?')+')',
+          oppFlag:oppT.flag, oppName:oppT.name+' ('+(oppT.rating||'?')+')', oppTeam:oppT,
           myScorers, oppScorers,
           hasPenalties, penOutcome,
           resultCls:cls, resultTxt:txt
@@ -2215,6 +2653,38 @@ async function startSimulation(){
 }
 setupHeroBackground();
 </script>
+<div id="lmv-overlay" class="lmv-overlay">
+  <div class="lmv-modal" id="lmv-modal">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<div id="lineup-overlay" class="lineup-overlay">
+  <div class="lineup-modal">
+    <div class="lineup-header">
+      <div class="lineup-round" id="lu-round"></div>
+    </div>
+    <div class="lineup-teams-header">
+      <div style="text-align:left">
+        <div class="lineup-team-name" id="lu-my-name"></div>
+        <div class="lineup-team-rating" id="lu-my-rating"></div>
+      </div>
+      <div class="lineup-vs">VS</div>
+      <div style="text-align:right">
+        <div class="lineup-team-name" id="lu-opp-name"></div>
+        <div class="lineup-team-rating" id="lu-opp-rating"></div>
+      </div>
+    </div>
+    <div class="lineup-pitch">
+      <div class="lineup-col home" id="lu-my-players"></div>
+      <div class="lineup-col away" id="lu-opp-players"></div>
+    </div>
+    <div class="lineup-footer">
+      <button class="btn btn-gold" id="lu-start-btn" style="min-width:200px">⚽ Começar Jogo</button>
+    </div>
+  </div>
+</div>
+
 <div id="share-overlay" class="share-overlay">
   <div class="share-modal">
     <div class="share-modal-title">📸 Partilhar Resultado</div>
