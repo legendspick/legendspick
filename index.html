@@ -2382,14 +2382,19 @@ async function startSimulation(){
   let wins=0, losses=0, draws=0, totalGoals=0, groupPts=0, eliminated=false, eliminationStage=null;
   const goalTally={};
 
-  // Simulate all 12 groups
+  // Simulate all 12 groups (compute instantly, but reveal progressively)
   log.innerHTML+='<div class="sim-match"><div class="sim-round">A simular fase de grupos completa...</div></div>';
   await new Promise(res=>setTimeout(res,300));
   const groupStandings={};
   for(const gk of groupKeys){
-    await new Promise(res=>setTimeout(res,60));
     const teams = gk===chosenGroupKey ? groupTeamsList.map(t=>({...t})) : WC2026_GROUPS[gk].map(t=>({...t}));
     groupStandings[gk] = simGroupFull(teams);
+  }
+
+  // Reveal other groups one by one (not yet my group), paced
+  const otherGroupKeys = groupKeys.filter(gk=>gk!==chosenGroupKey);
+  for(const gk of otherGroupKeys){
+    await new Promise(res=>setTimeout(res,90));
     fullBracket.groups[gk] = groupStandings[gk];
     renderFullBracketHTML();
   }
@@ -2426,6 +2431,8 @@ async function startSimulation(){
   }
 
   const myGroupSt = groupStandings[chosenGroupKey];
+  fullBracket.groups[chosenGroupKey] = myGroupSt;
+  renderFullBracketHTML();
   const myStPos = myGroupSt.findIndex(t=>t.isMe)+1;
   groupPts = myGroupSt.find(t=>t.isMe)?.pts||0;
   await new Promise(res=>setTimeout(res,300));
