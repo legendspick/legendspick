@@ -276,6 +276,20 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .scorer-bar-wrap { width:60px; height:3px; background:var(--dark4); border-radius:2px; margin-left:8px; }
 .scorer-bar { height:100%; background:var(--gold); border-radius:2px; }
 
+/* BENCH STRIP */
+#bench-strip { margin-top:10px; }
+.bench-strip-title { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); margin-bottom:6px; }
+.bench-strip-row { display:flex; gap:8px; }
+.bench-slot {
+  flex:1; background:var(--dark2); border:1px solid var(--border);
+  padding:8px 6px; text-align:center; border-radius:2px;
+}
+.bench-slot.filled { border-color:var(--gold); background:rgba(201,168,76,0.06); }
+.bench-slot .bs-flag { margin-bottom:3px; display:flex; justify-content:center; }
+.bench-slot .bs-name { font-size:11px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bench-slot .bs-pos { font-size:9px; color:var(--text3); }
+.bench-slot.empty .bs-name { color:var(--text3); }
+
 /* LINEUP POPUP */
 .lineup-overlay {
   position:fixed; inset:0; z-index:990;
@@ -619,6 +633,156 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
   animation:matchIn 0.3s ease both;
 }
 
+/* INJURY & SUBSTITUTION */
+.injury-flash {
+  animation: injuryPulse 0.5s ease 3;
+}
+@keyframes injuryPulse {
+  0%,100% { filter:brightness(1); }
+  50% { filter:brightness(1.8) saturate(0); }
+}
+.sub-overlay {
+  position:fixed; inset:0; z-index:995;
+  background:rgba(0,0,0,0.92);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+  padding:16px;
+}
+.sub-overlay.show { opacity:1; pointer-events:all; }
+.sub-modal {
+  background:var(--dark2); border:1px solid rgba(158,74,74,0.4);
+  max-width:420px; width:100%; padding:24px;
+  text-align:center;
+  transform:scale(0.9); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sub-overlay.show .sub-modal { transform:scale(1); }
+.sub-icon { font-size:36px; margin-bottom:10px; }
+.sub-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px; color:#E04B4B; margin-bottom:6px; }
+.sub-injured-name { font-size:15px; color:var(--text); margin-bottom:4px; }
+.sub-injured-detail { font-size:12px; color:var(--text3); margin-bottom:20px; }
+.sub-options { display:flex; flex-direction:column; gap:8px; }
+.sub-option {
+  background:var(--dark3); border:1px solid var(--border);
+  padding:12px 14px; cursor:pointer; text-align:left;
+  display:flex; align-items:center; gap:10px;
+  transition:all 0.2s;
+}
+.sub-option:hover { background:var(--dark4); border-color:var(--gold); }
+.sub-option-flag { flex-shrink:0; }
+.sub-option-info { flex:1; }
+.sub-option-name { font-size:14px; font-weight:600; color:var(--text); }
+.sub-option-pos { font-size:11px; color:var(--text3); }
+.sub-option-rating { font-family:'Bebas Neue',sans-serif; font-size:18px; }
+.sub-none-option {
+  background:transparent; border:1px dashed var(--border);
+  padding:10px; font-size:12px; color:var(--text3); cursor:pointer; text-align:center;
+}
+.sub-none-option:hover { border-color:var(--text3); }
+
+/* PENALTY SHOOTOUT */
+.lmv-pens-panel {
+  background:rgba(0,0,0,0.5); border-top:1px solid rgba(255,255,255,0.08);
+  padding:10px 14px;
+}
+.lmv-pens-title {
+  font-size:10px; text-transform:uppercase; letter-spacing:0.12em;
+  color:var(--text3); text-align:center; margin-bottom:8px;
+}
+.lmv-pens-row {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  margin-bottom:6px; flex-wrap:wrap;
+}
+.lmv-pen-dot {
+  width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.15);
+  opacity:0.25; transform:scale(0.6);
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.lmv-pen-dot.shown { opacity:1; transform:scale(1); }
+.lmv-pen-dot.scored { background:rgba(74,158,111,0.25); border-color:#4A9E6F; color:#4A9E6F; }
+.lmv-pen-dot.missed { background:rgba(158,74,74,0.25); border-color:#9E4A4A; color:#9E4A4A; }
+.lmv-pens-score {
+  text-align:center; font-family:'Bebas Neue',sans-serif; font-size:26px;
+  letter-spacing:2px; color:#fff; margin:4px 0;
+}
+.lmv-pens-score span.bump { animation:lmBump 0.4s ease; }
+.lmv-pens-status {
+  text-align:center; font-size:11px; color:var(--text3); min-height:16px;
+}
+.lmv-pens-status.scorer { color:var(--gold); font-weight:600; }
+
+/* TROPHY CELEBRATION */
+.lmv-celebration {
+  position:absolute; inset:0; z-index:20;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse 80% 70% at 50% 40%, rgba(201,168,76,0.18) 0%, rgba(0,0,0,0.88) 70%);
+  opacity:0; pointer-events:none; transition:opacity 0.5s;
+  overflow:hidden;
+}
+.lmv-celebration.show { opacity:1; pointer-events:all; }
+.lmv-cel-trophy {
+  width:70px; height:70px; margin-bottom:10px;
+  opacity:0; transform:translateY(40px) scale(0.6);
+  animation:cupRise 1.1s 0.2s cubic-bezier(0.22,1.4,0.36,1) forwards;
+  filter:drop-shadow(0 0 24px rgba(201,168,76,0.7));
+}
+@keyframes cupRise {
+  0%   { opacity:0; transform:translateY(50px) scale(0.5) rotate(-8deg); }
+  60%  { opacity:1; transform:translateY(-8px) scale(1.08) rotate(4deg); }
+  100% { opacity:1; transform:translateY(0) scale(1) rotate(0deg); }
+}
+.lmv-cel-rays {
+  position:absolute; top:38%; left:50%; width:220px; height:220px;
+  transform:translate(-50%,-50%);
+  background:conic-gradient(from 0deg, rgba(201,168,76,0.0) 0deg, rgba(201,168,76,0.25) 8deg, rgba(201,168,76,0.0) 16deg);
+  animation: rayRotate 6s linear infinite;
+  pointer-events:none;
+  border-radius:50%;
+}
+@keyframes rayRotate { from{transform:translate(-50%,-50%) rotate(0deg);} to{transform:translate(-50%,-50%) rotate(360deg);} }
+.lmv-cel-title {
+  font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:2px;
+  color:var(--gold); text-shadow:0 0 24px rgba(201,168,76,0.6);
+  opacity:0; transform:translateY(12px);
+  animation:celFadeUp 0.6s 0.9s ease forwards;
+  position:relative; z-index:2;
+}
+.lmv-cel-team {
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px;
+  color:#fff; margin-top:4px;
+  opacity:0; transform:translateY(12px);
+  animation:celFadeUp 0.6s 1.15s ease forwards;
+  position:relative; z-index:2;
+}
+@keyframes celFadeUp { to{opacity:1; transform:translateY(0);} }
+.lmv-cel-players {
+  display:flex; gap:8px; margin-top:18px; position:relative; z-index:2;
+  flex-wrap:wrap; justify-content:center; max-width:90%;
+}
+.lmv-cel-player {
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  opacity:0; transform:translateY(16px) scale(0.7);
+  animation:celPlayerIn 0.5s ease forwards;
+}
+.lmv-cel-player-shirt {
+  width:26px; height:26px; border-radius:50%;
+  background:rgba(201,168,76,0.25); border:1px solid rgba(201,168,76,0.6);
+  display:flex; align-items:center; justify-content:center; font-size:10px;
+}
+.lmv-cel-player-name { font-size:8px; color:rgba(255,255,255,0.75); max-width:40px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@keyframes celPlayerIn { to{opacity:1; transform:translateY(0) scale(1);} }
+.lmv-cel-spark {
+  position:absolute; border-radius:50%; pointer-events:none;
+  animation: sparkFly linear forwards;
+}
+@keyframes sparkFly {
+  0% { transform:translate(0,0) scale(1); opacity:1; }
+  100% { transform:translate(var(--sx,0), var(--sy,0)) scale(0); opacity:0; }
+}
+
 /* CONFETTI */
 .confetti-piece {
   position:fixed; width:8px; height:8px; top:-10px;
@@ -943,6 +1107,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
   <div class="pitch-centre-line"></div>
   <div class="pitch-centre-circle"></div>
 </div>
+          <div id="bench-strip" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -970,6 +1135,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
       <div style="font-size:12px;color:var(--text3);margin-top:4px" id="squad-tactic-label"></div>
     </div>
     <div class="pitch-full"><div class="pitch-rows-full" id="pitch-rows"></div></div>
+    <div id="squad-bench-section" style="margin-bottom:20px"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-gold" onclick="startSimulation()">Simular Copa do Mundo →</button>
       <button class="btn" onclick="showScreen('screen-tactics')">Novo Draft</button>
@@ -1094,7 +1260,7 @@ const SELS=[
 function selAvgRating(sel){ return Math.round(sel.players.reduce((s,p)=>s+p.rating,0)/sel.players.length); }
 
 // State
-let squad=[], currentRound=0, currentSelection=null, selectedPlayer=null;
+let squad=[], bench=[], inBenchPhase=false, currentRound=0, currentSelection=null, selectedPlayer=null;
 let bonusUsed=false, bonusActive=null; // bonusActive: null | 'legendary' | 'double'
 let teamName='LegendsPick';
 let teamNick='LGP';
@@ -1104,6 +1270,10 @@ let rerollsLeft=3, chosenTactic=null, lastAdded=null;
 let usedSelectionIds=[]; // selections already shown this draft — never repeat
 
 function spotsLeft(){
+  if(inBenchPhase){
+    const remaining = 3 - bench.length;
+    return {GR:remaining,DEF:remaining,MED:remaining,AVA:remaining};
+  }
   const filled={GR:0,DEF:0,MED:0,AVA:0};
   squad.forEach(p=>filled[p.pos]++);
   const left={};
@@ -1111,8 +1281,13 @@ function spotsLeft(){
   return left;
 }
 function isPosLocked(pos){ return spotsLeft()[pos]<=0; }
-// A player is locked if their position is full OR they're already in the squad
-function isPlayerLocked(p){ return isPosLocked(p.pos) || squad.some(s=>s.name===p.name); }
+// A player is locked if their position is full OR they're already in the squad/bench
+function isPlayerLocked(p){
+  const alreadyIn = inBenchPhase
+    ? (squad.some(s=>s.name===p.name) || bench.some(s=>s.name===p.name))
+    : squad.some(s=>s.name===p.name);
+  return isPosLocked(p.pos) || alreadyIn;
+}
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1148,7 +1323,7 @@ function selectTactic(id){
 }
 
 function confirmTactic(){
-  squad=[]; currentRound=0; selectedPlayer=null; rerollsLeft=3; lastAdded=null;
+  squad=[]; bench=[]; inBenchPhase=false; currentRound=0; selectedPlayer=null; rerollsLeft=3; lastAdded=null;
   usedSelectionIds=[]; bonusUsed=false; bonusActive=null;
   showScreen('screen-draft');
   loadRound();
@@ -1174,8 +1349,8 @@ function pickSelection(){
 }
 
 function loadRound(){
-  // Check for bonus at round 5 (6th pick), 20% chance, only once
-  if(currentRound===5 && !bonusUsed && Math.random()<0.2){
+  // Check for bonus at round 5 (6th pick), 20% chance, only once — only during starters phase
+  if(!inBenchPhase && currentRound===5 && !bonusUsed && Math.random()<0.2){
     bonusUsed=true;
     showBonusPopup();
     return; // pause draft until player chooses
@@ -1193,9 +1368,16 @@ function loadRound(){
   }
   usedSelectionIds.push(currentSelection.id);
   selectedPlayer=null; lastAdded=null;
-  const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
-  document.getElementById('prog').style.width=(currentRound/total*100)+'%';
-  document.getElementById('prog-label').textContent=`Escolha ${currentRound+1} de ${total}`;
+
+  if(inBenchPhase){
+    const total = 3;
+    document.getElementById('prog').style.width=(bench.length/total*100)+'%';
+    document.getElementById('prog-label').textContent=`Suplente ${bench.length+1} de ${total}`;
+  } else {
+    const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
+    document.getElementById('prog').style.width=(currentRound/total*100)+'%';
+    document.getElementById('prog-label').textContent=`Escolha ${currentRound+1} de ${total}`;
+  }
 
   // Show rarity reveal for rare/epic/legendary, then render
   showRarityReveal(currentSelection, () => {
@@ -1209,6 +1391,11 @@ function loadRound(){
 }
 
 function renderSlotsDisplay(){
+  if(inBenchPhase){
+    document.getElementById('slots-display').innerHTML =
+      Array(3).fill(0).map((_,i)=>`<span class="slot-pill ${i<bench.length?'filled':'open'}">Suplente</span>`).join('');
+    return;
+  }
   const left=spotsLeft();
   document.getElementById('slots-display').innerHTML=['GR','DEF','MED','AVA'].map(pos=>{
     const total=chosenTactic.quota[pos]; const filled=total-left[pos];
@@ -1217,12 +1404,13 @@ function renderSlotsDisplay(){
 }
 
 function renderDraftInfo(){
-  const left=spotsLeft();
-  const avail=Object.entries(left).filter(([,v])=>v>0).map(([k,v])=>`${v}× ${POS_LABELS[k]}`).join(', ');
   const rarity = currentSelection.rarity || 'common';
   const rarityLabel = RARITY_LABELS[rarity] || rarity;
   const infoEl = document.getElementById('draft-info');
   infoEl.className = `draft-info ${rarity}`;
+  const avail = inBenchPhase
+    ? `${3-bench.length}× Suplente (qualquer posição)`
+    : Object.entries(spotsLeft()).filter(([,v])=>v>0).map(([k,v])=>`${v}× ${POS_LABELS[k]}`).join(', ');
   infoEl.innerHTML=`${flagImg(currentSelection.flag,'flag-img-sm')} <strong>${currentSelection.name}</strong><span class="rarity-badge ${rarity}">${rarityLabel}</span> &nbsp;·&nbsp; Vagas: ${avail}`;
 }
 
@@ -1277,6 +1465,20 @@ function renderLivePitch(newPlayerName){
     const avg=squad.length?Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length):'—';
     document.getElementById('lp-avg').textContent=avg;
   }
+
+  const benchEl = document.getElementById('bench-strip');
+  if(inBenchPhase){
+    benchEl.style.display='block';
+    const hideRat = gameMode==='knowledge';
+    const slots = Array(3).fill(0).map((_,i)=>{
+      const p = bench[i];
+      if(!p) return `<div class="bench-slot empty"><div class="bs-flag">·</div><div class="bs-name">Suplente</div><div class="bs-pos">&nbsp;</div></div>`;
+      return `<div class="bench-slot filled"><div class="bs-flag">${flagImg(p.flag,'flag-img-sm')}</div><div class="bs-name">${p.name}</div><div class="bs-pos">${p.pos} · ${hideRat?'?':p.rating}</div></div>`;
+    }).join('');
+    benchEl.innerHTML = `<div class="bench-strip-title">🪑 Banco de Suplentes</div><div class="bench-strip-row">${slots}</div>`;
+  } else {
+    benchEl.style.display='none';
+  }
 }
 
 function selectPlayer(el,name){
@@ -1292,11 +1494,27 @@ let doublePickDone=false; // track if first pick of double bonus is done
 function confirmPick(){
   if(!selectedPlayer||isPlayerLocked(selectedPlayer)) return;
   const added={...selectedPlayer,flag:currentSelection.flag,selName:currentSelection.name,selRarity:currentSelection.rarity||'common'};
+
+  if(inBenchPhase){
+    bench.push(added);
+    currentRound++;
+    renderLivePitch(null);
+    if(bench.length>=3){ showSquad(); return; }
+    loadRound();
+    return;
+  }
+
   squad.push(added);
   currentRound++;
   renderLivePitch(added.name);
   const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
-  if(currentRound>=total){ showSquad(); return; }
+  if(currentRound>=total){
+    // Starters complete — move to bench phase (3 substitutes, any position)
+    inBenchPhase=true;
+    bonusActive=null; doublePickDone=false;
+    loadRound();
+    return;
+  }
 
   // Double pick bonus: stay on same selection for one more pick
   if(bonusActive==='double' && !doublePickDone){
@@ -1351,6 +1569,17 @@ function showSquad(){
   document.getElementById('squad-tactic-label').textContent=`Tática: ${chosenTactic.name} · ${chosenTactic.label}`;
   document.getElementById('knowledge-reveal-banner').style.display = gameMode==='knowledge' ? 'block' : 'none';
   renderFullPitch('pitch-rows');
+
+  const benchSection = document.getElementById('squad-bench-section');
+  if(bench.length){
+    const slots = bench.map(p=>
+      `<div class="bench-slot filled"><div class="bs-flag">${flagImg(p.flag,'flag-img-sm')}</div><div class="bs-name">${p.name}</div><div class="bs-pos">${p.pos} · ${p.rating}</div></div>`
+    ).join('');
+    benchSection.innerHTML = `<div class="bench-strip-title">🪑 Banco de Suplentes</div><div class="bench-strip-row">${slots}</div>`;
+  } else {
+    benchSection.innerHTML = '';
+  }
+
   showScreen('screen-squad');
 }
 
@@ -1399,11 +1628,17 @@ function generateOppScorers(n, oppSel) {
   const scorers = [];
   let pool = [];
   if(oppSel.players && oppSel.players.length) {
-    if(typeof oppSel.players[0] === 'string') {
+    const first = oppSel.players[0];
+    if(typeof first === 'string') {
       pool = oppSel.players;
+    } else if(first.n !== undefined) {
+      // WC2026 format: {n, p}
+      const atk = oppSel.players.filter(pl=>pl.p==='AVA'||pl.p==='MED');
+      pool = (atk.length ? atk : oppSel.players).map(pl=>pl.n);
     } else {
-      const atk = oppSel.players.filter(p=>p.pos==='AVA'||p.pos==='MED');
-      pool = (atk.length ? atk : oppSel.players).map(p=>p.name);
+      // SELS format: {name, pos, rating}
+      const atk = oppSel.players.filter(pl=>pl.pos==='AVA'||pl.pos==='MED');
+      pool = (atk.length ? atk : oppSel.players).map(pl=>pl.name);
     }
   }
   for(let i=0; i<n; i++) {
@@ -1504,76 +1739,76 @@ function dismissReveal() {
 // WORLD CUP 2026 REAL GROUPS
 const WC2026_GROUPS = {
   A: [
-    {name:'México',flag:'mx',rating:78,players:['Ochoa','Sánchez','Araujo','Álvarez','Lozano','Antuna','Giménez','Gallardo','Álvarez','Romo','Flores']},
-    {name:'Czechia',flag:'cz',rating:74,players:['Vaclík','Kúdela','Holeš','Souček','Schick','Barák','Jankto','Krejci','Jirka','Lingr','Vlkanova']},
-    {name:'Coreia do Sul',flag:'kr',rating:76,players:['Kim S.','Kim M.','Lee J.','Hwang H.','Son H.','Lee K.','Hwang U.','Jung W.','Cho G.','Oh S.','Na S.']},
-    {name:'África do Sul',flag:'za',rating:64,players:['Williams','Tau','Zwane','Dolly','Mothiba','Lakay','Foster','Mobbie','Hlanti','Mudau','Lorch']}
+    {name:'México',flag:'mx',rating:78,players:[{n:'Ochoa',p:'GR'},{n:'Sánchez',p:'DEF'},{n:'Araujo',p:'DEF'},{n:'Álvarez',p:'AVA'},{n:'Lozano',p:'AVA'},{n:'Antuna',p:'AVA'},{n:'Giménez',p:'DEF'},{n:'Gallardo',p:'MED'},{n:'Álvarez',p:'AVA'},{n:'Romo',p:'GR'},{n:'Flores',p:'MED'}]},
+    {name:'Czechia',flag:'cz',rating:74,players:[{n:'Vaclík',p:'GR'},{n:'Kúdela',p:'DEF'},{n:'Holeš',p:'MED'},{n:'Souček',p:'MED'},{n:'Schick',p:'AVA'},{n:'Barák',p:'MED'},{n:'Jankto',p:'MED'},{n:'Krejci',p:'DEF'},{n:'Jirka',p:'DEF'},{n:'Lingr',p:'MED'},{n:'Vlkanova',p:'AVA'}]},
+    {name:'Coreia do Sul',flag:'kr',rating:76,players:[{n:'Kim S.',p:'GR'},{n:'Kim M.',p:'DEF'},{n:'Lee J.',p:'DEF'},{n:'Hwang H.',p:'AVA'},{n:'Son H.',p:'AVA'},{n:'Lee K.',p:'MED'},{n:'Hwang U.',p:'MED'},{n:'Jung W.',p:'GR'},{n:'Cho G.',p:'DEF'},{n:'Oh S.',p:'MED'},{n:'Na S.',p:'DEF'}]},
+    {name:'África do Sul',flag:'za',rating:64,players:[{n:'Williams',p:'AVA'},{n:'Tau',p:'AVA'},{n:'Zwane',p:'MED'},{n:'Dolly',p:'MED'},{n:'Mothiba',p:'AVA'},{n:'Lakay',p:'MED'},{n:'Foster',p:'GR'},{n:'Mobbie',p:'DEF'},{n:'Hlanti',p:'DEF'},{n:'Mudau',p:'DEF'},{n:'Lorch',p:'AVA'}]}
   ],
   B: [
-    {name:'Canadá',flag:'ca',rating:74,players:['Borjan','Johnston','Buchanan','Eustáquio','David','Davies','Laryea','Waterman','Adekugbe','Hoilett','Cyle Larin']},
-    {name:'Suíça',flag:'ch',rating:77,players:['Sommer','Akanji','Rodríguez','Freuler','Shaqiri','Embolo','Vargas','Mvogo','Stergiou','Rieder','Steffen']},
-    {name:'Bósnia-Herzegovina',flag:'ba',rating:68,players:['Sehic','Civic','Kolasinac','Pjanic','Dzeko','Prevljak','Krunic','Sunjic','Ahmedhodzic','Demirovic','Piric']},
-    {name:'Qatar',flag:'qa',rating:62,players:['Al Sheeb','Khoukhi','Hassan','Ali','Almoez','Afif','Boudiaf','Salman','Ismail','Hatem','Hassan A.']}
+    {name:'Canadá',flag:'ca',rating:74,players:[{n:'Borjan',p:'GR'},{n:'Johnston',p:'DEF'},{n:'Buchanan',p:'DEF'},{n:'Eustáquio',p:'MED'},{n:'David',p:'AVA'},{n:'Davies',p:'DEF'},{n:'Laryea',p:'MED'},{n:'Waterman',p:'DEF'},{n:'Adekugbe',p:'DEF'},{n:'Hoilett',p:'AVA'},{n:'Cyle Larin',p:'AVA'}]},
+    {name:'Suíça',flag:'ch',rating:77,players:[{n:'Sommer',p:'GR'},{n:'Akanji',p:'DEF'},{n:'Rodríguez',p:'DEF'},{n:'Freuler',p:'MED'},{n:'Shaqiri',p:'MED'},{n:'Embolo',p:'AVA'},{n:'Vargas',p:'GR'},{n:'Mvogo',p:'GR'},{n:'Stergiou',p:'DEF'},{n:'Rieder',p:'MED'},{n:'Steffen',p:'MED'}]},
+    {name:'Bósnia-Herzegovina',flag:'ba',rating:68,players:[{n:'Sehic',p:'GR'},{n:'Civic',p:'DEF'},{n:'Kolasinac',p:'DEF'},{n:'Pjanic',p:'MED'},{n:'Dzeko',p:'AVA'},{n:'Prevljak',p:'AVA'},{n:'Krunic',p:'MED'},{n:'Sunjic',p:'DEF'},{n:'Ahmedhodzic',p:'DEF'},{n:'Demirovic',p:'AVA'},{n:'Piric',p:'MED'}]},
+    {name:'Qatar',flag:'qa',rating:62,players:[{n:'Al Sheeb',p:'GR'},{n:'Khoukhi',p:'DEF'},{n:'Hassan',p:'DEF'},{n:'Ali',p:'MED'},{n:'Almoez',p:'AVA'},{n:'Afif',p:'AVA'},{n:'Boudiaf',p:'MED'},{n:'Salman',p:'DEF'},{n:'Ismail',p:'MED'},{n:'Hatem',p:'MED'},{n:'Hassan A.',p:'DEF'}]}
   ],
   C: [
-    {name:'Brasil',flag:'br',rating:85,players:['Alisson','Militão','Marquinhos','Danilo','Rodrygo','Vinicius','Endrick','Gabigol','Savinho','Gerson','Lucas Paquetá']},
-    {name:'Marrocos',flag:'ma',rating:79,players:['Bono','Hakimi','Saïss','Amrabat','Ziyech','En-Nesyri','Boufal','Benoun','Ounahi','Sabiri','Louza']},
-    {name:'Escócia',flag:'gb-sct',rating:70,players:['Gordon','Hendry','McTominay','McGinn','Adams','Christie','Robertson','Tierney','Gilmour','Dykes','Patterson']},
-    {name:'Haiti',flag:'ht',rating:55,players:['Voltaire','Pierre','Herold','Chery','Borgella','Noel','Saintil','Joseph','Guerrier','Bazile','Pierre-Louis']}
+    {name:'Brasil',flag:'br',rating:85,players:[{n:'Alisson',p:'GR'},{n:'Militão',p:'DEF'},{n:'Marquinhos',p:'DEF'},{n:'Danilo',p:'DEF'},{n:'Rodrygo',p:'AVA'},{n:'Vinicius',p:'AVA'},{n:'Endrick',p:'AVA'},{n:'Gabigol',p:'AVA'},{n:'Savinho',p:'MED'},{n:'Gerson',p:'MED'},{n:'Lucas Paquetá',p:'MED'}]},
+    {name:'Marrocos',flag:'ma',rating:79,players:[{n:'Bono',p:'GR'},{n:'Hakimi',p:'DEF'},{n:'Saïss',p:'DEF'},{n:'Amrabat',p:'MED'},{n:'Ziyech',p:'MED'},{n:'En-Nesyri',p:'AVA'},{n:'Boufal',p:'AVA'},{n:'Benoun',p:'DEF'},{n:'Ounahi',p:'MED'},{n:'Sabiri',p:'MED'},{n:'Louza',p:'MED'}]},
+    {name:'Escócia',flag:'gb-sct',rating:70,players:[{n:'Gordon',p:'AVA'},{n:'Hendry',p:'DEF'},{n:'McTominay',p:'MED'},{n:'McGinn',p:'MED'},{n:'Adams',p:'MED'},{n:'Christie',p:'MED'},{n:'Robertson',p:'DEF'},{n:'Tierney',p:'DEF'},{n:'Gilmour',p:'MED'},{n:'Dykes',p:'AVA'},{n:'Patterson',p:'DEF'}]},
+    {name:'Haiti',flag:'ht',rating:55,players:[{n:'Voltaire',p:'GR'},{n:'Pierre',p:'DEF'},{n:'Herold',p:'DEF'},{n:'Chery',p:'AVA'},{n:'Borgella',p:'DEF'},{n:'Noel',p:'MED'},{n:'Saintil',p:'MED'},{n:'Joseph',p:'MED'},{n:'Guerrier',p:'AVA'},{n:'Bazile',p:'AVA'},{n:'Pierre-Louis',p:'MED'}]}
   ],
   D: [
-    {name:'EUA',flag:'us',rating:76,players:['Turner','Dest','Zimmerman','Adams','Musah','McKennie','Pulisic','Aaronson','Weah','Reyna','Acosta']},
-    {name:'Paraguai',flag:'py',rating:68,players:['Silva','Alonso','Balbuena','Cubas','Bareiro','Sanabria','Romero','Gómez','Alderete','Enciso','Almirón']},
-    {name:'Turquia',flag:'tr',rating:75,players:['Çakır','Söyüncü','Kabak','Calhanoglu','Yazici','Yilmaz','Akturkoglu','Müldür','Demiral','Karaman','Ünder']},
-    {name:'Austrália',flag:'au',rating:71,players:['Ryan','Souttar','Rowles','Mooy','Irvine','Leckie','Duke','Degenek','Atkinson','McGree','Maclaren']}
+    {name:'EUA',flag:'us',rating:76,players:[{n:'Turner',p:'GR'},{n:'Dest',p:'DEF'},{n:'Zimmerman',p:'DEF'},{n:'Adams',p:'MED'},{n:'Musah',p:'MED'},{n:'McKennie',p:'MED'},{n:'Pulisic',p:'AVA'},{n:'Aaronson',p:'MED'},{n:'Weah',p:'AVA'},{n:'Reyna',p:'MED'},{n:'Acosta',p:'MED'}]},
+    {name:'Paraguai',flag:'py',rating:68,players:[{n:'Silva',p:'GR'},{n:'Alonso',p:'DEF'},{n:'Balbuena',p:'DEF'},{n:'Cubas',p:'MED'},{n:'Bareiro',p:'AVA'},{n:'Sanabria',p:'AVA'},{n:'Romero',p:'DEF'},{n:'Gómez',p:'DEF'},{n:'Alderete',p:'DEF'},{n:'Enciso',p:'MED'},{n:'Almirón',p:'AVA'}]},
+    {name:'Turquia',flag:'tr',rating:75,players:[{n:'Çakır',p:'GR'},{n:'Söyüncü',p:'DEF'},{n:'Kabak',p:'DEF'},{n:'Calhanoglu',p:'MED'},{n:'Yazici',p:'MED'},{n:'Yilmaz',p:'AVA'},{n:'Akturkoglu',p:'AVA'},{n:'Müldür',p:'DEF'},{n:'Demiral',p:'DEF'},{n:'Karaman',p:'AVA'},{n:'Ünder',p:'AVA'}]},
+    {name:'Austrália',flag:'au',rating:71,players:[{n:'Ryan',p:'GR'},{n:'Souttar',p:'DEF'},{n:'Rowles',p:'DEF'},{n:'Mooy',p:'MED'},{n:'Irvine',p:'MED'},{n:'Leckie',p:'AVA'},{n:'Duke',p:'AVA'},{n:'Degenek',p:'DEF'},{n:'Atkinson',p:'DEF'},{n:'McGree',p:'MED'},{n:'Maclaren',p:'AVA'}]}
   ],
   E: [
-    {name:'Alemanha',flag:'de',rating:84,players:['Neuer','Rüdiger','Schlotterbeck','Kimmich','Kroos','Musiala','Havertz','Mittelstädt','Tah','Wirtz','Gnabry']},
-    {name:'Equador',flag:'ec',rating:72,players:['Galíndez','Preciado','Hincapié','Gruezo','Caicedo','Plata','Valencia','Reasco','Estupiñán','Sarmiento','Ibarra']},
-    {name:'Costa do Marfim',flag:'ci',rating:73,players:['Sangaré','Konaté','Fofana','Zaha','Pépé','Gradel','Haller','Aurier','Diallo','Cornet','Kessié']},
-    {name:'Curaçao',flag:'cw',rating:58,players:['Wilnis','Cijntje','Marchena','Do Rego','Martina','Bacuna','Vlijter','Sulvaran','Angelok','Naar','Metgod']}
+    {name:'Alemanha',flag:'de',rating:84,players:[{n:'Neuer',p:'GR'},{n:'Rüdiger',p:'DEF'},{n:'Schlotterbeck',p:'DEF'},{n:'Kimmich',p:'MED'},{n:'Kroos',p:'MED'},{n:'Musiala',p:'MED'},{n:'Havertz',p:'AVA'},{n:'Mittelstädt',p:'DEF'},{n:'Tah',p:'DEF'},{n:'Wirtz',p:'MED'},{n:'Gnabry',p:'AVA'}]},
+    {name:'Equador',flag:'ec',rating:72,players:[{n:'Galíndez',p:'GR'},{n:'Preciado',p:'DEF'},{n:'Hincapié',p:'DEF'},{n:'Gruezo',p:'MED'},{n:'Caicedo',p:'MED'},{n:'Plata',p:'AVA'},{n:'Valencia',p:'AVA'},{n:'Reasco',p:'DEF'},{n:'Estupiñán',p:'DEF'},{n:'Sarmiento',p:'AVA'},{n:'Ibarra',p:'MED'}]},
+    {name:'Costa do Marfim',flag:'ci',rating:73,players:[{n:'Sangaré',p:'GR'},{n:'Konaté',p:'DEF'},{n:'Fofana',p:'DEF'},{n:'Zaha',p:'AVA'},{n:'Pépé',p:'AVA'},{n:'Gradel',p:'AVA'},{n:'Haller',p:'AVA'},{n:'Aurier',p:'DEF'},{n:'Diallo',p:'DEF'},{n:'Cornet',p:'AVA'},{n:'Kessié',p:'MED'}]},
+    {name:'Curaçao',flag:'cw',rating:58,players:[{n:'Wilnis',p:'GR'},{n:'Cijntje',p:'DEF'},{n:'Marchena',p:'DEF'},{n:'Do Rego',p:'MED'},{n:'Martina',p:'DEF'},{n:'Bacuna',p:'MED'},{n:'Vlijter',p:'AVA'},{n:'Sulvaran',p:'DEF'},{n:'Angelok',p:'MED'},{n:'Naar',p:'AVA'},{n:'Metgod',p:'MED'}]}
   ],
   F: [
-    {name:'Holanda',flag:'nl',rating:83,players:['Flekken','De Ligt','Dumfries','De Jong','Van Dijk','Gakpo','Depay','Timber','Ake','Weghorst','Veerman']},
-    {name:'Japão',flag:'jp',rating:77,players:['Gonda','Yoshida','Itakura','Endo','Tanaka','Mitoma','Doan','Tomiyasu','Sugawara','Kamada','Ueda']},
-    {name:'Suécia',flag:'se',rating:76,players:['Olsen','Lindelöf','Danielson','Larsson','Ekdal','Isak','Kulusevski','Krafth','Augustinsson','Forsberg','Gyökeres']},
-    {name:'Tunísia',flag:'tn',rating:67,players:['Dahmen','Meriah','Talbi','Skhiri','Ben Slimane','Msakni','Jebali','Bronn','Sliti','Jaziri','Ben Romdhane']}
+    {name:'Holanda',flag:'nl',rating:83,players:[{n:'Flekken',p:'GR'},{n:'De Ligt',p:'DEF'},{n:'Dumfries',p:'DEF'},{n:'De Jong',p:'MED'},{n:'Van Dijk',p:'DEF'},{n:'Gakpo',p:'AVA'},{n:'Depay',p:'AVA'},{n:'Timber',p:'DEF'},{n:'Ake',p:'DEF'},{n:'Weghorst',p:'AVA'},{n:'Veerman',p:'MED'}]},
+    {name:'Japão',flag:'jp',rating:77,players:[{n:'Gonda',p:'GR'},{n:'Yoshida',p:'DEF'},{n:'Itakura',p:'DEF'},{n:'Endo',p:'MED'},{n:'Tanaka',p:'MED'},{n:'Mitoma',p:'AVA'},{n:'Doan',p:'AVA'},{n:'Tomiyasu',p:'DEF'},{n:'Sugawara',p:'DEF'},{n:'Kamada',p:'MED'},{n:'Ueda',p:'AVA'}]},
+    {name:'Suécia',flag:'se',rating:76,players:[{n:'Olsen',p:'GR'},{n:'Lindelöf',p:'DEF'},{n:'Danielson',p:'DEF'},{n:'Larsson',p:'MED'},{n:'Ekdal',p:'MED'},{n:'Isak',p:'AVA'},{n:'Kulusevski',p:'AVA'},{n:'Krafth',p:'DEF'},{n:'Augustinsson',p:'DEF'},{n:'Forsberg',p:'MED'},{n:'Gyökeres',p:'AVA'}]},
+    {name:'Tunísia',flag:'tn',rating:67,players:[{n:'Dahmen',p:'GR'},{n:'Meriah',p:'DEF'},{n:'Talbi',p:'DEF'},{n:'Skhiri',p:'MED'},{n:'Ben Slimane',p:'MED'},{n:'Msakni',p:'AVA'},{n:'Jebali',p:'AVA'},{n:'Bronn',p:'DEF'},{n:'Sliti',p:'MED'},{n:'Jaziri',p:'AVA'},{n:'Ben Romdhane',p:'MED'}]}
   ],
   G: [
-    {name:'Bélgica',flag:'be',rating:80,players:['Casteels','Alderweireld','Vertonghen','De Bruyne','Tielemans','Lukaku','Doku','Castagne','Faes','De Ketelaere','Openda']},
-    {name:'Irão',flag:'ir',rating:70,players:['Beiranvand','Pouraliganji','Rezaeian','Ezatolahi','Hajsafi','Azmoun','Taremi','Mohammadi','Hosseini','Jahanbakhsh','Ansarifard']},
-    {name:'Egito',flag:'eg',rating:68,players:['El Shenawy','Hegazi','Farouk','Elneny','Trezeguet','Salah','Mostafa','Hamdi','Ashour','Hassan','Marmoush']},
-    {name:'Nova Zelândia',flag:'nz',rating:59,players:['Sail','Hogg','Boxall','Waine','Cacace','Wood','Just','James','Payne','Bongos','Rawlins']}
+    {name:'Bélgica',flag:'be',rating:80,players:[{n:'Casteels',p:'GR'},{n:'Alderweireld',p:'DEF'},{n:'Vertonghen',p:'DEF'},{n:'De Bruyne',p:'MED'},{n:'Tielemans',p:'MED'},{n:'Lukaku',p:'AVA'},{n:'Doku',p:'AVA'},{n:'Castagne',p:'DEF'},{n:'Faes',p:'DEF'},{n:'De Ketelaere',p:'MED'},{n:'Openda',p:'AVA'}]},
+    {name:'Irão',flag:'ir',rating:70,players:[{n:'Beiranvand',p:'GR'},{n:'Pouraliganji',p:'DEF'},{n:'Rezaeian',p:'DEF'},{n:'Ezatolahi',p:'MED'},{n:'Hajsafi',p:'DEF'},{n:'Azmoun',p:'AVA'},{n:'Taremi',p:'AVA'},{n:'Mohammadi',p:'DEF'},{n:'Hosseini',p:'DEF'},{n:'Jahanbakhsh',p:'MED'},{n:'Ansarifard',p:'AVA'}]},
+    {name:'Egito',flag:'eg',rating:68,players:[{n:'El Shenawy',p:'GR'},{n:'Hegazi',p:'DEF'},{n:'Farouk',p:'DEF'},{n:'Elneny',p:'MED'},{n:'Trezeguet',p:'AVA'},{n:'Salah',p:'AVA'},{n:'Mostafa',p:'MED'},{n:'Hamdi',p:'DEF'},{n:'Ashour',p:'MED'},{n:'Hassan',p:'DEF'},{n:'Marmoush',p:'AVA'}]},
+    {name:'Nova Zelândia',flag:'nz',rating:59,players:[{n:'Sail',p:'GR'},{n:'Hogg',p:'DEF'},{n:'Boxall',p:'DEF'},{n:'Waine',p:'MED'},{n:'Cacace',p:'DEF'},{n:'Wood',p:'AVA'},{n:'Just',p:'MED'},{n:'James',p:'MED'},{n:'Payne',p:'MED'},{n:'Bongos',p:'DEF'},{n:'Rawlins',p:'AVA'}]}
   ],
   H: [
-    {name:'Espanha',flag:'es',rating:87,players:['Unai Simón','Carvajal','Laporte','Pedri','Gavi','Yamal','Morata','Grimaldo','Le Normand','Torres','Williams N.']},
-    {name:'Uruguai',flag:'uy',rating:79,players:['Rochet','Godín','Araújo','Valverde','Bentancur','Núñez','Suárez','Olivera','Gimenez','Pellistri','Ugarte']},
-    {name:'Arábia Saudita',flag:'sa',rating:70,players:['Al-Owais','Al-Bulaihi','Al-Tambakti','Al-Faraj','Al-Dawsari','Al-Shehri','Salem','Al-Ghannam','Bahebri','Kanno','Abdulhamid']},
-    {name:'Cabo Verde',flag:'cv',rating:63,players:['Vozinha','Júnior','Stopira','Andrade','Garry','Tavares','Ryan Mendes','Fortes','Andrade L.','Leandro','Semedo']}
+    {name:'Espanha',flag:'es',rating:87,players:[{n:'Unai Simón',p:'GR'},{n:'Carvajal',p:'DEF'},{n:'Laporte',p:'DEF'},{n:'Pedri',p:'MED'},{n:'Gavi',p:'MED'},{n:'Yamal',p:'AVA'},{n:'Morata',p:'AVA'},{n:'Grimaldo',p:'DEF'},{n:'Le Normand',p:'DEF'},{n:'Torres',p:'AVA'},{n:'Williams N.',p:'AVA'}]},
+    {name:'Uruguai',flag:'uy',rating:79,players:[{n:'Rochet',p:'GR'},{n:'Godín',p:'DEF'},{n:'Araújo',p:'DEF'},{n:'Valverde',p:'MED'},{n:'Bentancur',p:'MED'},{n:'Núñez',p:'AVA'},{n:'Suárez',p:'AVA'},{n:'Olivera',p:'DEF'},{n:'Gimenez',p:'DEF'},{n:'Pellistri',p:'AVA'},{n:'Ugarte',p:'MED'}]},
+    {name:'Arábia Saudita',flag:'sa',rating:70,players:[{n:'Al-Owais',p:'GR'},{n:'Al-Bulaihi',p:'DEF'},{n:'Al-Tambakti',p:'DEF'},{n:'Al-Faraj',p:'MED'},{n:'Al-Dawsari',p:'AVA'},{n:'Al-Shehri',p:'AVA'},{n:'Salem',p:'MED'},{n:'Al-Ghannam',p:'DEF'},{n:'Bahebri',p:'MED'},{n:'Kanno',p:'MED'},{n:'Abdulhamid',p:'DEF'}]},
+    {name:'Cabo Verde',flag:'cv',rating:63,players:[{n:'Vozinha',p:'GR'},{n:'Júnior',p:'DEF'},{n:'Stopira',p:'DEF'},{n:'Andrade',p:'MED'},{n:'Garry',p:'MED'},{n:'Tavares',p:'AVA'},{n:'Ryan Mendes',p:'AVA'},{n:'Fortes',p:'DEF'},{n:'Andrade L.',p:'DEF'},{n:'Leandro',p:'MED'},{n:'Semedo',p:'DEF'}]}
   ],
   I: [
-    {name:'França',flag:'fr',rating:86,players:['Maignan','Pavard','Upamecano','Tchouaméni','Camavinga','Mbappé','Dembélé','Theo','Konate','Guendouzi','Thuram']},
-    {name:'Noruega',flag:'no',rating:78,players:['Nyland','Hanche-Olsen','Ajer','Berge','Ødeegard','Haaland','Sorloth','Pedersen','Ostigard','Thorstvedt','Brekalo']},
-    {name:'Senegal',flag:'sn',rating:74,players:['Mendy','Koulibaly','Kouyaté','Gueye','Sarr','Mané','Diatta','Ciss','Diallo','Ndiaye','Diedhiou']},
-    {name:'Iraque',flag:'iq',rating:62,players:['Doham','Jasim','Tariq','Amjed','Mohanad','Aymen','Hussein','Ali A.','Karrar','Ballas','Hassan S.']}
+    {name:'França',flag:'fr',rating:86,players:[{n:'Maignan',p:'GR'},{n:'Pavard',p:'DEF'},{n:'Upamecano',p:'DEF'},{n:'Tchouaméni',p:'MED'},{n:'Camavinga',p:'MED'},{n:'Mbappé',p:'AVA'},{n:'Dembélé',p:'AVA'},{n:'Theo',p:'DEF'},{n:'Konate',p:'DEF'},{n:'Guendouzi',p:'MED'},{n:'Thuram',p:'AVA'}]},
+    {name:'Noruega',flag:'no',rating:78,players:[{n:'Nyland',p:'GR'},{n:'Hanche-Olsen',p:'DEF'},{n:'Ajer',p:'DEF'},{n:'Berge',p:'MED'},{n:'Ødeegard',p:'MED'},{n:'Haaland',p:'AVA'},{n:'Sorloth',p:'AVA'},{n:'Pedersen',p:'DEF'},{n:'Ostigard',p:'DEF'},{n:'Thorstvedt',p:'MED'},{n:'Brekalo',p:'AVA'}]},
+    {name:'Senegal',flag:'sn',rating:74,players:[{n:'Mendy',p:'GR'},{n:'Koulibaly',p:'DEF'},{n:'Kouyaté',p:'DEF'},{n:'Gueye',p:'MED'},{n:'Sarr',p:'AVA'},{n:'Mané',p:'AVA'},{n:'Diatta',p:'AVA'},{n:'Ciss',p:'MED'},{n:'Diallo',p:'DEF'},{n:'Ndiaye',p:'MED'},{n:'Diedhiou',p:'AVA'}]},
+    {name:'Iraque',flag:'iq',rating:62,players:[{n:'Doham',p:'GR'},{n:'Jasim',p:'DEF'},{n:'Tariq',p:'DEF'},{n:'Amjed',p:'MED'},{n:'Mohanad',p:'AVA'},{n:'Aymen',p:'AVA'},{n:'Hussein',p:'MED'},{n:'Ali A.',p:'DEF'},{n:'Karrar',p:'MED'},{n:'Ballas',p:'DEF'},{n:'Hassan S.',p:'AVA'}]}
   ],
   J: [
-    {name:'Argentina',flag:'ar',rating:88,players:['E.Martínez','Romero','Otamendi','De Paul','Mac Allister','Álvarez','Messi','Tagliafico','Lisandro','Lo Celso','Julián']},
-    {name:'Argélia',flag:'dz',rating:73,players:["M'Bolhi",'Mandi','Benlamri','Bentaleb','Benrahma','Slimani','Mahrez','Atal','Halaimia','Aouar','Bensebaini']},
-    {name:'Áustria',flag:'at',rating:76,players:['Pentz','Posch','Lienhart','Grillitsch','Sabitzer','Arnautovic','Gregoritsch','Wöber','Wimmer','Baumgartner','Entrup']},
-    {name:'Jordânia',flag:'jo',rating:60,players:['Shafi','Taha','Al-Rawabdeh','Bani Attiah','Bani Yaseen','Al-Tamari','Safawi','Shelbaieh','Hamed','Al-Naimat','Baha']}
+    {name:'Argentina',flag:'ar',rating:88,players:[{n:'E.Martínez',p:'GR'},{n:'Romero',p:'DEF'},{n:'Otamendi',p:'DEF'},{n:'De Paul',p:'MED'},{n:'Mac Allister',p:'MED'},{n:'Álvarez',p:'AVA'},{n:'Messi',p:'AVA'},{n:'Tagliafico',p:'DEF'},{n:'Lisandro',p:'DEF'},{n:'Lo Celso',p:'MED'},{n:'Julián',p:'AVA'}]},
+    {name:'Argélia',flag:'dz',rating:73,players:[{n:'Bolhi",',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'}]},
+    {name:'Áustria',flag:'at',rating:76,players:[{n:'Pentz',p:'GR'},{n:'Posch',p:'DEF'},{n:'Lienhart',p:'DEF'},{n:'Grillitsch',p:'MED'},{n:'Sabitzer',p:'MED'},{n:'Arnautovic',p:'AVA'},{n:'Gregoritsch',p:'AVA'},{n:'Wöber',p:'DEF'},{n:'Wimmer',p:'DEF'},{n:'Baumgartner',p:'MED'},{n:'Entrup',p:'AVA'}]},
+    {name:'Jordânia',flag:'jo',rating:60,players:[{n:'Shafi',p:'GR'},{n:'Taha',p:'DEF'},{n:'Al-Rawabdeh',p:'DEF'},{n:'Bani Attiah',p:'DEF'},{n:'Bani Yaseen',p:'MED'},{n:'Al-Tamari',p:'AVA'},{n:'Safawi',p:'AVA'},{n:'Shelbaieh',p:'MED'},{n:'Hamed',p:'MED'},{n:'Al-Naimat',p:'AVA'},{n:'Baha',p:'DEF'}]}
   ],
   K: [
-    {name:'Portugal',flag:'pt',rating:85,players:['Rui Patrício','Cancelo','Pepe','Vitinha','Bernardo','Leão','Ronaldo','Dalot','Gonçalo Inácio','Pedro Neto','Gonçalo Ramos']},
-    {name:'Colômbia',flag:'co',rating:79,players:['Vargas','Dávinson','Mina','Barrios','Cuadrado','James','Díaz','Arias','Lucumí','Sinisterra','Córdoba']},
-    {name:'Congo RD',flag:'cd',rating:65,players:['Kiassumbua','Mpoku','Bokadi','Bope','Meschack','Mbokani','Kakuta','Kimwaki','Lualua','Kayembe','Muleka']},
-    {name:'Uzbequistão',flag:'uz',rating:63,players:['Nesterov','Ashurmatov','Khamdamov','Tursunov','Shomurodov','Masharipov','Jaloliddinov','Komilov','Iskanderov','Sidikov','Alijonov']}
+    {name:'Portugal',flag:'pt',rating:85,players:[{n:'Rui Patrício',p:'GR'},{n:'Cancelo',p:'DEF'},{n:'Pepe',p:'DEF'},{n:'Vitinha',p:'MED'},{n:'Bernardo',p:'MED'},{n:'Leão',p:'AVA'},{n:'Ronaldo',p:'AVA'},{n:'Dalot',p:'DEF'},{n:'Gonçalo Inácio',p:'DEF'},{n:'Pedro Neto',p:'AVA'},{n:'Gonçalo Ramos',p:'AVA'}]},
+    {name:'Colômbia',flag:'co',rating:79,players:[{n:'Vargas',p:'GR'},{n:'Dávinson',p:'DEF'},{n:'Mina',p:'DEF'},{n:'Barrios',p:'MED'},{n:'Cuadrado',p:'AVA'},{n:'James',p:'MED'},{n:'Díaz',p:'AVA'},{n:'Arias',p:'DEF'},{n:'Lucumí',p:'DEF'},{n:'Sinisterra',p:'AVA'},{n:'Córdoba',p:'AVA'}]},
+    {name:'Congo RD',flag:'cd',rating:65,players:[{n:'Kiassumbua',p:'GR'},{n:'Mpoku',p:'MED'},{n:'Bokadi',p:'DEF'},{n:'Bope',p:'DEF'},{n:'Meschack',p:'MED'},{n:'Mbokani',p:'AVA'},{n:'Kakuta',p:'MED'},{n:'Kimwaki',p:'GR'},{n:'Lualua',p:'AVA'},{n:'Kayembe',p:'MED'},{n:'Muleka',p:'AVA'}]},
+    {name:'Uzbequistão',flag:'uz',rating:63,players:[{n:'Nesterov',p:'GR'},{n:'Ashurmatov',p:'DEF'},{n:'Khamdamov',p:'MED'},{n:'Tursunov',p:'DEF'},{n:'Shomurodov',p:'AVA'},{n:'Masharipov',p:'MED'},{n:'Jaloliddinov',p:'AVA'},{n:'Komilov',p:'DEF'},{n:'Iskanderov',p:'MED'},{n:'Sidikov',p:'DEF'},{n:'Alijonov',p:'MED'}]}
   ],
   L: [
-    {name:'Inglaterra',flag:'gb-eng',rating:85,players:['Ramsdale','Walker','Maguire','Rice','Bellingham','Saka','Kane','Trippier','Stones','Foden','Gordon']},
-    {name:'Croácia',flag:'hr',rating:78,players:['Livakovic','Gvardiol','Erlic','Modric','Kovacic','Perisic','Kramaric','Stanisic','Sutalo','Ivanusec','Budimir']},
-    {name:'Gana',flag:'gh',rating:67,players:['Ati-Zigi','Salisu','Amartey','Partey','Kudus','Ayew','Sulemana','Mensah','Djiku','Jordan','Afriyie']},
-    {name:'Panamá',flag:'pa',rating:62,players:['Penedo','Murillo','Miller','Godoy','Fajardo','Córdoba','Arroyo','Davis','Escobar','Blackman','Avilés']}
+    {name:'Inglaterra',flag:'gb-eng',rating:85,players:[{n:'Ramsdale',p:'GR'},{n:'Walker',p:'DEF'},{n:'Maguire',p:'DEF'},{n:'Rice',p:'MED'},{n:'Bellingham',p:'MED'},{n:'Saka',p:'AVA'},{n:'Kane',p:'AVA'},{n:'Trippier',p:'DEF'},{n:'Stones',p:'DEF'},{n:'Foden',p:'MED'},{n:'Gordon',p:'AVA'}]},
+    {name:'Croácia',flag:'hr',rating:78,players:[{n:'Livakovic',p:'GR'},{n:'Gvardiol',p:'DEF'},{n:'Erlic',p:'DEF'},{n:'Modric',p:'MED'},{n:'Kovacic',p:'MED'},{n:'Perisic',p:'AVA'},{n:'Kramaric',p:'AVA'},{n:'Stanisic',p:'DEF'},{n:'Sutalo',p:'DEF'},{n:'Ivanusec',p:'MED'},{n:'Budimir',p:'AVA'}]},
+    {name:'Gana',flag:'gh',rating:67,players:[{n:'Ati-Zigi',p:'GR'},{n:'Salisu',p:'DEF'},{n:'Amartey',p:'DEF'},{n:'Partey',p:'MED'},{n:'Kudus',p:'AVA'},{n:'Ayew',p:'AVA'},{n:'Sulemana',p:'AVA'},{n:'Mensah',p:'DEF'},{n:'Djiku',p:'DEF'},{n:'Jordan',p:'MED'},{n:'Afriyie',p:'AVA'}]},
+    {name:'Panamá',flag:'pa',rating:62,players:[{n:'Penedo',p:'GR'},{n:'Murillo',p:'DEF'},{n:'Miller',p:'DEF'},{n:'Godoy',p:'MED'},{n:'Fajardo',p:'MED'},{n:'Córdoba',p:'AVA'},{n:'Arroyo',p:'AVA'},{n:'Davis',p:'DEF'},{n:'Escobar',p:'DEF'},{n:'Blackman',p:'MED'},{n:'Avilés',p:'AVA'}]}
   ]
 };
 
@@ -1649,23 +1884,19 @@ function buildLineupPlayers(players, isMe) {
 }
 
 function buildOppLineupPlayers(oppTeam) {
-  // Generate opponent players from their WC2026 data or SELS data
-  const names = (oppTeam.players||[]);
-  // Assign positions roughly: 1 GR, ~3-4 DEF, ~3-4 MED, rest AVA
-  const posDist = ['GR','DEF','DEF','DEF','DEF','MED','MED','MED','AVA','AVA','AVA'];
   const posLabel = {GR:'Guarda-Redes',DEF:'Defesas',MED:'Médios',AVA:'Avançados'};
   const order = ['GR','DEF','MED','AVA'];
   const baseRating = oppTeam.rating || 75;
 
-  // Build player objects
-  const pool = names.slice(0,11);
-  while(pool.length < 11) pool.push('Jogador '+(pool.length+1));
-  const playerObjs = pool.map((name,i)=>{
-    const pos = posDist[i] || 'MED';
-    // Vary ratings a bit around team rating
+  const raw = (oppTeam.players||[]).slice(0,11);
+  while(raw.length < 11) raw.push({n:'Jogador '+(raw.length+1), p:'MED'});
+
+  const playerObjs = raw.map(pl=>{
+    const name = typeof pl==='string' ? pl : (pl.n||pl.name||'?');
+    const pos = typeof pl==='string' ? 'MED' : (pl.p||pl.pos||'MED');
     const variation = Math.round((Math.random()-0.5)*16);
     const rating = Math.max(55, Math.min(99, baseRating + variation));
-    return {name: typeof name==='string'?name:(name.name||'?'), pos, rating};
+    return {name, pos, rating};
   });
 
   let html = '';
@@ -1680,7 +1911,7 @@ function buildOppLineupPlayers(oppTeam) {
         + '<div class="lineup-player-flag">'+flagHtml+'</div>'
         + '<div class="lineup-player-info">'
           + '<div class="lineup-player-name">'+p.name+'</div>'
-          + '<div class="lineup-player-pos">'+pos+'</div>'
+          + '<div class="lineup-player-pos">'+p.pos+'</div>'
         + '</div>'
         + '<div class="lineup-player-rating" style="color:'+ratColor+'">'+p.rating+'</div>'
         + '</div>';
@@ -1727,18 +1958,18 @@ function buildFieldRows(squadData, side) {
 }
 
 function buildOppFieldRows(oppTeam) {
-  const names = (oppTeam.players||[]).slice(0,11);
-  while(names.length<11) names.push('?');
-  // 1 GR, 4 DEF, 4 MED, 2 AVA (standard 4-4-2)
-  const positions = ['GR','DEF','DEF','DEF','DEF','MED','MED','MED','MED','AVA','AVA'];
-  const players = names.map((n,i)=>({
-    name: typeof n==='string'?n:(n.name||'?'),
-    pos: positions[i],
-    flag: oppTeam.flag||'',
-    rating: Math.max(55, Math.min(99, (oppTeam.rating||75) + Math.round((Math.random()-0.5)*14)))
-  }));
+  const raw = (oppTeam.players||[]).slice(0,11);
+  while(raw.length<11) raw.push({n:'?',p:'MED'});
+  const players = raw.map(pl=>{
+    const name = typeof pl==='string' ? pl : (pl.n||pl.name||'?');
+    const pos = typeof pl==='string' ? 'MED' : (pl.p||pl.pos||'MED');
+    return {
+      name, pos,
+      flag: oppTeam.flag||'',
+      rating: Math.max(55, Math.min(99, (oppTeam.rating||75) + Math.round((Math.random()-0.5)*14)))
+    };
+  });
   const rows = [];
-  // Away col uses column-reverse so we reverse the order: GR→DEF→MED→AVA renders bottom to top
   for(const pos of ['GR','DEF','MED','AVA']){
     rows.push({pos, players: players.filter(p=>p.pos===pos)});
   }
@@ -1759,6 +1990,253 @@ function renderFieldCol(rows, side) {
     }).join('');
     return `<div class="lmv-pos-row">${playerHtml}</div>`;
   }).join('');
+}
+
+function launchFieldSparks(container){
+  const colors = ['#C9A84C','#E8C96A','#fff','#A78BFA','#60A5FA'];
+  for(let i=0;i<30;i++){
+    setTimeout(()=>{
+      const s = document.createElement('div');
+      s.className = 'lmv-cel-spark';
+      const size = 3+Math.random()*4;
+      const angle = Math.random()*Math.PI*2;
+      const dist = 60+Math.random()*120;
+      s.style.cssText = `
+        left:50%; top:42%;
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation-duration:${0.8+Math.random()*0.8}s;
+      `;
+      s.style.setProperty('--sx', (Math.cos(angle)*dist)+'px');
+      s.style.setProperty('--sy', (Math.sin(angle)*dist)+'px');
+      container.appendChild(s);
+      setTimeout(()=>s.remove(), 1700);
+    }, i*25);
+  }
+}
+
+async function showTrophyCelebration(teamName, teamSquad){
+  const el = document.getElementById('lmv_celebration');
+  if(!el) return;
+
+  const playersHtml = (teamSquad||[]).slice(0,11).map((p,i)=>{
+    const flagHtml = flagImg(p.flag||'star','flag-img-sm');
+    const shortName = (p.name||'').split(' ').pop().substring(0,8);
+    return `<div class="lmv-cel-player" style="animation-delay:${1.3+i*0.06}s">
+      <div class="lmv-cel-player-shirt">${flagHtml}</div>
+      <div class="lmv-cel-player-name">${shortName}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="lmv-cel-rays"></div>
+    <svg class="lmv-cel-trophy" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="celGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#F0D878"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9C7A2E"/>
+      </linearGradient></defs>
+      <rect x="30" y="105" width="40" height="10" rx="2" fill="url(#celGoldGrad)"/>
+      <rect x="38" y="95" width="24" height="12" rx="2" fill="url(#celGoldGrad)"/>
+      <path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#celGoldGrad)"/>
+      <path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#celGoldGrad)"/>
+      <path d="M30 15 C30 35 35 50 50 58 C65 50 70 35 70 15 C70 28 62 38 50 40 C38 38 30 28 30 15 Z" fill="url(#celGoldGrad)" opacity="0.85"/>
+      <circle cx="50" cy="14" r="13" fill="url(#celGoldGrad)"/>
+      <circle cx="46" cy="10" r="3" fill="#FCEFC0" opacity="0.6"/>
+    </svg>
+    <div class="lmv-cel-title">CAMPEÕES DO MUNDO!</div>
+    <div class="lmv-cel-team">${teamName}</div>
+    <div class="lmv-cel-players">${playersHtml}</div>
+  `;
+  el.classList.add('show');
+  launchFieldSparks(el);
+  launchConfetti();
+  await new Promise(r=>setTimeout(r, 3400));
+}
+
+// PENALTY SHOOTOUT — simulates kick by kick, alternating teams
+async function playPenaltyShootout(myName, oppName, myWillWin, myScorerNames, oppScorerNames){
+  const panel = document.getElementById('lmv_pens_panel');
+  if(!panel) return { homeScore:0, awayScore:0 };
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="lmv-pens-title">⚖️ Desempate por Grandes Penalidades</div>
+    <div class="lmv-pens-row" id="lmv_pens_home"></div>
+    <div class="lmv-pens-score"><span id="lmv_pens_s1">0</span> - <span id="lmv_pens_s2">0</span></div>
+    <div class="lmv-pens-row" id="lmv_pens_away"></div>
+    <div class="lmv-pens-status" id="lmv_pens_status"></div>
+  `;
+
+  const homeRow = document.getElementById('lmv_pens_home');
+  const awayRow = document.getElementById('lmv_pens_away');
+  const s1El = document.getElementById('lmv_pens_s1');
+  const s2El = document.getElementById('lmv_pens_s2');
+  const statusEl = document.getElementById('lmv_pens_status');
+
+  // Pre-create 5 dot slots per side (sudden death added dynamically)
+  for(let i=0;i<5;i++){
+    const d1 = document.createElement('div'); d1.className='lmv-pen-dot'; d1.id='pd_h_'+i;
+    homeRow.appendChild(d1);
+    const d2 = document.createElement('div'); d2.className='lmv-pen-dot'; d2.id='pd_a_'+i;
+    awayRow.appendChild(d2);
+  }
+
+  let homeScore=0, awayScore=0;
+  let homeTaken=0, awayTaken=0;
+  const namePoolHome = myScorerNames.length ? myScorerNames : ['Marcador '+(homeTaken+1)];
+  const namePoolAway = oppScorerNames.length ? oppScorerNames : ['Marcador '+(awayTaken+1)];
+
+  // Round 1-5 — last kick of each round is biased to respect myWillWin if it would decide the shootout
+  for(let round=0; round<5; round++){
+    // Home kicks first
+    await new Promise(r=>setTimeout(r,650));
+    let homeScored = Math.random() < 0.76;
+    if(round===4 && isLastKickDecisive(homeScore, awayScore, true, homeTaken, awayTaken)){
+      homeScored = myWillWin ? true : (homeScore <= awayScore ? false : homeScored);
+    }
+    const homeName = namePoolHome[homeTaken % namePoolHome.length];
+    homeTaken++;
+    const hd = document.getElementById('pd_h_'+round);
+    hd.classList.add('shown', homeScored?'scored':'missed');
+    hd.textContent = homeScored ? '✓' : '✗';
+    if(homeScored){ homeScore++; s1El.textContent=homeScore; s1El.classList.remove('bump'); void s1El.offsetWidth; s1El.classList.add('bump'); }
+    statusEl.textContent = homeName + (homeScored?' marcou!':' falhou!');
+    statusEl.className = 'lmv-pens-status' + (homeScored?' scorer':'');
+
+    if(isPensDecided(homeScore, awayScore, round, 5, homeTaken, awayTaken)) break;
+
+    // Away kicks
+    await new Promise(r=>setTimeout(r,650));
+    let awayScored = Math.random() < 0.74;
+    if(round===4 && isLastKickDecisive(homeScore, awayScore, false, homeTaken, awayTaken)){
+      awayScored = myWillWin ? false : true;
+    }
+    const awayName = namePoolAway[awayTaken % namePoolAway.length];
+    awayTaken++;
+    const ad = document.getElementById('pd_a_'+round);
+    ad.classList.add('shown', awayScored?'scored':'missed');
+    ad.textContent = awayScored ? '✓' : '✗';
+    if(awayScored){ awayScore++; s2El.textContent=awayScore; s2El.classList.remove('bump'); void s2El.offsetWidth; s2El.classList.add('bump'); }
+    statusEl.textContent = awayName + (awayScored?' marcou!':' falhou!');
+    statusEl.className = 'lmv-pens-status' + (awayScored?' scorer':'');
+
+    if(isPensDecided(homeScore, awayScore, round, 5, homeTaken, awayTaken)) break;
+  }
+
+  // Sudden death if tied after 5 — force the correct winner on this decisive round
+  let suddenRound = 5;
+  while(homeScore === awayScore && homeTaken>=5 && awayTaken>=5){
+    const d1 = document.createElement('div'); d1.className='lmv-pen-dot'; d1.id='pd_h_'+suddenRound;
+    homeRow.appendChild(d1);
+    const d2 = document.createElement('div'); d2.className='lmv-pen-dot'; d2.id='pd_a_'+suddenRound;
+    awayRow.appendChild(d2);
+
+    await new Promise(r=>setTimeout(r,650));
+    const homeScored = myWillWin ? true : (Math.random() < 0.7);
+    const homeName = namePoolHome[homeTaken % namePoolHome.length];
+    homeTaken++;
+    d1.classList.add('shown', homeScored?'scored':'missed');
+    d1.textContent = homeScored ? '✓' : '✗';
+    if(homeScored){ homeScore++; s1El.textContent=homeScore; }
+    statusEl.textContent = homeName + (homeScored?' marcou!':' falhou!');
+
+    await new Promise(r=>setTimeout(r,650));
+    // If home already scored and we want home to win, away must miss to end it; otherwise random
+    const needAwayMiss = myWillWin && homeScored;
+    const awayScored = needAwayMiss ? false : (myWillWin ? (Math.random()<0.7) : !homeScored || Math.random()<0.7);
+    const awayName = namePoolAway[awayTaken % namePoolAway.length];
+    awayTaken++;
+    d2.classList.add('shown', awayScored?'scored':'missed');
+    d2.textContent = awayScored ? '✓' : '✗';
+    if(awayScored){ awayScore++; s2El.textContent=awayScore; }
+    statusEl.textContent = awayName + (awayScored?' marcou!':' falhou!');
+
+    suddenRound++;
+    if(suddenRound>12) break; // safety
+  }
+
+  // Final safety net: if somehow the score doesn't match the predetermined winner, nudge it
+  if((myWillWin && homeScore<=awayScore) || (!myWillWin && awayScore<=homeScore)){
+    if(myWillWin) homeScore = awayScore+1; else awayScore = homeScore+1;
+    s1El.textContent=homeScore; s2El.textContent=awayScore;
+  }
+
+  await new Promise(r=>setTimeout(r,500));
+  const winner = homeScore>awayScore ? myName : oppName;
+  statusEl.innerHTML = '🏆 '+winner+' vence nos penáltis!';
+  statusEl.className = 'lmv-pens-status scorer';
+  await new Promise(r=>setTimeout(r,1200));
+
+  return { homeScore, awayScore };
+}
+
+function isLastKickDecisive(hs, as_, isHomeKick, homeTaken, awayTaken){
+  // True if this is potentially the final kick of regulation rounds
+  return (isHomeKick ? homeTaken===4 : awayTaken===4);
+}
+
+function isPensDecided(hs, as_, round, totalRounds, homeTaken, awayTaken){
+  const homeRemaining = totalRounds - homeTaken;
+  const awayRemaining = totalRounds - awayTaken;
+  if(hs > as_ + awayRemaining) return true;
+  if(as_ > hs + homeRemaining) return true;
+  return false;
+}
+
+// INJURY & SUBSTITUTION SYSTEM
+function showSubstitutionPopup(injuredPlayer, availableBench){
+  return new Promise(resolve=>{
+    const overlay = document.getElementById('sub-overlay');
+    document.getElementById('sub-injured-name').textContent =
+      injuredPlayer.name + ' (' + POS_LABELS[injuredPlayer.pos] + ') lesionou-se!';
+
+    const optionsEl = document.getElementById('sub-options');
+    let html = availableBench.map((p,i)=>{
+      const rc = p.rating>=95?'#C9A84C':p.rating>=85?'#A78BFA':p.rating>=80?'#4A9E6F':'#9A9690';
+      return `<div class="sub-option" data-idx="${i}">
+        <div class="sub-option-flag">${flagImg(p.flag,'flag-img-sm')}</div>
+        <div class="sub-option-info">
+          <div class="sub-option-name">${p.name}</div>
+          <div class="sub-option-pos">${POS_LABELS[p.pos]}</div>
+        </div>
+        <div class="sub-option-rating" style="color:${rc}">${p.rating}</div>
+      </div>`;
+    }).join('');
+
+    if(availableBench.length===0){
+      html = '<div style="font-size:13px;color:var(--text3);padding:14px 0">Sem suplentes disponíveis. A equipa fica reduzida a 10 jogadores.</div>';
+    }
+    html += '<div class="sub-none-option" id="sub-skip-btn">Jogar com 10 (não substituir)</div>';
+
+    optionsEl.innerHTML = html;
+    overlay.classList.add('show');
+
+    optionsEl.querySelectorAll('.sub-option').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const idx = parseInt(el.dataset.idx);
+        overlay.classList.remove('show');
+        setTimeout(()=>resolve(availableBench[idx]), 300);
+      }, {once:true});
+    });
+    document.getElementById('sub-skip-btn').addEventListener('click', ()=>{
+      overlay.classList.remove('show');
+      setTimeout(()=>resolve(null), 300);
+    }, {once:true});
+  });
+}
+
+// Tracks bench/used substitutes per-match (reset each playLiveMatch call via closure param)
+async function maybeTriggerInjury(activeSquad, usedBenchNames, side){
+  // ~6% chance per match for the player's own team to suffer an injury
+  if(side!=='home') return null; // only player's team has bench mechanics
+  if(Math.random() > 0.06) return null;
+  if(!activeSquad.length) return null;
+
+  const injuredIdx = Math.floor(Math.random()*activeSquad.length);
+  const injuredPlayer = activeSquad[injuredIdx];
+
+  const availableBench = bench.filter(p=>!usedBenchNames.includes(p.name));
+  const chosen = await showSubstitutionPopup(injuredPlayer, availableBench);
+
+  return { injuredIdx, injuredPlayer, replacement: chosen };
 }
 
 async function playLiveMatch(opts){
@@ -1836,7 +2314,9 @@ async function playLiveMatch(opts){
       </div>
       <div class="lmv-team-col away" id="lmv_away_col">${renderFieldCol(awayRows,'away')}</div>
       <div class="lmv-result-badge" id="lmv_result"></div>
+      <div class="lmv-celebration" id="lmv_celebration"></div>
     </div>
+    <div class="lmv-pens-panel" id="lmv_pens_panel" style="display:none"></div>
     <div class="lmv-stats">
       <div class="lmv-stat-home" id="lmv_poss_h">50%</div>
       <div class="lmv-stat-label">posse</div>
@@ -1861,6 +2341,10 @@ async function playLiveMatch(opts){
   let s1=0, s2=0, tIdx=0;
   const stepMs = 55;
 
+  let activeSquad = [...squad]; // mutable copy — reflects substitutions
+  const usedBenchNames = [];
+  let injuryHappened = false;
+
   for(let min=1; min<=90; min++){
     await new Promise(r=>setTimeout(r, stepMs));
 
@@ -1878,6 +2362,29 @@ async function playLiveMatch(opts){
     // Fouls
     if(foulMinutes.home.includes(min)){ homeFouls++; document.getElementById('lmv_fouls_h').textContent=homeFouls; }
     if(foulMinutes.away.includes(min)){ awayFouls++; document.getElementById('lmv_fouls_a').textContent=awayFouls; }
+
+    // Injury check (only once per match, minutes 10-85, only if bench exists)
+    if(!injuryHappened && min>=10 && min<=85 && bench.length>0){
+      const result = await maybeTriggerInjury(activeSquad, usedBenchNames, 'home');
+      if(result){
+        injuryHappened = true;
+        eventsEl.innerHTML += `<div class="lmv-ev" style="color:#E04B4B;text-align:center;width:100%">🩹 ${result.injuredPlayer.name} lesionou-se (${min}')</div>`;
+        if(result.replacement){
+          usedBenchNames.push(result.replacement.name);
+          activeSquad[result.injuredIdx] = result.replacement;
+          eventsEl.innerHTML += `<div class="lmv-ev home">🔄 Entra ${result.replacement.name} (${min}')</div>`;
+          // Re-render home field column with updated squad
+          const newHomeRows = buildFieldRows(activeSquad, 'home');
+          document.getElementById('lmv_home_col').innerHTML = renderFieldCol(newHomeRows,'home');
+        } else {
+          eventsEl.innerHTML += `<div class="lmv-ev" style="color:var(--text3);text-align:center;width:100%">Equipa reduzida a 10 jogadores</div>`;
+          activeSquad = activeSquad.filter((_,i)=>i!==result.injuredIdx);
+          const newHomeRows = buildFieldRows(activeSquad, 'home');
+          document.getElementById('lmv_home_col').innerHTML = renderFieldCol(newHomeRows,'home');
+        }
+        eventsEl.scrollTop = eventsEl.scrollHeight;
+      }
+    }
 
     // Goals
     while(tIdx<timeline.length && timeline[tIdx].min===min){
@@ -1907,18 +2414,28 @@ async function playLiveMatch(opts){
   // Penalties
   if(opts.hasPenalties){
     await new Promise(r=>setTimeout(r,400));
-    eventsEl.innerHTML += `<div class="lmv-ev" style="color:var(--text3);text-align:center">⚖️ ${opts.penOutcome}</div>`;
-    await new Promise(r=>setTimeout(r,600));
+    const myPenTakers = [...squad].sort((a,b)=>b.rating-a.rating).filter(p=>p.pos!=='GR').map(p=>p.name);
+    const oppPenTakers = (opts.oppTeam && opts.oppTeam.players)
+      ? opts.oppTeam.players.filter(p=>typeof p!=='string' && p.p!=='GR').map(p=>p.n)
+      : [];
+    const myWillWin = opts.resultCls === 'result-win';
+    await playPenaltyShootout(opts.myName, oppShortName, myWillWin, myPenTakers, oppPenTakers);
   }
 
-  // Show result badge
+  // Show result badge (or trophy celebration if champion)
   await new Promise(r=>setTimeout(r,300));
-  const resultEl = document.getElementById('lmv_result');
-  if(resultEl){
-    resultEl.innerHTML = `<div class="lmv-result-inner"><div class="sim-round" style="margin-bottom:6px">${opts.roundLabel}</div><div class="lm-final-badge ${opts.resultCls}" style="font-size:16px">${opts.resultTxt}</div></div>`;
-    resultEl.classList.add('show');
+  const isChampionshipWin = opts.roundLabel === 'Final' && opts.resultCls === 'result-win';
+
+  if(isChampionshipWin){
+    await showTrophyCelebration(opts.myName, squad);
+  } else {
+    const resultEl = document.getElementById('lmv_result');
+    if(resultEl){
+      resultEl.innerHTML = `<div class="lmv-result-inner"><div class="sim-round" style="margin-bottom:6px">${opts.roundLabel}</div><div class="lm-final-badge ${opts.resultCls}" style="font-size:16px">${opts.resultTxt}</div></div>`;
+      resultEl.classList.add('show');
+    }
+    await new Promise(r=>setTimeout(r,1800));
   }
-  await new Promise(r=>setTimeout(r,1800));
 
   // Close overlay
   overlay.classList.remove('show');
@@ -2660,6 +3177,16 @@ async function startSimulation(){
 }
 setupHeroBackground();
 </script>
+<div id="sub-overlay" class="sub-overlay">
+  <div class="sub-modal">
+    <div class="sub-icon">🩹</div>
+    <div class="sub-title">Lesão!</div>
+    <div class="sub-injured-name" id="sub-injured-name"></div>
+    <div class="sub-injured-detail">Tens de fazer uma substituição</div>
+    <div class="sub-options" id="sub-options"></div>
+  </div>
+</div>
+
 <div id="lmv-overlay" class="lmv-overlay">
   <div class="lmv-modal" id="lmv-modal">
     <!-- filled by JS -->
