@@ -352,6 +352,34 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
   background:rgba(0,0,0,0.3);
 }
 
+.lineup-player.editable { cursor:pointer; transition:background 0.15s; }
+.lineup-player.editable:hover { background:rgba(201,168,76,0.08); }
+.lineup-swap-hint { font-size:9px; color:var(--gold); opacity:0; transition:opacity 0.15s; margin-left:4px; }
+.lineup-player.editable:hover .lineup-swap-hint { opacity:1; }
+.lineup-bench-note { text-align:center; font-size:11px; color:var(--text3); padding:8px 0 0; }
+
+/* Quick swap picker (sits inside lineup modal) */
+.lineup-swap-picker {
+  position:absolute; inset:0; background:rgba(10,15,10,0.97); z-index:5;
+  display:none; flex-direction:column; padding:16px;
+}
+.lineup-swap-picker.show { display:flex; }
+.lineup-swap-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; color:var(--text); text-align:center; margin-bottom:4px; }
+.lineup-swap-sub { font-size:11px; color:var(--text3); text-align:center; margin-bottom:14px; }
+.lineup-swap-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+.lineup-swap-option {
+  display:flex; align-items:center; gap:10px; padding:9px 12px;
+  background:var(--dark3); border:1px solid var(--border); cursor:pointer;
+  transition:all 0.15s;
+}
+.lineup-swap-option:hover { border-color:var(--gold); background:var(--dark4); }
+.lineup-swap-cancel {
+  margin-top:12px; text-align:center; font-size:12px; color:var(--text3);
+  cursor:pointer; padding:8px;
+}
+.lineup-swap-cancel:hover { color:var(--text); }
+.lineup-modal { position:relative; }
+
 /* SHARE MODAL */
 .share-overlay {
   position:fixed; inset:0; z-index:1000;
@@ -455,16 +483,38 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .lmv-overlay {
   position:fixed; inset:0; z-index:980;
   background:rgba(0,0,0,0.96);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
   opacity:0; pointer-events:none; transition:opacity 0.3s;
   padding:12px;
+  overflow-y:auto;
 }
 .lmv-overlay.show { opacity:1; pointer-events:all; }
 .lmv-modal {
   width:100%; max-width:620px;
+  margin:auto 0;
   transform:scale(0.95); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
 .lmv-overlay.show .lmv-modal { transform:scale(1); }
+
+
+/* MOBILE ADJUSTMENTS for live match field */
+@media (max-width: 480px) {
+  .lmv-overlay { padding:6px; }
+  .lmv-field-wrap { grid-template-columns:1fr 90px 1fr; min-height:220px; }
+  .lmv-player { width:42px; }
+  .lmv-player-shirt { width:24px; height:24px; font-size:9px; }
+  .lmv-player-name { font-size:7px; max-width:42px; }
+  .lmv-player-rat { font-size:7px; }
+  .lmv-centre-circle { width:36px; height:36px; }
+  .lmv-events-list { max-height:70px; }
+  .lmv-ev { font-size:8px; }
+  .lmv-score-main { font-size:26px; }
+  .lmv-team-nm { font-size:14px; }
+  .lmv-topbar, .lmv-scoreboard { padding:6px 10px; }
+  .lmv-stats { padding:6px 10px; gap:2px 6px; }
+  .lmv-stat-home, .lmv-stat-away { font-size:12px; }
+  .lmv-stat-label { font-size:8px; }
+}
 
 /* Top bar */
 .lmv-topbar {
@@ -496,7 +546,7 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
   display:grid; grid-template-columns:1fr 140px 1fr;
   gap:0; background:#1a3d1a; border:1px solid rgba(255,255,255,0.06);
   position:relative; overflow:hidden;
-  min-height:340px;
+  min-height:280px;
 }
 /* Grass stripes */
 .lmv-field-wrap::before {
@@ -1271,8 +1321,14 @@ let usedSelectionIds=[]; // selections already shown this draft — never repeat
 
 function spotsLeft(){
   if(inBenchPhase){
-    const remaining = 3 - bench.length;
-    return {GR:remaining,DEF:remaining,MED:remaining,AVA:remaining};
+    const benchFilled={DEF:0,MED:0,AVA:0};
+    bench.forEach(p=>{ if(benchFilled[p.pos]!==undefined) benchFilled[p.pos]++; });
+    return {
+      GR:0, // no GR substitute slot
+      DEF:1-benchFilled.DEF,
+      MED:1-benchFilled.MED,
+      AVA:1-benchFilled.AVA
+    };
   }
   const filled={GR:0,DEF:0,MED:0,AVA:0};
   squad.forEach(p=>filled[p.pos]++);
@@ -1372,7 +1428,9 @@ function loadRound(){
   if(inBenchPhase){
     const total = 3;
     document.getElementById('prog').style.width=(bench.length/total*100)+'%';
-    document.getElementById('prog-label').textContent=`Suplente ${bench.length+1} de ${total}`;
+    const stillNeeded = ['DEF','MED','AVA'].filter(pos=>!bench.some(p=>p.pos===pos));
+    document.getElementById('prog-label').textContent =
+      `Suplente ${bench.length+1} de ${total} · Falta: ${stillNeeded.map(p=>POS_LABELS[p]).join(', ')}`;
   } else {
     const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
     document.getElementById('prog').style.width=(currentRound/total*100)+'%';
@@ -1392,8 +1450,10 @@ function loadRound(){
 
 function renderSlotsDisplay(){
   if(inBenchPhase){
-    document.getElementById('slots-display').innerHTML =
-      Array(3).fill(0).map((_,i)=>`<span class="slot-pill ${i<bench.length?'filled':'open'}">Suplente</span>`).join('');
+    document.getElementById('slots-display').innerHTML = ['DEF','MED','AVA'].map(pos=>{
+      const filled = bench.some(p=>p.pos===pos);
+      return `<span class="slot-pill ${filled?'filled':'open'}">${POS_LABELS[pos]}</span>`;
+    }).join('');
     return;
   }
   const left=spotsLeft();
@@ -1409,7 +1469,7 @@ function renderDraftInfo(){
   const infoEl = document.getElementById('draft-info');
   infoEl.className = `draft-info ${rarity}`;
   const avail = inBenchPhase
-    ? `${3-bench.length}× Suplente (qualquer posição)`
+    ? Object.entries(spotsLeft()).filter(([k,v])=>v>0 && k!=='GR').map(([k,v])=>`${v}× ${POS_LABELS[k]} (suplente)`).join(', ')
     : Object.entries(spotsLeft()).filter(([,v])=>v>0).map(([k,v])=>`${v}× ${POS_LABELS[k]}`).join(', ');
   infoEl.innerHTML=`${flagImg(currentSelection.flag,'flag-img-sm')} <strong>${currentSelection.name}</strong><span class="rarity-badge ${rarity}">${rarityLabel}</span> &nbsp;·&nbsp; Vagas: ${avail}`;
 }
@@ -1597,8 +1657,10 @@ function buildTournament(){
 
 // Pick a random goalscorer from squad, weighted by rating, preferring AVA > MED > DEF
 function pickScorer(squadData) {
-  // Weight: AVA=3x, MED=1.5x, DEF/GR=0.3x, scaled by rating
-  const weighted = squadData.map(p => {
+  // Weight: AVA=3x, MED=1.5x, DEF=0.3x, GR never scores
+  const eligible = squadData.filter(p => p.pos !== 'GR');
+  const pool = eligible.length ? eligible : squadData; // safety fallback
+  const weighted = pool.map(p => {
     const posW = p.pos==='AVA' ? 3 : p.pos==='MED' ? 1.5 : 0.3;
     return { p, w: posW * (p.rating / 100) };
   });
@@ -1633,12 +1695,14 @@ function generateOppScorers(n, oppSel) {
       pool = oppSel.players;
     } else if(first.n !== undefined) {
       // WC2026 format: {n, p}
-      const atk = oppSel.players.filter(pl=>pl.p==='AVA'||pl.p==='MED');
-      pool = (atk.length ? atk : oppSel.players).map(pl=>pl.n);
+      const nonGR = oppSel.players.filter(pl=>pl.p!=='GR');
+      const atk = nonGR.filter(pl=>pl.p==='AVA'||pl.p==='MED');
+      pool = (atk.length ? atk : nonGR).map(pl=>pl.n);
     } else {
       // SELS format: {name, pos, rating}
-      const atk = oppSel.players.filter(pl=>pl.pos==='AVA'||pl.pos==='MED');
-      pool = (atk.length ? atk : oppSel.players).map(pl=>pl.name);
+      const nonGR = oppSel.players.filter(pl=>pl.pos!=='GR');
+      const atk = nonGR.filter(pl=>pl.pos==='AVA'||pl.pos==='MED');
+      pool = (atk.length ? atk : nonGR).map(pl=>pl.name);
     }
   }
   for(let i=0; i<n; i++) {
@@ -1739,76 +1803,76 @@ function dismissReveal() {
 // WORLD CUP 2026 REAL GROUPS
 const WC2026_GROUPS = {
   A: [
-    {name:'México',flag:'mx',rating:78,players:[{n:'Ochoa',p:'GR'},{n:'Sánchez',p:'DEF'},{n:'Araujo',p:'DEF'},{n:'Álvarez',p:'AVA'},{n:'Lozano',p:'AVA'},{n:'Antuna',p:'AVA'},{n:'Giménez',p:'DEF'},{n:'Gallardo',p:'MED'},{n:'Álvarez',p:'AVA'},{n:'Romo',p:'GR'},{n:'Flores',p:'MED'}]},
-    {name:'Czechia',flag:'cz',rating:74,players:[{n:'Vaclík',p:'GR'},{n:'Kúdela',p:'DEF'},{n:'Holeš',p:'MED'},{n:'Souček',p:'MED'},{n:'Schick',p:'AVA'},{n:'Barák',p:'MED'},{n:'Jankto',p:'MED'},{n:'Krejci',p:'DEF'},{n:'Jirka',p:'DEF'},{n:'Lingr',p:'MED'},{n:'Vlkanova',p:'AVA'}]},
-    {name:'Coreia do Sul',flag:'kr',rating:76,players:[{n:'Kim S.',p:'GR'},{n:'Kim M.',p:'DEF'},{n:'Lee J.',p:'DEF'},{n:'Hwang H.',p:'AVA'},{n:'Son H.',p:'AVA'},{n:'Lee K.',p:'MED'},{n:'Hwang U.',p:'MED'},{n:'Jung W.',p:'GR'},{n:'Cho G.',p:'DEF'},{n:'Oh S.',p:'MED'},{n:'Na S.',p:'DEF'}]},
-    {name:'África do Sul',flag:'za',rating:64,players:[{n:'Williams',p:'AVA'},{n:'Tau',p:'AVA'},{n:'Zwane',p:'MED'},{n:'Dolly',p:'MED'},{n:'Mothiba',p:'AVA'},{n:'Lakay',p:'MED'},{n:'Foster',p:'GR'},{n:'Mobbie',p:'DEF'},{n:'Hlanti',p:'DEF'},{n:'Mudau',p:'DEF'},{n:'Lorch',p:'AVA'}]}
+    {name:'México',flag:'mx',rating:78,players:[{n:'Ochoa',p:'GR'},{n:'Sánchez',p:'DEF'},{n:'Araujo',p:'DEF'},{n:'Álvarez',p:'AVA'},{n:'Lozano',p:'AVA'},{n:'Antuna',p:'DEF'},{n:'Giménez',p:'DEF'},{n:'Gallardo',p:'MED'},{n:'Álvarez',p:'MED'},{n:'Romo',p:'MED'},{n:'Flores',p:'MED'}]},
+    {name:'Czechia',flag:'cz',rating:74,players:[{n:'Vaclík',p:'GR'},{n:'Kúdela',p:'DEF'},{n:'Holeš',p:'MED'},{n:'Souček',p:'MED'},{n:'Schick',p:'AVA'},{n:'Barák',p:'MED'},{n:'Jankto',p:'MED'},{n:'Krejci',p:'DEF'},{n:'Jirka',p:'DEF'},{n:'Lingr',p:'DEF'},{n:'Vlkanova',p:'AVA'}]},
+    {name:'Coreia do Sul',flag:'kr',rating:76,players:[{n:'Kim S.',p:'GR'},{n:'Kim M.',p:'DEF'},{n:'Lee J.',p:'DEF'},{n:'Hwang H.',p:'AVA'},{n:'Son H.',p:'AVA'},{n:'Lee K.',p:'MED'},{n:'Hwang U.',p:'MED'},{n:'Jung W.',p:'MED'},{n:'Cho G.',p:'DEF'},{n:'Oh S.',p:'MED'},{n:'Na S.',p:'DEF'}]},
+    {name:'África do Sul',flag:'za',rating:64,players:[{n:'Williams',p:'AVA'},{n:'Tau',p:'AVA'},{n:'Zwane',p:'MED'},{n:'Dolly',p:'MED'},{n:'Mothiba',p:'DEF'},{n:'Lakay',p:'MED'},{n:'Foster',p:'GR'},{n:'Mobbie',p:'DEF'},{n:'Hlanti',p:'DEF'},{n:'Mudau',p:'DEF'},{n:'Lorch',p:'MED'}]}
   ],
   B: [
-    {name:'Canadá',flag:'ca',rating:74,players:[{n:'Borjan',p:'GR'},{n:'Johnston',p:'DEF'},{n:'Buchanan',p:'DEF'},{n:'Eustáquio',p:'MED'},{n:'David',p:'AVA'},{n:'Davies',p:'DEF'},{n:'Laryea',p:'MED'},{n:'Waterman',p:'DEF'},{n:'Adekugbe',p:'DEF'},{n:'Hoilett',p:'AVA'},{n:'Cyle Larin',p:'AVA'}]},
-    {name:'Suíça',flag:'ch',rating:77,players:[{n:'Sommer',p:'GR'},{n:'Akanji',p:'DEF'},{n:'Rodríguez',p:'DEF'},{n:'Freuler',p:'MED'},{n:'Shaqiri',p:'MED'},{n:'Embolo',p:'AVA'},{n:'Vargas',p:'GR'},{n:'Mvogo',p:'GR'},{n:'Stergiou',p:'DEF'},{n:'Rieder',p:'MED'},{n:'Steffen',p:'MED'}]},
-    {name:'Bósnia-Herzegovina',flag:'ba',rating:68,players:[{n:'Sehic',p:'GR'},{n:'Civic',p:'DEF'},{n:'Kolasinac',p:'DEF'},{n:'Pjanic',p:'MED'},{n:'Dzeko',p:'AVA'},{n:'Prevljak',p:'AVA'},{n:'Krunic',p:'MED'},{n:'Sunjic',p:'DEF'},{n:'Ahmedhodzic',p:'DEF'},{n:'Demirovic',p:'AVA'},{n:'Piric',p:'MED'}]},
+    {name:'Canadá',flag:'ca',rating:74,players:[{n:'Borjan',p:'GR'},{n:'Johnston',p:'DEF'},{n:'Buchanan',p:'DEF'},{n:'Eustáquio',p:'MED'},{n:'David',p:'AVA'},{n:'Davies',p:'DEF'},{n:'Laryea',p:'MED'},{n:'Waterman',p:'DEF'},{n:'Adekugbe',p:'MED'},{n:'Hoilett',p:'AVA'},{n:'Cyle Larin',p:'MED'}]},
+    {name:'Suíça',flag:'ch',rating:77,players:[{n:'Sommer',p:'GR'},{n:'Akanji',p:'DEF'},{n:'Rodríguez',p:'DEF'},{n:'Freuler',p:'MED'},{n:'Shaqiri',p:'MED'},{n:'Embolo',p:'AVA'},{n:'Vargas',p:'DEF'},{n:'Mvogo',p:'AVA'},{n:'Stergiou',p:'DEF'},{n:'Rieder',p:'MED'},{n:'Steffen',p:'MED'}]},
+    {name:'Bósnia-Herzegovina',flag:'ba',rating:68,players:[{n:'Sehic',p:'GR'},{n:'Civic',p:'DEF'},{n:'Kolasinac',p:'DEF'},{n:'Pjanic',p:'MED'},{n:'Dzeko',p:'AVA'},{n:'Prevljak',p:'AVA'},{n:'Krunic',p:'MED'},{n:'Sunjic',p:'DEF'},{n:'Ahmedhodzic',p:'DEF'},{n:'Demirovic',p:'MED'},{n:'Piric',p:'MED'}]},
     {name:'Qatar',flag:'qa',rating:62,players:[{n:'Al Sheeb',p:'GR'},{n:'Khoukhi',p:'DEF'},{n:'Hassan',p:'DEF'},{n:'Ali',p:'MED'},{n:'Almoez',p:'AVA'},{n:'Afif',p:'AVA'},{n:'Boudiaf',p:'MED'},{n:'Salman',p:'DEF'},{n:'Ismail',p:'MED'},{n:'Hatem',p:'MED'},{n:'Hassan A.',p:'DEF'}]}
   ],
   C: [
-    {name:'Brasil',flag:'br',rating:85,players:[{n:'Alisson',p:'GR'},{n:'Militão',p:'DEF'},{n:'Marquinhos',p:'DEF'},{n:'Danilo',p:'DEF'},{n:'Rodrygo',p:'AVA'},{n:'Vinicius',p:'AVA'},{n:'Endrick',p:'AVA'},{n:'Gabigol',p:'AVA'},{n:'Savinho',p:'MED'},{n:'Gerson',p:'MED'},{n:'Lucas Paquetá',p:'MED'}]},
-    {name:'Marrocos',flag:'ma',rating:79,players:[{n:'Bono',p:'GR'},{n:'Hakimi',p:'DEF'},{n:'Saïss',p:'DEF'},{n:'Amrabat',p:'MED'},{n:'Ziyech',p:'MED'},{n:'En-Nesyri',p:'AVA'},{n:'Boufal',p:'AVA'},{n:'Benoun',p:'DEF'},{n:'Ounahi',p:'MED'},{n:'Sabiri',p:'MED'},{n:'Louza',p:'MED'}]},
-    {name:'Escócia',flag:'gb-sct',rating:70,players:[{n:'Gordon',p:'AVA'},{n:'Hendry',p:'DEF'},{n:'McTominay',p:'MED'},{n:'McGinn',p:'MED'},{n:'Adams',p:'MED'},{n:'Christie',p:'MED'},{n:'Robertson',p:'DEF'},{n:'Tierney',p:'DEF'},{n:'Gilmour',p:'MED'},{n:'Dykes',p:'AVA'},{n:'Patterson',p:'DEF'}]},
-    {name:'Haiti',flag:'ht',rating:55,players:[{n:'Voltaire',p:'GR'},{n:'Pierre',p:'DEF'},{n:'Herold',p:'DEF'},{n:'Chery',p:'AVA'},{n:'Borgella',p:'DEF'},{n:'Noel',p:'MED'},{n:'Saintil',p:'MED'},{n:'Joseph',p:'MED'},{n:'Guerrier',p:'AVA'},{n:'Bazile',p:'AVA'},{n:'Pierre-Louis',p:'MED'}]}
+    {name:'Brasil',flag:'br',rating:85,players:[{n:'Alisson',p:'GR'},{n:'Militão',p:'DEF'},{n:'Marquinhos',p:'DEF'},{n:'Danilo',p:'DEF'},{n:'Rodrygo',p:'AVA'},{n:'Vinicius',p:'AVA'},{n:'Endrick',p:'DEF'},{n:'Gabigol',p:'MED'},{n:'Savinho',p:'MED'},{n:'Gerson',p:'MED'},{n:'Lucas Paquetá',p:'MED'}]},
+    {name:'Marrocos',flag:'ma',rating:79,players:[{n:'Bono',p:'GR'},{n:'Hakimi',p:'DEF'},{n:'Saïss',p:'DEF'},{n:'Amrabat',p:'MED'},{n:'Ziyech',p:'MED'},{n:'En-Nesyri',p:'AVA'},{n:'Boufal',p:'AVA'},{n:'Benoun',p:'DEF'},{n:'Ounahi',p:'MED'},{n:'Sabiri',p:'MED'},{n:'Louza',p:'DEF'}]},
+    {name:'Escócia',flag:'gb-sct',rating:70,players:[{n:'Gordon',p:'GR'},{n:'Hendry',p:'DEF'},{n:'McTominay',p:'MED'},{n:'McGinn',p:'MED'},{n:'Adams',p:'MED'},{n:'Christie',p:'MED'},{n:'Robertson',p:'DEF'},{n:'Tierney',p:'DEF'},{n:'Gilmour',p:'AVA'},{n:'Dykes',p:'AVA'},{n:'Patterson',p:'DEF'}]},
+    {name:'Haiti',flag:'ht',rating:55,players:[{n:'Voltaire',p:'GR'},{n:'Pierre',p:'DEF'},{n:'Herold',p:'DEF'},{n:'Chery',p:'AVA'},{n:'Borgella',p:'DEF'},{n:'Noel',p:'MED'},{n:'Saintil',p:'MED'},{n:'Joseph',p:'MED'},{n:'Guerrier',p:'AVA'},{n:'Bazile',p:'DEF'},{n:'Pierre-Louis',p:'MED'}]}
   ],
   D: [
-    {name:'EUA',flag:'us',rating:76,players:[{n:'Turner',p:'GR'},{n:'Dest',p:'DEF'},{n:'Zimmerman',p:'DEF'},{n:'Adams',p:'MED'},{n:'Musah',p:'MED'},{n:'McKennie',p:'MED'},{n:'Pulisic',p:'AVA'},{n:'Aaronson',p:'MED'},{n:'Weah',p:'AVA'},{n:'Reyna',p:'MED'},{n:'Acosta',p:'MED'}]},
-    {name:'Paraguai',flag:'py',rating:68,players:[{n:'Silva',p:'GR'},{n:'Alonso',p:'DEF'},{n:'Balbuena',p:'DEF'},{n:'Cubas',p:'MED'},{n:'Bareiro',p:'AVA'},{n:'Sanabria',p:'AVA'},{n:'Romero',p:'DEF'},{n:'Gómez',p:'DEF'},{n:'Alderete',p:'DEF'},{n:'Enciso',p:'MED'},{n:'Almirón',p:'AVA'}]},
-    {name:'Turquia',flag:'tr',rating:75,players:[{n:'Çakır',p:'GR'},{n:'Söyüncü',p:'DEF'},{n:'Kabak',p:'DEF'},{n:'Calhanoglu',p:'MED'},{n:'Yazici',p:'MED'},{n:'Yilmaz',p:'AVA'},{n:'Akturkoglu',p:'AVA'},{n:'Müldür',p:'DEF'},{n:'Demiral',p:'DEF'},{n:'Karaman',p:'AVA'},{n:'Ünder',p:'AVA'}]},
-    {name:'Austrália',flag:'au',rating:71,players:[{n:'Ryan',p:'GR'},{n:'Souttar',p:'DEF'},{n:'Rowles',p:'DEF'},{n:'Mooy',p:'MED'},{n:'Irvine',p:'MED'},{n:'Leckie',p:'AVA'},{n:'Duke',p:'AVA'},{n:'Degenek',p:'DEF'},{n:'Atkinson',p:'DEF'},{n:'McGree',p:'MED'},{n:'Maclaren',p:'AVA'}]}
+    {name:'EUA',flag:'us',rating:76,players:[{n:'Turner',p:'GR'},{n:'Dest',p:'DEF'},{n:'Zimmerman',p:'DEF'},{n:'Adams',p:'MED'},{n:'Musah',p:'MED'},{n:'McKennie',p:'MED'},{n:'Pulisic',p:'AVA'},{n:'Aaronson',p:'MED'},{n:'Weah',p:'AVA'},{n:'Reyna',p:'DEF'},{n:'Acosta',p:'DEF'}]},
+    {name:'Paraguai',flag:'py',rating:68,players:[{n:'Silva',p:'GR'},{n:'Alonso',p:'DEF'},{n:'Balbuena',p:'DEF'},{n:'Cubas',p:'MED'},{n:'Bareiro',p:'AVA'},{n:'Sanabria',p:'AVA'},{n:'Romero',p:'DEF'},{n:'Gómez',p:'DEF'},{n:'Alderete',p:'MED'},{n:'Enciso',p:'MED'},{n:'Almirón',p:'MED'}]},
+    {name:'Turquia',flag:'tr',rating:75,players:[{n:'Çakır',p:'GR'},{n:'Söyüncü',p:'DEF'},{n:'Kabak',p:'DEF'},{n:'Calhanoglu',p:'MED'},{n:'Yazici',p:'MED'},{n:'Yilmaz',p:'AVA'},{n:'Akturkoglu',p:'AVA'},{n:'Müldür',p:'DEF'},{n:'Demiral',p:'DEF'},{n:'Karaman',p:'MED'},{n:'Ünder',p:'MED'}]},
+    {name:'Austrália',flag:'au',rating:71,players:[{n:'Ryan',p:'GR'},{n:'Souttar',p:'DEF'},{n:'Rowles',p:'DEF'},{n:'Mooy',p:'MED'},{n:'Irvine',p:'MED'},{n:'Leckie',p:'AVA'},{n:'Duke',p:'AVA'},{n:'Degenek',p:'DEF'},{n:'Atkinson',p:'DEF'},{n:'McGree',p:'MED'},{n:'Maclaren',p:'MED'}]}
   ],
   E: [
     {name:'Alemanha',flag:'de',rating:84,players:[{n:'Neuer',p:'GR'},{n:'Rüdiger',p:'DEF'},{n:'Schlotterbeck',p:'DEF'},{n:'Kimmich',p:'MED'},{n:'Kroos',p:'MED'},{n:'Musiala',p:'MED'},{n:'Havertz',p:'AVA'},{n:'Mittelstädt',p:'DEF'},{n:'Tah',p:'DEF'},{n:'Wirtz',p:'MED'},{n:'Gnabry',p:'AVA'}]},
-    {name:'Equador',flag:'ec',rating:72,players:[{n:'Galíndez',p:'GR'},{n:'Preciado',p:'DEF'},{n:'Hincapié',p:'DEF'},{n:'Gruezo',p:'MED'},{n:'Caicedo',p:'MED'},{n:'Plata',p:'AVA'},{n:'Valencia',p:'AVA'},{n:'Reasco',p:'DEF'},{n:'Estupiñán',p:'DEF'},{n:'Sarmiento',p:'AVA'},{n:'Ibarra',p:'MED'}]},
-    {name:'Costa do Marfim',flag:'ci',rating:73,players:[{n:'Sangaré',p:'GR'},{n:'Konaté',p:'DEF'},{n:'Fofana',p:'DEF'},{n:'Zaha',p:'AVA'},{n:'Pépé',p:'AVA'},{n:'Gradel',p:'AVA'},{n:'Haller',p:'AVA'},{n:'Aurier',p:'DEF'},{n:'Diallo',p:'DEF'},{n:'Cornet',p:'AVA'},{n:'Kessié',p:'MED'}]},
+    {name:'Equador',flag:'ec',rating:72,players:[{n:'Galíndez',p:'GR'},{n:'Preciado',p:'DEF'},{n:'Hincapié',p:'DEF'},{n:'Gruezo',p:'MED'},{n:'Caicedo',p:'MED'},{n:'Plata',p:'AVA'},{n:'Valencia',p:'AVA'},{n:'Reasco',p:'DEF'},{n:'Estupiñán',p:'DEF'},{n:'Sarmiento',p:'MED'},{n:'Ibarra',p:'MED'}]},
+    {name:'Costa do Marfim',flag:'ci',rating:73,players:[{n:'Sangaré',p:'GR'},{n:'Konaté',p:'DEF'},{n:'Fofana',p:'DEF'},{n:'Zaha',p:'AVA'},{n:'Pépé',p:'AVA'},{n:'Gradel',p:'MED'},{n:'Haller',p:'MED'},{n:'Aurier',p:'DEF'},{n:'Diallo',p:'DEF'},{n:'Cornet',p:'MED'},{n:'Kessié',p:'MED'}]},
     {name:'Curaçao',flag:'cw',rating:58,players:[{n:'Wilnis',p:'GR'},{n:'Cijntje',p:'DEF'},{n:'Marchena',p:'DEF'},{n:'Do Rego',p:'MED'},{n:'Martina',p:'DEF'},{n:'Bacuna',p:'MED'},{n:'Vlijter',p:'AVA'},{n:'Sulvaran',p:'DEF'},{n:'Angelok',p:'MED'},{n:'Naar',p:'AVA'},{n:'Metgod',p:'MED'}]}
   ],
   F: [
-    {name:'Holanda',flag:'nl',rating:83,players:[{n:'Flekken',p:'GR'},{n:'De Ligt',p:'DEF'},{n:'Dumfries',p:'DEF'},{n:'De Jong',p:'MED'},{n:'Van Dijk',p:'DEF'},{n:'Gakpo',p:'AVA'},{n:'Depay',p:'AVA'},{n:'Timber',p:'DEF'},{n:'Ake',p:'DEF'},{n:'Weghorst',p:'AVA'},{n:'Veerman',p:'MED'}]},
-    {name:'Japão',flag:'jp',rating:77,players:[{n:'Gonda',p:'GR'},{n:'Yoshida',p:'DEF'},{n:'Itakura',p:'DEF'},{n:'Endo',p:'MED'},{n:'Tanaka',p:'MED'},{n:'Mitoma',p:'AVA'},{n:'Doan',p:'AVA'},{n:'Tomiyasu',p:'DEF'},{n:'Sugawara',p:'DEF'},{n:'Kamada',p:'MED'},{n:'Ueda',p:'AVA'}]},
-    {name:'Suécia',flag:'se',rating:76,players:[{n:'Olsen',p:'GR'},{n:'Lindelöf',p:'DEF'},{n:'Danielson',p:'DEF'},{n:'Larsson',p:'MED'},{n:'Ekdal',p:'MED'},{n:'Isak',p:'AVA'},{n:'Kulusevski',p:'AVA'},{n:'Krafth',p:'DEF'},{n:'Augustinsson',p:'DEF'},{n:'Forsberg',p:'MED'},{n:'Gyökeres',p:'AVA'}]},
-    {name:'Tunísia',flag:'tn',rating:67,players:[{n:'Dahmen',p:'GR'},{n:'Meriah',p:'DEF'},{n:'Talbi',p:'DEF'},{n:'Skhiri',p:'MED'},{n:'Ben Slimane',p:'MED'},{n:'Msakni',p:'AVA'},{n:'Jebali',p:'AVA'},{n:'Bronn',p:'DEF'},{n:'Sliti',p:'MED'},{n:'Jaziri',p:'AVA'},{n:'Ben Romdhane',p:'MED'}]}
+    {name:'Holanda',flag:'nl',rating:83,players:[{n:'Flekken',p:'GR'},{n:'De Ligt',p:'DEF'},{n:'Dumfries',p:'DEF'},{n:'De Jong',p:'MED'},{n:'Van Dijk',p:'DEF'},{n:'Gakpo',p:'AVA'},{n:'Depay',p:'AVA'},{n:'Timber',p:'DEF'},{n:'Ake',p:'MED'},{n:'Weghorst',p:'MED'},{n:'Veerman',p:'MED'}]},
+    {name:'Japão',flag:'jp',rating:77,players:[{n:'Gonda',p:'GR'},{n:'Yoshida',p:'DEF'},{n:'Itakura',p:'DEF'},{n:'Endo',p:'MED'},{n:'Tanaka',p:'MED'},{n:'Mitoma',p:'AVA'},{n:'Doan',p:'AVA'},{n:'Tomiyasu',p:'DEF'},{n:'Sugawara',p:'DEF'},{n:'Kamada',p:'MED'},{n:'Ueda',p:'MED'}]},
+    {name:'Suécia',flag:'se',rating:76,players:[{n:'Olsen',p:'GR'},{n:'Lindelöf',p:'DEF'},{n:'Danielson',p:'DEF'},{n:'Larsson',p:'MED'},{n:'Ekdal',p:'MED'},{n:'Isak',p:'AVA'},{n:'Kulusevski',p:'AVA'},{n:'Krafth',p:'DEF'},{n:'Augustinsson',p:'DEF'},{n:'Forsberg',p:'MED'},{n:'Gyökeres',p:'MED'}]},
+    {name:'Tunísia',flag:'tn',rating:67,players:[{n:'Dahmen',p:'GR'},{n:'Meriah',p:'DEF'},{n:'Talbi',p:'DEF'},{n:'Skhiri',p:'MED'},{n:'Ben Slimane',p:'MED'},{n:'Msakni',p:'AVA'},{n:'Jebali',p:'AVA'},{n:'Bronn',p:'DEF'},{n:'Sliti',p:'MED'},{n:'Jaziri',p:'DEF'},{n:'Ben Romdhane',p:'MED'}]}
   ],
   G: [
-    {name:'Bélgica',flag:'be',rating:80,players:[{n:'Casteels',p:'GR'},{n:'Alderweireld',p:'DEF'},{n:'Vertonghen',p:'DEF'},{n:'De Bruyne',p:'MED'},{n:'Tielemans',p:'MED'},{n:'Lukaku',p:'AVA'},{n:'Doku',p:'AVA'},{n:'Castagne',p:'DEF'},{n:'Faes',p:'DEF'},{n:'De Ketelaere',p:'MED'},{n:'Openda',p:'AVA'}]},
-    {name:'Irão',flag:'ir',rating:70,players:[{n:'Beiranvand',p:'GR'},{n:'Pouraliganji',p:'DEF'},{n:'Rezaeian',p:'DEF'},{n:'Ezatolahi',p:'MED'},{n:'Hajsafi',p:'DEF'},{n:'Azmoun',p:'AVA'},{n:'Taremi',p:'AVA'},{n:'Mohammadi',p:'DEF'},{n:'Hosseini',p:'DEF'},{n:'Jahanbakhsh',p:'MED'},{n:'Ansarifard',p:'AVA'}]},
-    {name:'Egito',flag:'eg',rating:68,players:[{n:'El Shenawy',p:'GR'},{n:'Hegazi',p:'DEF'},{n:'Farouk',p:'DEF'},{n:'Elneny',p:'MED'},{n:'Trezeguet',p:'AVA'},{n:'Salah',p:'AVA'},{n:'Mostafa',p:'MED'},{n:'Hamdi',p:'DEF'},{n:'Ashour',p:'MED'},{n:'Hassan',p:'DEF'},{n:'Marmoush',p:'AVA'}]},
+    {name:'Bélgica',flag:'be',rating:80,players:[{n:'Casteels',p:'GR'},{n:'Alderweireld',p:'DEF'},{n:'Vertonghen',p:'DEF'},{n:'De Bruyne',p:'MED'},{n:'Tielemans',p:'MED'},{n:'Lukaku',p:'AVA'},{n:'Doku',p:'AVA'},{n:'Castagne',p:'DEF'},{n:'Faes',p:'DEF'},{n:'De Ketelaere',p:'MED'},{n:'Openda',p:'MED'}]},
+    {name:'Irão',flag:'ir',rating:70,players:[{n:'Beiranvand',p:'GR'},{n:'Pouraliganji',p:'DEF'},{n:'Rezaeian',p:'DEF'},{n:'Ezatolahi',p:'MED'},{n:'Hajsafi',p:'DEF'},{n:'Azmoun',p:'AVA'},{n:'Taremi',p:'AVA'},{n:'Mohammadi',p:'DEF'},{n:'Hosseini',p:'MED'},{n:'Jahanbakhsh',p:'MED'},{n:'Ansarifard',p:'MED'}]},
+    {name:'Egito',flag:'eg',rating:68,players:[{n:'El Shenawy',p:'GR'},{n:'Hegazi',p:'DEF'},{n:'Farouk',p:'DEF'},{n:'Elneny',p:'MED'},{n:'Trezeguet',p:'AVA'},{n:'Salah',p:'AVA'},{n:'Mostafa',p:'MED'},{n:'Hamdi',p:'DEF'},{n:'Ashour',p:'MED'},{n:'Hassan',p:'DEF'},{n:'Marmoush',p:'MED'}]},
     {name:'Nova Zelândia',flag:'nz',rating:59,players:[{n:'Sail',p:'GR'},{n:'Hogg',p:'DEF'},{n:'Boxall',p:'DEF'},{n:'Waine',p:'MED'},{n:'Cacace',p:'DEF'},{n:'Wood',p:'AVA'},{n:'Just',p:'MED'},{n:'James',p:'MED'},{n:'Payne',p:'MED'},{n:'Bongos',p:'DEF'},{n:'Rawlins',p:'AVA'}]}
   ],
   H: [
-    {name:'Espanha',flag:'es',rating:87,players:[{n:'Unai Simón',p:'GR'},{n:'Carvajal',p:'DEF'},{n:'Laporte',p:'DEF'},{n:'Pedri',p:'MED'},{n:'Gavi',p:'MED'},{n:'Yamal',p:'AVA'},{n:'Morata',p:'AVA'},{n:'Grimaldo',p:'DEF'},{n:'Le Normand',p:'DEF'},{n:'Torres',p:'AVA'},{n:'Williams N.',p:'AVA'}]},
-    {name:'Uruguai',flag:'uy',rating:79,players:[{n:'Rochet',p:'GR'},{n:'Godín',p:'DEF'},{n:'Araújo',p:'DEF'},{n:'Valverde',p:'MED'},{n:'Bentancur',p:'MED'},{n:'Núñez',p:'AVA'},{n:'Suárez',p:'AVA'},{n:'Olivera',p:'DEF'},{n:'Gimenez',p:'DEF'},{n:'Pellistri',p:'AVA'},{n:'Ugarte',p:'MED'}]},
+    {name:'Espanha',flag:'es',rating:87,players:[{n:'Unai Simón',p:'GR'},{n:'Carvajal',p:'DEF'},{n:'Laporte',p:'DEF'},{n:'Pedri',p:'MED'},{n:'Gavi',p:'MED'},{n:'Yamal',p:'AVA'},{n:'Morata',p:'AVA'},{n:'Grimaldo',p:'DEF'},{n:'Le Normand',p:'DEF'},{n:'Torres',p:'MED'},{n:'Williams N.',p:'MED'}]},
+    {name:'Uruguai',flag:'uy',rating:79,players:[{n:'Rochet',p:'GR'},{n:'Godín',p:'DEF'},{n:'Araújo',p:'DEF'},{n:'Valverde',p:'MED'},{n:'Bentancur',p:'MED'},{n:'Núñez',p:'AVA'},{n:'Suárez',p:'AVA'},{n:'Olivera',p:'DEF'},{n:'Gimenez',p:'DEF'},{n:'Pellistri',p:'MED'},{n:'Ugarte',p:'MED'}]},
     {name:'Arábia Saudita',flag:'sa',rating:70,players:[{n:'Al-Owais',p:'GR'},{n:'Al-Bulaihi',p:'DEF'},{n:'Al-Tambakti',p:'DEF'},{n:'Al-Faraj',p:'MED'},{n:'Al-Dawsari',p:'AVA'},{n:'Al-Shehri',p:'AVA'},{n:'Salem',p:'MED'},{n:'Al-Ghannam',p:'DEF'},{n:'Bahebri',p:'MED'},{n:'Kanno',p:'MED'},{n:'Abdulhamid',p:'DEF'}]},
-    {name:'Cabo Verde',flag:'cv',rating:63,players:[{n:'Vozinha',p:'GR'},{n:'Júnior',p:'DEF'},{n:'Stopira',p:'DEF'},{n:'Andrade',p:'MED'},{n:'Garry',p:'MED'},{n:'Tavares',p:'AVA'},{n:'Ryan Mendes',p:'AVA'},{n:'Fortes',p:'DEF'},{n:'Andrade L.',p:'DEF'},{n:'Leandro',p:'MED'},{n:'Semedo',p:'DEF'}]}
+    {name:'Cabo Verde',flag:'cv',rating:63,players:[{n:'Vozinha',p:'GR'},{n:'Júnior',p:'DEF'},{n:'Stopira',p:'DEF'},{n:'Andrade',p:'MED'},{n:'Garry',p:'MED'},{n:'Tavares',p:'AVA'},{n:'Ryan Mendes',p:'AVA'},{n:'Fortes',p:'DEF'},{n:'Andrade L.',p:'DEF'},{n:'Leandro',p:'MED'},{n:'Semedo',p:'MED'}]}
   ],
   I: [
-    {name:'França',flag:'fr',rating:86,players:[{n:'Maignan',p:'GR'},{n:'Pavard',p:'DEF'},{n:'Upamecano',p:'DEF'},{n:'Tchouaméni',p:'MED'},{n:'Camavinga',p:'MED'},{n:'Mbappé',p:'AVA'},{n:'Dembélé',p:'AVA'},{n:'Theo',p:'DEF'},{n:'Konate',p:'DEF'},{n:'Guendouzi',p:'MED'},{n:'Thuram',p:'AVA'}]},
-    {name:'Noruega',flag:'no',rating:78,players:[{n:'Nyland',p:'GR'},{n:'Hanche-Olsen',p:'DEF'},{n:'Ajer',p:'DEF'},{n:'Berge',p:'MED'},{n:'Ødeegard',p:'MED'},{n:'Haaland',p:'AVA'},{n:'Sorloth',p:'AVA'},{n:'Pedersen',p:'DEF'},{n:'Ostigard',p:'DEF'},{n:'Thorstvedt',p:'MED'},{n:'Brekalo',p:'AVA'}]},
-    {name:'Senegal',flag:'sn',rating:74,players:[{n:'Mendy',p:'GR'},{n:'Koulibaly',p:'DEF'},{n:'Kouyaté',p:'DEF'},{n:'Gueye',p:'MED'},{n:'Sarr',p:'AVA'},{n:'Mané',p:'AVA'},{n:'Diatta',p:'AVA'},{n:'Ciss',p:'MED'},{n:'Diallo',p:'DEF'},{n:'Ndiaye',p:'MED'},{n:'Diedhiou',p:'AVA'}]},
-    {name:'Iraque',flag:'iq',rating:62,players:[{n:'Doham',p:'GR'},{n:'Jasim',p:'DEF'},{n:'Tariq',p:'DEF'},{n:'Amjed',p:'MED'},{n:'Mohanad',p:'AVA'},{n:'Aymen',p:'AVA'},{n:'Hussein',p:'MED'},{n:'Ali A.',p:'DEF'},{n:'Karrar',p:'MED'},{n:'Ballas',p:'DEF'},{n:'Hassan S.',p:'AVA'}]}
+    {name:'França',flag:'fr',rating:86,players:[{n:'Maignan',p:'GR'},{n:'Pavard',p:'DEF'},{n:'Upamecano',p:'DEF'},{n:'Tchouaméni',p:'MED'},{n:'Camavinga',p:'MED'},{n:'Mbappé',p:'AVA'},{n:'Dembélé',p:'AVA'},{n:'Theo',p:'DEF'},{n:'Konate',p:'DEF'},{n:'Guendouzi',p:'MED'},{n:'Thuram',p:'MED'}]},
+    {name:'Noruega',flag:'no',rating:78,players:[{n:'Nyland',p:'GR'},{n:'Hanche-Olsen',p:'DEF'},{n:'Ajer',p:'DEF'},{n:'Berge',p:'MED'},{n:'Ødeegard',p:'MED'},{n:'Haaland',p:'AVA'},{n:'Sorloth',p:'AVA'},{n:'Pedersen',p:'DEF'},{n:'Ostigard',p:'DEF'},{n:'Thorstvedt',p:'MED'},{n:'Brekalo',p:'MED'}]},
+    {name:'Senegal',flag:'sn',rating:74,players:[{n:'Mendy',p:'GR'},{n:'Koulibaly',p:'DEF'},{n:'Kouyaté',p:'DEF'},{n:'Gueye',p:'MED'},{n:'Sarr',p:'AVA'},{n:'Mané',p:'AVA'},{n:'Diatta',p:'DEF'},{n:'Ciss',p:'MED'},{n:'Diallo',p:'DEF'},{n:'Ndiaye',p:'MED'},{n:'Diedhiou',p:'MED'}]},
+    {name:'Iraque',flag:'iq',rating:62,players:[{n:'Doham',p:'GR'},{n:'Jasim',p:'DEF'},{n:'Tariq',p:'DEF'},{n:'Amjed',p:'MED'},{n:'Mohanad',p:'AVA'},{n:'Aymen',p:'AVA'},{n:'Hussein',p:'MED'},{n:'Ali A.',p:'DEF'},{n:'Karrar',p:'MED'},{n:'Ballas',p:'DEF'},{n:'Hassan S.',p:'MED'}]}
   ],
   J: [
-    {name:'Argentina',flag:'ar',rating:88,players:[{n:'E.Martínez',p:'GR'},{n:'Romero',p:'DEF'},{n:'Otamendi',p:'DEF'},{n:'De Paul',p:'MED'},{n:'Mac Allister',p:'MED'},{n:'Álvarez',p:'AVA'},{n:'Messi',p:'AVA'},{n:'Tagliafico',p:'DEF'},{n:'Lisandro',p:'DEF'},{n:'Lo Celso',p:'MED'},{n:'Julián',p:'AVA'}]},
-    {name:'Argélia',flag:'dz',rating:73,players:[{n:'Bolhi",',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'}]},
-    {name:'Áustria',flag:'at',rating:76,players:[{n:'Pentz',p:'GR'},{n:'Posch',p:'DEF'},{n:'Lienhart',p:'DEF'},{n:'Grillitsch',p:'MED'},{n:'Sabitzer',p:'MED'},{n:'Arnautovic',p:'AVA'},{n:'Gregoritsch',p:'AVA'},{n:'Wöber',p:'DEF'},{n:'Wimmer',p:'DEF'},{n:'Baumgartner',p:'MED'},{n:'Entrup',p:'AVA'}]},
-    {name:'Jordânia',flag:'jo',rating:60,players:[{n:'Shafi',p:'GR'},{n:'Taha',p:'DEF'},{n:'Al-Rawabdeh',p:'DEF'},{n:'Bani Attiah',p:'DEF'},{n:'Bani Yaseen',p:'MED'},{n:'Al-Tamari',p:'AVA'},{n:'Safawi',p:'AVA'},{n:'Shelbaieh',p:'MED'},{n:'Hamed',p:'MED'},{n:'Al-Naimat',p:'AVA'},{n:'Baha',p:'DEF'}]}
+    {name:'Argentina',flag:'ar',rating:88,players:[{n:'E.Martínez',p:'GR'},{n:'Romero',p:'DEF'},{n:'Otamendi',p:'DEF'},{n:'De Paul',p:'MED'},{n:'Mac Allister',p:'MED'},{n:'Álvarez',p:'AVA'},{n:'Messi',p:'AVA'},{n:'Tagliafico',p:'DEF'},{n:'Lisandro',p:'DEF'},{n:'Lo Celso',p:'MED'},{n:'Julián',p:'MED'}]},
+    {name:'Argélia',flag:'dz',rating:73,players:[{n:'Bolhi",',p:'GR'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'MED'},{n:',',p:'DEF'},{n:',',p:'DEF'},{n:',',p:'DEF'},{n:',',p:'DEF'},{n:',',p:'AVA'},{n:'Jogador11',p:'AVA'}]},
+    {name:'Áustria',flag:'at',rating:76,players:[{n:'Pentz',p:'GR'},{n:'Posch',p:'DEF'},{n:'Lienhart',p:'DEF'},{n:'Grillitsch',p:'MED'},{n:'Sabitzer',p:'MED'},{n:'Arnautovic',p:'AVA'},{n:'Gregoritsch',p:'AVA'},{n:'Wöber',p:'DEF'},{n:'Wimmer',p:'DEF'},{n:'Baumgartner',p:'MED'},{n:'Entrup',p:'MED'}]},
+    {name:'Jordânia',flag:'jo',rating:60,players:[{n:'Shafi',p:'GR'},{n:'Taha',p:'DEF'},{n:'Al-Rawabdeh',p:'DEF'},{n:'Bani Attiah',p:'DEF'},{n:'Bani Yaseen',p:'MED'},{n:'Al-Tamari',p:'AVA'},{n:'Safawi',p:'AVA'},{n:'Shelbaieh',p:'MED'},{n:'Hamed',p:'MED'},{n:'Al-Naimat',p:'MED'},{n:'Baha',p:'DEF'}]}
   ],
   K: [
-    {name:'Portugal',flag:'pt',rating:85,players:[{n:'Rui Patrício',p:'GR'},{n:'Cancelo',p:'DEF'},{n:'Pepe',p:'DEF'},{n:'Vitinha',p:'MED'},{n:'Bernardo',p:'MED'},{n:'Leão',p:'AVA'},{n:'Ronaldo',p:'AVA'},{n:'Dalot',p:'DEF'},{n:'Gonçalo Inácio',p:'DEF'},{n:'Pedro Neto',p:'AVA'},{n:'Gonçalo Ramos',p:'AVA'}]},
-    {name:'Colômbia',flag:'co',rating:79,players:[{n:'Vargas',p:'GR'},{n:'Dávinson',p:'DEF'},{n:'Mina',p:'DEF'},{n:'Barrios',p:'MED'},{n:'Cuadrado',p:'AVA'},{n:'James',p:'MED'},{n:'Díaz',p:'AVA'},{n:'Arias',p:'DEF'},{n:'Lucumí',p:'DEF'},{n:'Sinisterra',p:'AVA'},{n:'Córdoba',p:'AVA'}]},
-    {name:'Congo RD',flag:'cd',rating:65,players:[{n:'Kiassumbua',p:'GR'},{n:'Mpoku',p:'MED'},{n:'Bokadi',p:'DEF'},{n:'Bope',p:'DEF'},{n:'Meschack',p:'MED'},{n:'Mbokani',p:'AVA'},{n:'Kakuta',p:'MED'},{n:'Kimwaki',p:'GR'},{n:'Lualua',p:'AVA'},{n:'Kayembe',p:'MED'},{n:'Muleka',p:'AVA'}]},
+    {name:'Portugal',flag:'pt',rating:85,players:[{n:'Rui Patrício',p:'GR'},{n:'Cancelo',p:'DEF'},{n:'Pepe',p:'DEF'},{n:'Vitinha',p:'MED'},{n:'Bernardo',p:'MED'},{n:'Leão',p:'AVA'},{n:'Ronaldo',p:'AVA'},{n:'Dalot',p:'DEF'},{n:'Gonçalo Inácio',p:'DEF'},{n:'Pedro Neto',p:'MED'},{n:'Gonçalo Ramos',p:'MED'}]},
+    {name:'Colômbia',flag:'co',rating:79,players:[{n:'Vargas',p:'GR'},{n:'Dávinson',p:'DEF'},{n:'Mina',p:'DEF'},{n:'Barrios',p:'MED'},{n:'Cuadrado',p:'AVA'},{n:'James',p:'MED'},{n:'Díaz',p:'AVA'},{n:'Arias',p:'DEF'},{n:'Lucumí',p:'DEF'},{n:'Sinisterra',p:'MED'},{n:'Córdoba',p:'MED'}]},
+    {name:'Congo RD',flag:'cd',rating:65,players:[{n:'Kiassumbua',p:'GR'},{n:'Mpoku',p:'MED'},{n:'Bokadi',p:'DEF'},{n:'Bope',p:'DEF'},{n:'Meschack',p:'MED'},{n:'Mbokani',p:'AVA'},{n:'Kakuta',p:'MED'},{n:'Kimwaki',p:'DEF'},{n:'Lualua',p:'AVA'},{n:'Kayembe',p:'MED'},{n:'Muleka',p:'DEF'}]},
     {name:'Uzbequistão',flag:'uz',rating:63,players:[{n:'Nesterov',p:'GR'},{n:'Ashurmatov',p:'DEF'},{n:'Khamdamov',p:'MED'},{n:'Tursunov',p:'DEF'},{n:'Shomurodov',p:'AVA'},{n:'Masharipov',p:'MED'},{n:'Jaloliddinov',p:'AVA'},{n:'Komilov',p:'DEF'},{n:'Iskanderov',p:'MED'},{n:'Sidikov',p:'DEF'},{n:'Alijonov',p:'MED'}]}
   ],
   L: [
-    {name:'Inglaterra',flag:'gb-eng',rating:85,players:[{n:'Ramsdale',p:'GR'},{n:'Walker',p:'DEF'},{n:'Maguire',p:'DEF'},{n:'Rice',p:'MED'},{n:'Bellingham',p:'MED'},{n:'Saka',p:'AVA'},{n:'Kane',p:'AVA'},{n:'Trippier',p:'DEF'},{n:'Stones',p:'DEF'},{n:'Foden',p:'MED'},{n:'Gordon',p:'AVA'}]},
-    {name:'Croácia',flag:'hr',rating:78,players:[{n:'Livakovic',p:'GR'},{n:'Gvardiol',p:'DEF'},{n:'Erlic',p:'DEF'},{n:'Modric',p:'MED'},{n:'Kovacic',p:'MED'},{n:'Perisic',p:'AVA'},{n:'Kramaric',p:'AVA'},{n:'Stanisic',p:'DEF'},{n:'Sutalo',p:'DEF'},{n:'Ivanusec',p:'MED'},{n:'Budimir',p:'AVA'}]},
-    {name:'Gana',flag:'gh',rating:67,players:[{n:'Ati-Zigi',p:'GR'},{n:'Salisu',p:'DEF'},{n:'Amartey',p:'DEF'},{n:'Partey',p:'MED'},{n:'Kudus',p:'AVA'},{n:'Ayew',p:'AVA'},{n:'Sulemana',p:'AVA'},{n:'Mensah',p:'DEF'},{n:'Djiku',p:'DEF'},{n:'Jordan',p:'MED'},{n:'Afriyie',p:'AVA'}]},
-    {name:'Panamá',flag:'pa',rating:62,players:[{n:'Penedo',p:'GR'},{n:'Murillo',p:'DEF'},{n:'Miller',p:'DEF'},{n:'Godoy',p:'MED'},{n:'Fajardo',p:'MED'},{n:'Córdoba',p:'AVA'},{n:'Arroyo',p:'AVA'},{n:'Davis',p:'DEF'},{n:'Escobar',p:'DEF'},{n:'Blackman',p:'MED'},{n:'Avilés',p:'AVA'}]}
+    {name:'Inglaterra',flag:'gb-eng',rating:85,players:[{n:'Ramsdale',p:'GR'},{n:'Walker',p:'DEF'},{n:'Maguire',p:'DEF'},{n:'Rice',p:'MED'},{n:'Bellingham',p:'MED'},{n:'Saka',p:'AVA'},{n:'Kane',p:'AVA'},{n:'Trippier',p:'DEF'},{n:'Stones',p:'DEF'},{n:'Foden',p:'MED'},{n:'Gordon',p:'MED'}]},
+    {name:'Croácia',flag:'hr',rating:78,players:[{n:'Livakovic',p:'GR'},{n:'Gvardiol',p:'DEF'},{n:'Erlic',p:'DEF'},{n:'Modric',p:'MED'},{n:'Kovacic',p:'MED'},{n:'Perisic',p:'AVA'},{n:'Kramaric',p:'AVA'},{n:'Stanisic',p:'DEF'},{n:'Sutalo',p:'DEF'},{n:'Ivanusec',p:'MED'},{n:'Budimir',p:'MED'}]},
+    {name:'Gana',flag:'gh',rating:67,players:[{n:'Ati-Zigi',p:'GR'},{n:'Salisu',p:'DEF'},{n:'Amartey',p:'DEF'},{n:'Partey',p:'MED'},{n:'Kudus',p:'AVA'},{n:'Ayew',p:'AVA'},{n:'Sulemana',p:'MED'},{n:'Mensah',p:'DEF'},{n:'Djiku',p:'DEF'},{n:'Jordan',p:'MED'},{n:'Afriyie',p:'MED'}]},
+    {name:'Panamá',flag:'pa',rating:62,players:[{n:'Penedo',p:'GR'},{n:'Murillo',p:'DEF'},{n:'Miller',p:'DEF'},{n:'Godoy',p:'MED'},{n:'Fajardo',p:'MED'},{n:'Córdoba',p:'AVA'},{n:'Arroyo',p:'AVA'},{n:'Davis',p:'DEF'},{n:'Escobar',p:'DEF'},{n:'Blackman',p:'MED'},{n:'Avilés',p:'MED'}]}
   ]
 };
 
@@ -1870,10 +1934,12 @@ function buildLineupPlayers(players, isMe) {
     for(const p of group){
       const ratColor = p.rating>=95?'#C9A84C':p.rating>=85?'#A78BFA':p.rating>=80?'#4A9E6F':'#9A9690';
       const flagHtml = flagImg(p.flag||p.flagCode||'', 'flag-img-sm');
-      html += '<div class="lineup-player">'
+      const editable = isMe==='home' && pos!=='GR' && bench.some(b=>b.pos===pos);
+      const dataAttr = editable ? ` data-swap-name="${p.name}" data-swap-pos="${pos}"` : '';
+      html += '<div class="lineup-player'+(editable?' editable':'')+'"'+dataAttr+'>'
         + '<div class="lineup-player-flag">'+flagHtml+'</div>'
         + '<div class="lineup-player-info">'
-          + '<div class="lineup-player-name">'+p.name+'</div>'
+          + '<div class="lineup-player-name">'+p.name+(editable?'<span class="lineup-swap-hint"> ⇄ trocar</span>':'')+'</div>'
           + '<div class="lineup-player-pos">'+pos+'</div>'
         + '</div>'
         + '<div class="lineup-player-rating" style="color:'+ratColor+'">'+p.rating+'</div>'
@@ -1923,13 +1989,78 @@ function buildOppLineupPlayers(oppTeam) {
 function showLineupPopup(opts){
   return new Promise(resolve=>{
     const el = document.getElementById('lineup-overlay');
+    let lineupActiveSquad = [...squad];
+    let usedBenchNames = [];
+
+    function renderHomePlayers(){
+      document.getElementById('lu-my-players').innerHTML = buildLineupPlayers(lineupActiveSquad,'home');
+      const availableBench = bench.filter(b=>!usedBenchNames.includes(b.name));
+      const benchNote = document.getElementById('lu-bench-note');
+      if(bench.length){
+        benchNote.textContent = availableBench.length
+          ? 'Toca num jogador para o trocar por um suplente · '+availableBench.length+' disponível'+(availableBench.length===1?'':'eis')
+          : 'Todos os suplentes já foram colocados em campo';
+      } else {
+        benchNote.textContent = '';
+      }
+      wireSwapClicks();
+    }
+
+    function wireSwapClicks(){
+      document.querySelectorAll('#lu-my-players .lineup-player.editable').forEach(el2=>{
+        el2.addEventListener('click', ()=>{
+          const name = el2.dataset.swapName;
+          const pos = el2.dataset.swapPos;
+          openSwapPicker(name, pos);
+        });
+      });
+    }
+
+    function openSwapPicker(outName, pos){
+      const picker = document.getElementById('lu-swap-picker');
+      const availableBench = bench.filter(b=>!usedBenchNames.includes(b.name) && b.pos===pos);
+      document.getElementById('lu-swap-title').textContent = 'Trocar '+outName;
+
+      const listEl = document.getElementById('lu-swap-list');
+      if(!availableBench.length){
+        listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0">Sem suplentes disponíveis para esta posição.</div>';
+      } else {
+        listEl.innerHTML = availableBench.map((p,i)=>{
+          const ratColor = p.rating>=95?'#C9A84C':p.rating>=85?'#A78BFA':p.rating>=80?'#4A9E6F':'#9A9690';
+          return '<div class="lineup-swap-option" data-bench-name="'+p.name+'">'
+            + '<div>'+flagImg(p.flag,'flag-img-sm')+'</div>'
+            + '<div style="flex:1"><div class="lineup-player-name">'+p.name+'</div><div class="lineup-player-pos">'+p.pos+'</div></div>'
+            + '<div class="lineup-player-rating" style="color:'+ratColor+'">'+p.rating+'</div>'
+            + '</div>';
+        }).join('');
+        listEl.querySelectorAll('.lineup-swap-option').forEach(optEl=>{
+          optEl.addEventListener('click', ()=>{
+            const benchName = optEl.dataset.benchName;
+            const benchPlayer = bench.find(b=>b.name===benchName);
+            const outIdx = lineupActiveSquad.findIndex(p=>p.name===outName);
+            if(outIdx>-1 && benchPlayer){
+              lineupActiveSquad[outIdx] = benchPlayer;
+              usedBenchNames.push(benchPlayer.name);
+            }
+            picker.classList.remove('show');
+            renderHomePlayers();
+          });
+        });
+      }
+      picker.classList.add('show');
+    }
+
+    document.getElementById('lu-swap-cancel').onclick = ()=>{
+      document.getElementById('lu-swap-picker').classList.remove('show');
+    };
+
     // Fill in data
     document.getElementById('lu-round').textContent = opts.roundLabel;
     document.getElementById('lu-my-name').textContent = opts.myName;
     document.getElementById('lu-my-rating').textContent = 'Nota média: '+opts.myRating;
     document.getElementById('lu-opp-name').textContent = opts.oppName;
     document.getElementById('lu-opp-rating').textContent = 'Nota média: '+(opts.oppTeam.rating||'?');
-    document.getElementById('lu-my-players').innerHTML = buildLineupPlayers(squad,'home');
+    renderHomePlayers();
     document.getElementById('lu-opp-players').innerHTML = buildOppLineupPlayers(opts.oppTeam);
     el.classList.add('show');
     // Scroll to top of modal
@@ -1939,7 +2070,7 @@ function showLineupPopup(opts){
     const handler = ()=>{
       btn.removeEventListener('click', handler);
       el.classList.remove('show');
-      setTimeout(resolve, 300);
+      setTimeout(()=>resolve(lineupActiveSquad), 300);
     };
     btn.addEventListener('click', handler);
   });
@@ -2224,14 +2355,19 @@ function showSubstitutionPopup(injuredPlayer, availableBench){
 }
 
 // Tracks bench/used substitutes per-match (reset each playLiveMatch call via closure param)
+// STRATEGIC SUBSTITUTION (halftime / 70min) — player-initiated, up to 3 per match
 async function maybeTriggerInjury(activeSquad, usedBenchNames, side){
-  // ~6% chance per match for the player's own team to suffer an injury
   if(side!=='home') return null; // only player's team has bench mechanics
-  if(Math.random() > 0.06) return null;
-  if(!activeSquad.length) return null;
 
-  const injuredIdx = Math.floor(Math.random()*activeSquad.length);
-  const injuredPlayer = activeSquad[injuredIdx];
+  // Goalkeepers never get injured (no GR substitute available)
+  const injurablePlayers = activeSquad
+    .map((p,idx)=>({p,idx}))
+    .filter(({p})=>p.pos!=='GR');
+  if(!injurablePlayers.length) return null;
+
+  const pick = injurablePlayers[Math.floor(Math.random()*injurablePlayers.length)];
+  const injuredIdx = pick.idx;
+  const injuredPlayer = pick.p;
 
   const availableBench = bench.filter(p=>!usedBenchNames.includes(p.name));
   const chosen = await showSubstitutionPopup(injuredPlayer, availableBench);
@@ -2240,8 +2376,8 @@ async function maybeTriggerInjury(activeSquad, usedBenchNames, side){
 }
 
 async function playLiveMatch(opts){
-  // Show lineup popup first
-  await showLineupPopup({
+  // Show lineup popup first — returns the (possibly edited) starting lineup
+  const lineupSquad = await showLineupPopup({
     roundLabel: opts.roundLabel,
     myName: opts.myName,
     myRating: Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length),
@@ -2250,7 +2386,7 @@ async function playLiveMatch(opts){
   });
 
   const oppTeam = opts.oppTeam || {rating:75, players:[], flag:opts.oppFlag, name:opts.oppName};
-  const homeRows = buildFieldRows(squad, 'home');
+  const homeRows = buildFieldRows(lineupSquad, 'home');
   const awayRows = buildOppFieldRows(oppTeam);
   const oppShortName = (oppTeam.name||opts.oppName).split(' (')[0];
 
@@ -2282,7 +2418,7 @@ async function playLiveMatch(opts){
   const overlay = document.getElementById('lmv-overlay');
   const modal = document.getElementById('lmv-modal');
   const tacticLabel = chosenTactic ? chosenTactic.name : '4-4-2';
-  const myAvg = Math.round(squad.reduce((s,p)=>s+p.rating,0)/squad.length);
+  const myAvg = Math.round(lineupSquad.reduce((s,p)=>s+p.rating,0)/lineupSquad.length);
   const oppAvg = oppTeam.rating||75;
 
   modal.innerHTML = `
@@ -2341,9 +2477,16 @@ async function playLiveMatch(opts){
   let s1=0, s2=0, tIdx=0;
   const stepMs = 55;
 
-  let activeSquad = [...squad]; // mutable copy — reflects substitutions
-  const usedBenchNames = [];
+  let activeSquad = [...lineupSquad]; // mutable copy — reflects in-match substitutions
+  const usedBenchNames = lineupSquad
+    .filter(p => bench.some(b=>b.name===p.name)) // players that came from the bench via pre-match lineup edit
+    .map(p => p.name);
   let injuryHappened = false;
+  let subsUsed = usedBenchNames.length; // pre-match swaps count toward the 3-sub limit
+  const maxSubs = 3;
+  // Single roll per match: ~7% chance of an injury occurring, and a fixed minute if so
+  const willHaveInjury = bench.length>0 && Math.random() < 0.07;
+  const injuryMinute = willHaveInjury ? (10 + Math.floor(Math.random()*75)) : -1;
 
   for(let min=1; min<=90; min++){
     await new Promise(r=>setTimeout(r, stepMs));
@@ -2363,8 +2506,8 @@ async function playLiveMatch(opts){
     if(foulMinutes.home.includes(min)){ homeFouls++; document.getElementById('lmv_fouls_h').textContent=homeFouls; }
     if(foulMinutes.away.includes(min)){ awayFouls++; document.getElementById('lmv_fouls_a').textContent=awayFouls; }
 
-    // Injury check (only once per match, minutes 10-85, only if bench exists)
-    if(!injuryHappened && min>=10 && min<=85 && bench.length>0){
+    // Injury check (predetermined: happens once at injuryMinute, if willHaveInjury)
+    if(!injuryHappened && min===injuryMinute){
       const result = await maybeTriggerInjury(activeSquad, usedBenchNames, 'home');
       if(result){
         injuryHappened = true;
@@ -2372,6 +2515,7 @@ async function playLiveMatch(opts){
         if(result.replacement){
           usedBenchNames.push(result.replacement.name);
           activeSquad[result.injuredIdx] = result.replacement;
+          subsUsed++;
           eventsEl.innerHTML += `<div class="lmv-ev home">🔄 Entra ${result.replacement.name} (${min}')</div>`;
           // Re-render home field column with updated squad
           const newHomeRows = buildFieldRows(activeSquad, 'home');
@@ -2414,7 +2558,7 @@ async function playLiveMatch(opts){
   // Penalties
   if(opts.hasPenalties){
     await new Promise(r=>setTimeout(r,400));
-    const myPenTakers = [...squad].sort((a,b)=>b.rating-a.rating).filter(p=>p.pos!=='GR').map(p=>p.name);
+    const myPenTakers = [...activeSquad].sort((a,b)=>b.rating-a.rating).filter(p=>p.pos!=='GR').map(p=>p.name);
     const oppPenTakers = (opts.oppTeam && opts.oppTeam.players)
       ? opts.oppTeam.players.filter(p=>typeof p!=='string' && p.p!=='GR').map(p=>p.n)
       : [];
@@ -2427,7 +2571,7 @@ async function playLiveMatch(opts){
   const isChampionshipWin = opts.roundLabel === 'Final' && opts.resultCls === 'result-win';
 
   if(isChampionshipWin){
-    await showTrophyCelebration(opts.myName, squad);
+    await showTrophyCelebration(opts.myName, activeSquad);
   } else {
     const resultEl = document.getElementById('lmv_result');
     if(resultEl){
@@ -3213,8 +3357,15 @@ setupHeroBackground();
       <div class="lineup-col home" id="lu-my-players"></div>
       <div class="lineup-col away" id="lu-opp-players"></div>
     </div>
+    <div class="lineup-bench-note" id="lu-bench-note"></div>
     <div class="lineup-footer">
       <button class="btn btn-gold" id="lu-start-btn" style="min-width:200px">⚽ Começar Jogo</button>
+    </div>
+    <div class="lineup-swap-picker" id="lu-swap-picker">
+      <div class="lineup-swap-title" id="lu-swap-title"></div>
+      <div class="lineup-swap-sub">Escolhe quem entra no lugar</div>
+      <div class="lineup-swap-list" id="lu-swap-list"></div>
+      <div class="lineup-swap-cancel" id="lu-swap-cancel">Cancelar</div>
     </div>
   </div>
 </div>
