@@ -1130,12 +1130,30 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
         <div class="hero-stat"><span class="num">1930</span><span class="lbl">Até 2026</span></div>
         <div class="hero-stat"><span class="num">11</span><span class="lbl">Titulares</span></div>
       </div>
-      <button class="btn btn-gold" onclick="showScreen('screen-mode')">Começar Draft →</button>
+      <button class="btn btn-gold" onclick="showScreen('screen-universe')">Começar Draft →</button>
       </div>
     </div>
   </div>
 
   <!-- TACTICS -->
+  <div id="screen-universe" class="screen">
+    <div class="section-title">Escolhe o Universo</div>
+    <div class="section-sub">Em que mundo queres jogar?</div>
+    <div class="mode-grid">
+      <div class="mode-card" id="uni-real" onclick="selectUniverse('real')">
+        <span class="mode-icon">🌍</span>
+        <div class="mode-name">Real</div>
+        <div class="mode-desc">Draft com as maiores lendas reais do futebol mundial. Simula o <strong>Mundial 2026</strong>.</div>
+      </div>
+      <div class="mode-card" id="uni-tsubasa" onclick="selectUniverse('tsubasa')">
+        <span class="mode-icon">⚡</span>
+        <div class="mode-name">Tsubasa</div>
+        <div class="mode-desc">Draft com os heróis do <strong>Oliver e Benji</strong> — Tsubasa, Hyuga, Schneider e mais. Torneio Mundial do anime!</div>
+      </div>
+    </div>
+    <button class="btn" onclick="showScreen('screen-start')">← Voltar</button>
+  </div>
+
   <div id="screen-mode" class="screen">
     <div class="section-title">Escolhe o Modo de Jogo</div>
     <div class="section-sub">Como queres escolher os teus jogadores?</div>
@@ -1295,6 +1313,241 @@ function flagImg(code, cls) {
   return '<img class="'+cls+'" src="https://flagcdn.com/w40/'+iso+'.png" loading="lazy">';
 }
 
+// TSUBASA UNIVERSE DATA
+const TSUBASA_SELS = [
+  {id:'ts_jpn1', name:'Nankatsu SC', flag:'jp', rarity:'legendary', players:[
+    {name:'Tsubasa Ozora',   pos:'AVA', rating:99},
+    {name:'Taro Misaki',     pos:'MED', rating:93},
+    {name:'Ryo Ishizaki',    pos:'DEF', rating:80},
+    {name:'Hiroshi Jito',    pos:'DEF', rating:78},
+    {name:'Kazuo Tachibana', pos:'MED', rating:82},
+    {name:'Koji Tachibana',  pos:'MED', rating:82},
+    {name:'Shingo Aoi',      pos:'AVA', rating:84},
+    {name:'Yukari Nishimura',pos:'DEF', rating:75},
+    {name:'Mamoru Izawa',    pos:'GR',  rating:79},
+    {name:'Mitsuru Sano',    pos:'DEF', rating:77},
+    {name:'Kirio Iwama',     pos:'AVA', rating:78},
+  ]},
+  {id:'ts_jpn2', name:'Toho Academy', flag:'jp', rarity:'legendary', players:[
+    {name:'Kojiro Hyuga',    pos:'AVA', rating:98},
+    {name:'Ken Wakashimazu', pos:'GR',  rating:95},
+    {name:'Takeshi Sawada',  pos:'MED', rating:87},
+    {name:'Ichiro Kishida',  pos:'DEF', rating:82},
+    {name:'Ryoichi Endo',    pos:'DEF', rating:80},
+    {name:'Takashi Sano',    pos:'MED', rating:79},
+    {name:'Mitsuru Sano',    pos:'DEF', rating:77},
+    {name:'Yuzo Morisaki',   pos:'MED', rating:78},
+    {name:'Shingo Takasugi', pos:'AVA', rating:76},
+    {name:'Noboru Nitta',    pos:'DEF', rating:75},
+    {name:'Makoto Soma',     pos:'MED', rating:74},
+  ]},
+  {id:'ts_deu1', name:'Alemanha Oeste', flag:'de', rarity:'epic', players:[
+    {name:'Karl-Heinz Schneider', pos:'AVA', rating:97},
+    {name:'Stefan Levin',         pos:'MED', rating:91},
+    {name:'Hermann Kaltz',        pos:'DEF', rating:86},
+    {name:'Gerhard Muller',       pos:'AVA', rating:85},
+    {name:'Paul Schultz',         pos:'DEF', rating:84},
+    {name:'Dieter Weiss',         pos:'MED', rating:83},
+    {name:'Klaus Fischer',        pos:'DEF', rating:82},
+    {name:'Ernst Muller',         pos:'GR',  rating:88},
+    {name:'Fritz Nagel',          pos:'MED', rating:80},
+    {name:'Hans Gruber',          pos:'DEF', rating:79},
+    {name:'Wolfgang Strauss',     pos:'AVA', rating:81},
+  ]},
+  {id:'ts_bra1', name:'Brasil Tsubasa', flag:'br', rarity:'epic', players:[
+    {name:'Roberto Hongo',   pos:'AVA', rating:95},
+    {name:'Carlos Santana',  pos:'MED', rating:92},
+    {name:'Pepe',            pos:'DEF', rating:87},
+    {name:'Victorino',       pos:'AVA', rating:88},
+    {name:'Batista',         pos:'DEF', rating:84},
+    {name:'Ramirez',         pos:'MED', rating:83},
+    {name:'Goulart',         pos:'DEF', rating:82},
+    {name:'Jose',            pos:'MED', rating:80},
+    {name:'Antonio',         pos:'GR',  rating:85},
+    {name:'Pedro',           pos:'DEF', rating:79},
+    {name:'Luis',            pos:'AVA', rating:81},
+  ]},
+  {id:'ts_fra1', name:'França Tsubasa', flag:'fr', rarity:'epic', players:[
+    {name:'Pierre Napoleon',  pos:'AVA', rating:93},
+    {name:'Jean Dubois',      pos:'MED', rating:89},
+    {name:'Michel Laurent',   pos:'DEF', rating:85},
+    {name:'François Martin',  pos:'AVA', rating:84},
+    {name:'Henri Bernard',    pos:'MED', rating:83},
+    {name:'Jacques Petit',    pos:'DEF', rating:82},
+    {name:'Louis Blanc',      pos:'GR',  rating:86},
+    {name:'Claude Moreau',    pos:'DEF', rating:80},
+    {name:'René Dupont',      pos:'MED', rating:79},
+    {name:'André Simon',      pos:'DEF', rating:78},
+    {name:'Marcel Leroy',     pos:'AVA', rating:81},
+  ]},
+  {id:'ts_arg1', name:'Argentina Tsubasa', flag:'ar', rarity:'epic', players:[
+    {name:'Juan Diaz',        pos:'AVA', rating:94},
+    {name:'Pablo Valdez',     pos:'MED', rating:89},
+    {name:'Carlos Ruiz',      pos:'DEF', rating:85},
+    {name:'Miguel Torres',    pos:'AVA', rating:84},
+    {name:'Roberto Gomez',    pos:'MED', rating:83},
+    {name:'Diego Herrera',    pos:'DEF', rating:82},
+    {name:'Fernando Lopez',   pos:'GR',  rating:84},
+    {name:'Antonio Perez',    pos:'DEF', rating:80},
+    {name:'Luis Garcia',      pos:'MED', rating:79},
+    {name:'Jorge Martinez',   pos:'DEF', rating:78},
+    {name:'Eduardo Silva',    pos:'AVA', rating:80},
+  ]},
+  {id:'ts_ita1', name:'Itália Tsubasa', flag:'it', rarity:'rare', players:[
+    {name:'Gino Hernandez',   pos:'AVA', rating:91},
+    {name:'Marco Rossi',      pos:'DEF', rating:87},
+    {name:'Luca Ferrari',     pos:'MED', rating:86},
+    {name:'Antonio Romano',   pos:'AVA', rating:83},
+    {name:'Giovanni Bruno',   pos:'MED', rating:82},
+    {name:'Stefano Conti',    pos:'DEF', rating:81},
+    {name:'Franco Moretti',   pos:'GR',  rating:85},
+    {name:'Claudio Ricci',    pos:'DEF', rating:79},
+    {name:'Dario Costa',      pos:'MED', rating:78},
+    {name:'Sergio Bianchi',   pos:'DEF', rating:77},
+    {name:'Roberto Greco',    pos:'AVA', rating:80},
+  ]},
+  // EQUIPAS JAPONESAS ADICIONAIS
+  {id:'ts_jpn3', name:'Newfield SC', flag:'jp', rarity:'epic', players:[
+    {name:'Mark Landers',    pos:'GR',  rating:97},
+    {name:'Bruce Harper',    pos:'DEF', rating:86},
+    {name:'Alan Pascal',     pos:'DEF', rating:84},
+    {name:'Tom Baker',       pos:'DEF', rating:82},
+    {name:'Jimmy Stone',     pos:'DEF', rating:80},
+    {name:'Kevin Roberts',   pos:'MED', rating:85},
+    {name:'Chris Evans',     pos:'MED', rating:83},
+    {name:'Danny Brown',     pos:'MED', rating:81},
+    {name:'Sam Wilson',      pos:'MED', rating:79},
+    {name:'Bobby Clark',     pos:'AVA', rating:86},
+    {name:'Eddie Mills',     pos:'AVA', rating:84},
+  ]},
+  {id:'ts_jpn4', name:'Furano FC', flag:'jp', rarity:'rare', players:[
+    {name:'Shun Nitta',      pos:'GR',  rating:88},
+    {name:'Kenta Fujisawa',  pos:'DEF', rating:81},
+    {name:'Osamu Taki',      pos:'DEF', rating:80},
+    {name:'Kenji Matsui',    pos:'DEF', rating:79},
+    {name:'Ryota Hara',      pos:'DEF', rating:77},
+    {name:'Toshio Mizaki',   pos:'MED', rating:82},
+    {name:'Hiroki Kubo',     pos:'MED', rating:80},
+    {name:'Daisuke Mori',    pos:'MED', rating:78},
+    {name:'Tetsuya Oda',     pos:'MED', rating:76},
+    {name:'Yuki Tanaka',     pos:'AVA', rating:83},
+    {name:'Akira Sudo',      pos:'AVA', rating:81},
+  ]},
+  {id:'ts_jpn5', name:'Meiwa FC', flag:'jp', rarity:'rare', players:[
+    {name:'Makoto Soda',     pos:'GR',  rating:85},
+    {name:'Ichiro Ueda',     pos:'DEF', rating:80},
+    {name:'Saburo Kato',     pos:'DEF', rating:79},
+    {name:'Shiro Kimura',    pos:'DEF', rating:78},
+    {name:'Goro Saito',      pos:'DEF', rating:76},
+    {name:'Hajime Ito',      pos:'MED', rating:81},
+    {name:'Nobuo Shimada',   pos:'MED', rating:79},
+    {name:'Katsumi Wada',    pos:'MED', rating:77},
+    {name:'Yuichi Aoki',     pos:'MED', rating:75},
+    {name:'Tatsuo Honda',    pos:'AVA', rating:82},
+    {name:'Keisuke Noda',    pos:'AVA', rating:80},
+  ]},
+  {id:'ts_jpn6', name:'Musashi FC', flag:'jp', rarity:'common', players:[
+    {name:'Takuya Matsui',   pos:'GR',  rating:82},
+    {name:'Hiroshi Kano',    pos:'DEF', rating:77},
+    {name:'Masaru Endo',     pos:'DEF', rating:76},
+    {name:'Toru Hayashi',    pos:'DEF', rating:75},
+    {name:'Satoru Imai',     pos:'DEF', rating:73},
+    {name:'Kenji Ogawa',     pos:'MED', rating:78},
+    {name:'Norio Fujita',    pos:'MED', rating:76},
+    {name:'Akio Shimizu',    pos:'MED', rating:74},
+    {name:'Yosuke Abe',      pos:'MED', rating:72},
+    {name:'Masato Kondo',    pos:'AVA', rating:79},
+    {name:'Ryuji Sato',      pos:'AVA', rating:77},
+  ]},
+  {id:'ts_jpn7', name:'Gêmeos Tachibana', flag:'jp', rarity:'epic', players:[
+    {name:'Kazuo Tachibana', pos:'MED', rating:88},
+    {name:'Koji Tachibana',  pos:'MED', rating:88},
+    {name:'Yuki Haibara',    pos:'GR',  rating:83},
+    {name:'Shu Kamiya',      pos:'DEF', rating:82},
+    {name:'Takao Doi',       pos:'DEF', rating:81},
+    {name:'Kenji Shima',     pos:'DEF', rating:80},
+    {name:'Ryo Fujita',      pos:'DEF', rating:78},
+    {name:'Hideo Nishio',    pos:'MED', rating:83},
+    {name:'Makoto Toda',     pos:'MED', rating:81},
+    {name:'Osamu Seta',      pos:'AVA', rating:84},
+    {name:'Isamu Toda',      pos:'AVA', rating:82},
+  ]},
+  {id:'ts_jpn8', name:'Seleção Japão Sub-16', flag:'jp', rarity:'legendary', players:[
+    {name:'Tsubasa Ozora',   pos:'AVA', rating:99},
+    {name:'Kojiro Hyuga',    pos:'AVA', rating:98},
+    {name:'Taro Misaki',     pos:'MED', rating:93},
+    {name:'Ken Wakashimazu', pos:'GR',  rating:95},
+    {name:'Kazuo Tachibana', pos:'MED', rating:88},
+    {name:'Koji Tachibana',  pos:'MED', rating:88},
+    {name:'Shingo Aoi',      pos:'AVA', rating:84},
+    {name:'Takeshi Sawada',  pos:'MED', rating:87},
+    {name:'Ryo Ishizaki',    pos:'DEF', rating:80},
+    {name:'Hiroshi Jito',    pos:'DEF', rating:78},
+    {name:'Ichiro Kishida',  pos:'DEF', rating:82},
+  ]},
+  {id:'ts_jpn9', name:'Nishi Chiba SC', flag:'jp', rarity:'common', players:[
+    {name:'Mamoru Izawa',    pos:'GR',  rating:79},
+    {name:'Shu Kamiya',      pos:'DEF', rating:76},
+    {name:'Ryo Fujita',      pos:'DEF', rating:75},
+    {name:'Kenji Shima',     pos:'DEF', rating:74},
+    {name:'Takao Doi',       pos:'DEF', rating:73},
+    {name:'Hideo Nishio',    pos:'MED', rating:77},
+    {name:'Makoto Toda',     pos:'MED', rating:75},
+    {name:'Osamu Seta',      pos:'MED', rating:74},
+    {name:'Isamu Toda',      pos:'MED', rating:72},
+    {name:'Toru Aizawa',     pos:'AVA', rating:78},
+    {name:'Kenta Hasebe',    pos:'AVA', rating:76},
+  ]},
+
+  {id:'ts_esp1', name:'Espanha Tsubasa', flag:'es', rarity:'rare', players:[
+    {name:'Roberto Carlos',   pos:'DEF', rating:88},
+    {name:'Miguel Sanchez',   pos:'AVA', rating:86},
+    {name:'Pedro Alonso',     pos:'MED', rating:84},
+    {name:'Juan Fernandez',   pos:'AVA', rating:83},
+    {name:'Carlos Jimenez',   pos:'MED', rating:82},
+    {name:'Antonio Navarro',  pos:'DEF', rating:81},
+    {name:'Luis Medina',      pos:'GR',  rating:84},
+    {name:'Diego Morales',    pos:'DEF', rating:79},
+    {name:'Pablo Reyes',      pos:'MED', rating:78},
+    {name:'Sergio Vidal',     pos:'DEF', rating:77},
+    {name:'Manuel Cruz',      pos:'AVA', rating:79},
+  ]},
+  {id:'ts_ned1', name:'Holanda Tsubasa', flag:'nl', rarity:'rare', players:[
+    {name:'Johan Stroink',    pos:'MED', rating:89},
+    {name:'Peter Van Berg',   pos:'AVA', rating:86},
+    {name:'Hans De Groot',    pos:'DEF', rating:84},
+    {name:'Erik Bakker',      pos:'MED', rating:82},
+    {name:'Lars Visser',      pos:'AVA', rating:81},
+    {name:'Pieter Meijer',    pos:'DEF', rating:80},
+    {name:'Willem Smit',      pos:'GR',  rating:83},
+    {name:'Jan Dekker',       pos:'DEF', rating:78},
+    {name:'Kees Brouwer',     pos:'MED', rating:77},
+    {name:'Arie Dijkstra',    pos:'DEF', rating:76},
+    {name:'Sander Wolf',      pos:'AVA', rating:78},
+  ]},
+  {id:'ts_uru1', name:'Uruguai Tsubasa', flag:'uy', rarity:'rare', players:[
+    {name:'Carlos Santana Jr',pos:'AVA', rating:87},
+    {name:'Mario Gonzalez',   pos:'MED', rating:84},
+    {name:'Diego Suarez',     pos:'DEF', rating:82},
+    {name:'Luis Pedrosa',     pos:'AVA', rating:81},
+    {name:'Roberto Acosta',   pos:'MED', rating:80},
+    {name:'Jorge Benitez',    pos:'DEF', rating:79},
+    {name:'Felipe Mendez',    pos:'GR',  rating:82},
+    {name:'Andres Rojas',     pos:'DEF', rating:77},
+    {name:'Pablo Soto',       pos:'MED', rating:76},
+    {name:'Carlos Vega',      pos:'DEF', rating:75},
+    {name:'Miguel Pinto',     pos:'AVA', rating:78},
+  ]},
+];
+
+// Tsubasa tournament countries
+const TSUBASA_GROUPS = {
+  A:[{name:'Japão',flag:'jp',rating:90},{name:'Brasil',flag:'br',rating:88},{name:'Argentina',flag:'ar',rating:86},{name:'Uruguai',flag:'uy',rating:77}],
+  B:[{name:'Alemanha',flag:'de',rating:87},{name:'França',flag:'fr',rating:83},{name:'Itália',flag:'it',rating:81},{name:'Espanha',flag:'es',rating:80}],
+  C:[{name:'Holanda',flag:'nl',rating:79},{name:'México',flag:'mx',rating:75},{name:'Coreia do Sul',flag:'kr',rating:73},{name:'Portugal',flag:'pt',rating:76}],
+  D:[{name:'EUA',flag:'us',rating:72},{name:'Suécia',flag:'se',rating:74},{name:'Austrália',flag:'au',rating:70},{name:'Camarões',flag:'cm',rating:68}],
+};
+
 const TACTICS=[
   {id:'442',name:'4-4-2',label:'Clássico',desc:'Sólido e versátil. Dois avançados com suporte de quatro médios.',quota:{GR:1,DEF:4,MED:4,AVA:2}},
   {id:'433',name:'4-3-3',label:'Ataque total',desc:'Três avançados dinâmicos. Alta pressão, ofensivo e direto.',quota:{GR:1,DEF:4,MED:3,AVA:3}},
@@ -1348,7 +1601,8 @@ let squad=[], bench=[], inBenchPhase=false, currentRound=0, currentSelection=nul
 let bonusUsed=false, bonusActive=null; // bonusActive: null | 'legendary' | 'double'
 let teamName='LegendsPick';
 let teamNick='LGP';
-let gameMode='ratings'; // 'ratings' | 'knowledge'
+let gameMode='ratings';
+let gameUniverse='real'; // 'real' | 'tsubasa' // 'ratings' | 'knowledge'
 let lastResult = null;
 let rerollsLeft=3, chosenTactic=null, lastAdded=null;
 let usedSelectionIds=[]; // selections already shown this draft — never repeat
@@ -1398,6 +1652,14 @@ function renderTactics(){
   }).join('');
 }
 
+function selectUniverse(universe){
+  gameUniverse = universe;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  const el = document.getElementById('uni-'+universe);
+  if(el) el.classList.add('selected');
+  setTimeout(()=>showScreen('screen-mode'), 200);
+}
+
 function selectGameMode(mode){
   gameMode = mode;
   document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
@@ -1419,9 +1681,12 @@ function confirmTactic(){
   loadRound();
 }
 
+function activeSELS(){ return gameUniverse==='tsubasa' ? TSUBASA_SELS : SELS; }
+
 function pickSelection(){
-  const fresh=SELS.filter(s=>!usedSelectionIds.includes(s.id));
-  const pool=fresh.length>0 ? fresh : SELS.filter(s=>s.id!==(currentSelection&&currentSelection.id));
+  const sels = activeSELS();
+  const fresh=sels.filter(s=>!usedSelectionIds.includes(s.id));
+  const pool=fresh.length>0 ? fresh : sels.filter(s=>s.id!==(currentSelection&&currentSelection.id));
 
   const roll=Math.random()*100;
   let target='common';
@@ -1430,11 +1695,7 @@ function pickSelection(){
   else if(roll<45) target='rare';
 
   let candidates=pool.filter(s=>s.rarity===target);
-
-  if(candidates.length===0){
-    candidates=pool;
-  }
-
+  if(candidates.length===0){ candidates=pool; }
   return candidates[Math.floor(Math.random()*candidates.length)];
 }
 
@@ -1449,7 +1710,7 @@ function loadRound(){
   // If legendary bonus active, force legendary selection
   if(bonusActive==='legendary'){
     bonusActive=null;
-    const legendaries = SELS.filter(s=>s.rarity==='legendary' && !usedSelectionIds.includes(s.id));
+    const legendaries = activeSELS().filter(s=>s.rarity==='legendary' && !usedSelectionIds.includes(s.id));
     currentSelection = legendaries.length
       ? legendaries[Math.floor(Math.random()*legendaries.length)]
       : pickSelection();
@@ -3028,7 +3289,9 @@ function renderFullBracketHTML() {
     return '<div class="b-match">'+teamEl(m.a,aWon,m.result&&bWon)+teamEl(m.b,bWon,m.result&&aWon)+'</div>';
   }
 
-  const groupKeys = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  const groupKeys = gameUniverse==='tsubasa'
+    ? ['A','B','C','D']
+    : ['A','B','C','D','E','F','G','H','I','J','K','L'];
   let groupsHtml = '<div class="groups-grid">';
   for(const gk of groupKeys){
     const st = fullBracket.groups[gk];
@@ -3042,25 +3305,38 @@ function renderFullBracketHTML() {
   }
   groupsHtml += '</div>';
 
-  const r32a = (fullBracket.r32||[]).slice(0,8).map(matchEl).join('');
-  const r32b = (fullBracket.r32||[]).slice(8,16).map(matchEl).join('');
-  const r16H = (fullBracket.r16||[]).slice(0,8).map(matchEl).join('');
-  const qfH  = (fullBracket.qf||[]).slice(0,4).map(matchEl).join('');
-  const sfH  = (fullBracket.sf||[]).slice(0,2).map(matchEl).join('');
-  const finH = (fullBracket.fin||[]).slice(0,1).map(matchEl).join('');
   const champH = fullBracket.champion
-    ? '<div class="b-champion"><div class="bc-trophy"><svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="width:1em;height:1em;display:inline-block;vertical-align:-0.15em">  <defs>    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">      <stop offset="0%" stop-color="#F0D878"/>      <stop offset="50%" stop-color="#C9A84C"/>      <stop offset="100%" stop-color="#9C7A2E"/>    </linearGradient>  </defs>  <!-- Base -->  <rect x="30" y="105" width="40" height="10" rx="2" fill="url(#goldGrad)"/>  <rect x="38" y="95" width="24" height="12" rx="2" fill="url(#goldGrad)"/>  <!-- Stem -->  <path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#goldGrad)"/>  <!-- Cup body - spiraling bands like the real trophy -->  <path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#goldGrad)"/>  <path d="M30 15 C30 35 35 50 50 58 C65 50 70 35 70 15 C70 28 62 38 50 40 C38 38 30 28 30 15 Z" fill="url(#goldGrad)" opacity="0.85"/>  <!-- Top sphere -->  <circle cx="50" cy="14" r="13" fill="url(#goldGrad)"/>  <circle cx="46" cy="10" r="3" fill="#FCEFC0" opacity="0.6"/></svg></div><div class="bc-flag">'+flagImg(fullBracket.champion.flag,'flag-img-lg')+'</div><div class="bc-name">'+sName(fullBracket.champion)+'</div></div>'
+    ? '<div class="b-champion"><div class="bc-trophy"><svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="celGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F0D878"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9C7A2E"/></linearGradient></defs><rect x="30" y="105" width="40" height="10" rx="2" fill="url(#celGoldGrad)"/><rect x="38" y="95" width="24" height="12" rx="2" fill="url(#celGoldGrad)"/><path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#celGoldGrad)"/><path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#celGoldGrad)"/><circle cx="50" cy="14" r="13" fill="url(#celGoldGrad)"/></svg></div><div class="bc-flag">'+flagImg(fullBracket.champion.flag,'flag-img-lg')+'</div><div class="bc-name">'+sName(fullBracket.champion)+'</div></div>'
     : '<div class="b-champion"><div class="bc-tbd">Campeão</div></div>';
 
-  el.innerHTML = groupsHtml +
-    '<div class="bracket-grid">' +
-    '<div class="bracket-col"><div class="bracket-col-title">16avos A</div><div class="b-round">'+r32a+'</div></div>' +
-    '<div class="bracket-col"><div class="bracket-col-title">16avos B</div><div class="b-round">'+r32b+'</div></div>' +
-    '<div class="bracket-col"><div class="bracket-col-title">Oitavos</div><div class="b-round">'+r16H+'</div></div>' +
-    '<div class="bracket-col"><div class="bracket-col-title">Quartos</div><div class="b-round">'+qfH+'</div></div>' +
-    '<div class="bracket-col"><div class="bracket-col-title">Meias</div><div class="b-round">'+sfH+'</div></div>' +
-    '<div class="bracket-col"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>' +
-    '</div>';
+  let bracketGrid = '';
+  if(gameUniverse==='tsubasa'){
+    const qfA = (fullBracket.r32||[]).slice(0,2).map(matchEl).join('');
+    const qfB = (fullBracket.r32||[]).slice(2,4).map(matchEl).join('');
+    const sfH = (fullBracket.r16||[]).slice(0,2).map(matchEl).join('');
+    const finH = (fullBracket.qf||[]).slice(0,1).map(matchEl).join('');
+    bracketGrid =
+      '<div class="bracket-col"><div class="bracket-col-title">Quartos A</div><div class="b-round">'+qfA+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Quartos B</div><div class="b-round">'+qfB+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Meias</div><div class="b-round">'+sfH+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>';
+  } else {
+    const r32a = (fullBracket.r32||[]).slice(0,8).map(matchEl).join('');
+    const r32b = (fullBracket.r32||[]).slice(8,16).map(matchEl).join('');
+    const r16H = (fullBracket.r16||[]).slice(0,8).map(matchEl).join('');
+    const qfH  = (fullBracket.qf||[]).slice(0,4).map(matchEl).join('');
+    const sfH  = (fullBracket.sf||[]).slice(0,2).map(matchEl).join('');
+    const finH = (fullBracket.fin||[]).slice(0,1).map(matchEl).join('');
+    bracketGrid =
+      '<div class="bracket-col"><div class="bracket-col-title">16avos A</div><div class="b-round">'+r32a+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">16avos B</div><div class="b-round">'+r32b+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Oitavos</div><div class="b-round">'+r16H+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Quartos</div><div class="b-round">'+qfH+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Meias</div><div class="b-round">'+sfH+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>';
+  }
+
+  el.innerHTML = groupsHtml + '<div class="bracket-grid">' + bracketGrid + '</div>';
 }
 
 async function startSimulation(){
@@ -3071,9 +3347,11 @@ async function startSimulation(){
   if(teamNick.length < 2) teamNick = 'LGP';
 
   const myRating = squadRating();
-  const groupKeys = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  const isTsubasa = gameUniverse==='tsubasa';
+  const activeGroups = isTsubasa ? TSUBASA_GROUPS : WC2026_GROUPS;
+  const groupKeys = Object.keys(activeGroups);
   const chosenGroupKey = groupKeys[Math.floor(Math.random()*groupKeys.length)];
-  const groupTeamsList = WC2026_GROUPS[chosenGroupKey].map(t=>({...t}));
+  const groupTeamsList = activeGroups[chosenGroupKey].map(t=>({...t}));
   const replacedIdx = Math.floor(Math.random()*groupTeamsList.length);
   const replacedTeam = {...groupTeamsList[replacedIdx]};
   const myTeam = {name:teamName, shortName:teamNick, flag:'star', rating:Math.round(myRating), isMe:true, players:squad.map(p=>p.name)};
@@ -3117,7 +3395,7 @@ async function startSimulation(){
   await new Promise(res=>setTimeout(res,300));
   const groupStandings={};
   for(const gk of groupKeys){
-    const teams = gk===chosenGroupKey ? groupTeamsList.map(t=>({...t})) : WC2026_GROUPS[gk].map(t=>({...t}));
+    const teams = gk===chosenGroupKey ? groupTeamsList.map(t=>({...t})) : activeGroups[gk].map(t=>({...t}));
     groupStandings[gk] = simGroupFull(teams);
   }
 
@@ -3168,10 +3446,10 @@ async function startSimulation(){
   await new Promise(res=>setTimeout(res,300));
 
   // Determine best 8 third-placed teams (real WC2026 rule)
-  const allThirdsForCheck = Object.entries(groupStandings).map(([gk,st])=>({...st[2],fromGroup:gk}));
+  const allThirdsForCheck = Object.entries(groupStandings).map(([gk,st])=>({...(st[2]||{}),fromGroup:gk}));
   allThirdsForCheck.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
   const best8ThirdsKeys = allThirdsForCheck.slice(0,8).map(t=>t.fromGroup);
-  const qualifiedAsThird = myStPos===3 && best8ThirdsKeys.includes(chosenGroupKey);
+  const qualifiedAsThird = !isTsubasa && myStPos===3 && best8ThirdsKeys.includes(chosenGroupKey);
   const qualified = myStPos<=2 || qualifiedAsThird;
 
   if(!qualified){
@@ -3186,45 +3464,54 @@ async function startSimulation(){
   log.scrollTop=log.scrollHeight;
   await new Promise(res=>setTimeout(res,300));
 
-  // Build correct WC2026 knockout bracket
-  // 48 teams: 12 group winners (1st), 12 runners-up (2nd), 8 best 3rd place
-  // R32: 16 matches (32 teams)
-  // WC2026 real bracket pairings (1st vs 2nd from different groups):
-  // 1A-2C, 1B-2D, 1C-2A(?), etc. — using official WC2026 bracket structure
-
-  // Get best 8 third-placed teams by points then GD then GF
-  const allThirds = Object.entries(groupStandings).map(([gk,st])=>({...st[2],fromGroup:gk}));
+  // Build knockout bracket — dynamically handles both 12-group (WC2026) and 4-group (Tsubasa)
+  const allThirds = Object.entries(groupStandings).map(([gk,st])=>({...(st[2]||{}),fromGroup:gk}));
   allThirds.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
   const best8thirds = allThirds.slice(0,8);
 
-  // Official WC2026 R32 pairings (32 teams → 16 matches)
-  // Format: [winner/runner/third, groupKey, position]
-  // Using simplified but realistic bracket:
-  const r32Pairs = [
-    [groupStandings['A'][0], groupStandings['B'][1]],  // 1A vs 2B
-    [groupStandings['C'][0], groupStandings['D'][1]],  // 1C vs 2D
-    [groupStandings['E'][0], groupStandings['F'][1]],  // 1E vs 2F
-    [groupStandings['G'][0], groupStandings['H'][1]],  // 1G vs 2H
-    [groupStandings['I'][0], groupStandings['J'][1]],  // 1I vs 2J
-    [groupStandings['K'][0], groupStandings['L'][1]],  // 1K vs 2L
-    [groupStandings['B'][0], groupStandings['A'][1]],  // 1B vs 2A
-    [groupStandings['D'][0], groupStandings['C'][1]],  // 1D vs 2C
-    [groupStandings['F'][0], groupStandings['E'][1]],  // 1F vs 2E
-    [groupStandings['H'][0], groupStandings['G'][1]],  // 1H vs 2G
-    [groupStandings['J'][0], groupStandings['I'][1]],  // 1J vs 2I
-    [groupStandings['L'][0], groupStandings['K'][1]],  // 1L vs 2K
-    [best8thirds[0], best8thirds[1]],                  // best 3rd vs 2nd best 3rd
-    [best8thirds[2], best8thirds[3]],                  // 3rd vs 4th best 3rd
-    [best8thirds[4], best8thirds[5]],                  // 5th vs 6th best 3rd
-    [best8thirds[6], best8thirds[7]],                  // 7th vs 8th best 3rd
-  ];
+  let r32Pairs = [];
+  if(isTsubasa){
+    // 4 groups (A-D), 16 teams: 1st vs 2nd cross-matched
+    r32Pairs = [
+      [groupStandings['A'][0], groupStandings['B'][1]],
+      [groupStandings['B'][0], groupStandings['A'][1]],
+      [groupStandings['C'][0], groupStandings['D'][1]],
+      [groupStandings['D'][0], groupStandings['C'][1]],
+    ];
+  } else {
+    // 12 groups (A-L), 48 teams, 32 in knockouts
+    r32Pairs = [
+      [groupStandings['A'][0], groupStandings['B'][1]],
+      [groupStandings['C'][0], groupStandings['D'][1]],
+      [groupStandings['E'][0], groupStandings['F'][1]],
+      [groupStandings['G'][0], groupStandings['H'][1]],
+      [groupStandings['I'][0], groupStandings['J'][1]],
+      [groupStandings['K'][0], groupStandings['L'][1]],
+      [groupStandings['B'][0], groupStandings['A'][1]],
+      [groupStandings['D'][0], groupStandings['C'][1]],
+      [groupStandings['F'][0], groupStandings['E'][1]],
+      [groupStandings['H'][0], groupStandings['G'][1]],
+      [groupStandings['J'][0], groupStandings['I'][1]],
+      [groupStandings['L'][0], groupStandings['K'][1]],
+      [best8thirds[0], best8thirds[1]],
+      [best8thirds[2], best8thirds[3]],
+      [best8thirds[4], best8thirds[5]],
+      [best8thirds[6], best8thirds[7]],
+    ];
+  }
 
   fullBracket.r32 = r32Pairs.map(([a,b])=>({a:{...a},b:{...b},result:null}));
   renderFullBracketHTML();
   await new Promise(res=>setTimeout(res,300));
 
   // Knockout rounds: R32(16 matches) → R16(8) → QF(4) → SF(2) → Final(1)
-  const roundDefs=[
+  const roundDefs = isTsubasa ? [
+    {key:'r32', name:'Quartos de Final',  arr:'r32'},
+    {key:'r16', name:'Meias-Finais',      arr:'r16'},
+    {key:'qf',  name:'Final',             arr:'qf'},
+    {key:'sf',  name:'',                  arr:'sf'},
+    {key:'fin', name:'',                  arr:'fin'}
+  ] : [
     {key:'r32', name:'16avos de Final',  arr:'r32'},
     {key:'r16', name:'Oitavos de Final', arr:'r16'},
     {key:'qf',  name:'Quartos de Final', arr:'qf'},
@@ -3232,16 +3519,17 @@ async function startSimulation(){
     {key:'fin', name:'Final',            arr:'fin'}
   ];
 
-  // Init all arrays
-  fullBracket.r16  = Array(8).fill(null);
-  fullBracket.qf   = Array(4).fill(null);
-  fullBracket.sf   = Array(2).fill(null);
-  fullBracket.fin  = Array(1).fill(null);
+  fullBracket.r16  = Array(isTsubasa?2:8).fill(null);
+  fullBracket.qf   = Array(isTsubasa?1:4).fill(null);
+  fullBracket.sf   = Array(isTsubasa?0:2).fill(null);
+  fullBracket.fin  = Array(isTsubasa?0:1).fill(null);
+  const totalRounds = isTsubasa ? 3 : 5;
 
   let prevWinners = null;
 
-  for(let ri=0;ri<5;ri++){
+  for(let ri=0;ri<totalRounds;ri++){
     const {key,name,arr}=roundDefs[ri];
+    if(!name) break; // skip empty rounds (Tsubasa)
     log.innerHTML+='<div class="sim-match" style="border-left:2px solid var(--border);padding-left:10px"><div class="sim-round">'+name+'</div></div>';
     log.scrollTop=log.scrollHeight;
 
