@@ -179,10 +179,16 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .bracket-title { font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); margin-bottom:14px; border-top:1px solid var(--border); padding-top:20px; }
 .bracket-grid {
   display:grid;
-  grid-template-columns: repeat(6, minmax(120px,1fr));
+  grid-template-columns: repeat(4, minmax(100px,1fr)) minmax(120px,1.3fr) repeat(4, minmax(100px,1fr));
   gap:0;
-  min-width:820px;
+  min-width:900px;
 }
+.bracket-col { display:flex; flex-direction:column; }
+.bracket-col-centre { border-left:1px solid rgba(201,168,76,0.2); border-right:1px solid rgba(201,168,76,0.2); }
+/* Right side columns mirror text alignment */
+.bracket-col-right .b-team { flex-direction:row-reverse; }
+.bracket-col-right .bt-name { text-align:right; }
+.bracket-col-right .b-champion { text-align:right; }
 .bracket-col { display:flex; flex-direction:column; }
 .bracket-col-title {
   font-size:9px; text-transform:uppercase; letter-spacing:0.1em;
@@ -275,6 +281,42 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .scorer-goals { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--text2); margin-left:auto; }
 .scorer-bar-wrap { width:60px; height:3px; background:var(--dark4); border-radius:2px; margin-left:8px; }
 .scorer-bar { height:100%; background:var(--gold); border-radius:2px; }
+
+/* BENCH PHASE TRANSITION */
+.bench-transition-overlay {
+  position:fixed; inset:0; z-index:997;
+  background:rgba(0,0,0,0.92);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.bench-transition-overlay.show { opacity:1; pointer-events:all; }
+.bench-transition-modal {
+  background:var(--dark2); border:1px solid rgba(60,130,246,0.3);
+  max-width:400px; width:90%; padding:32px 28px; text-align:center;
+  transform:scale(0.88); transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative; overflow:hidden;
+}
+.bench-transition-overlay.show .bench-transition-modal { transform:scale(1); }
+.bench-transition-modal::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(60,130,246,0.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.bench-transition-icon { font-size:40px; margin-bottom:12px; display:block; }
+.bench-transition-title {
+  font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:2px;
+  color:var(--text); margin-bottom:8px;
+}
+.bench-transition-sub { font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:20px; }
+.bench-transition-slots {
+  display:flex; gap:10px; justify-content:center; margin-bottom:24px;
+}
+.bench-transition-slot {
+  flex:1; max-width:100px; padding:10px 8px;
+  background:var(--dark3); border:1px solid rgba(60,130,246,0.3);
+  font-size:11px; color:#60A5FA; text-align:center;
+  text-transform:uppercase; letter-spacing:0.08em;
+}
 
 /* BENCH STRIP */
 #bench-strip { margin-top:10px; }
@@ -1110,7 +1152,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
   <header>
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
-        <a class="logo" href="#"><span>Legends</span>Pick</a>
+        <a class="logo" href="#" id="logo-secret" onclick="handleLogoClick(event)"><span>Legends</span>Pick</a>
         <div class="tagline">World Cup Fantasy Draft</div>
       </div>
     </div>
@@ -1145,7 +1187,7 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
         <div class="mode-name">Real</div>
         <div class="mode-desc">Draft com as maiores lendas reais do futebol mundial. Simula o <strong>Mundial 2026</strong>.</div>
       </div>
-      <div class="mode-card" id="uni-tsubasa" onclick="selectUniverse('tsubasa')">
+      <div class="mode-card" id="uni-tsubasa" onclick="selectUniverse('tsubasa')" style="display:none">
         <span class="mode-icon">⚡</span>
         <div class="mode-name">Tsubasa</div>
         <div class="mode-desc">Draft com os heróis do <strong>Oliver e Benji</strong> — Tsubasa, Hyuga, Schneider e mais. Torneio Mundial do anime!</div>
@@ -1652,6 +1694,36 @@ function renderTactics(){
   }).join('');
 }
 
+// SECRET TSUBASA UNLOCK — click logo 5 times
+let _secretClicks = 0, _secretTimer = null;
+function handleLogoClick(e){
+  e.preventDefault();
+  showScreen('screen-start');
+  _secretClicks++;
+  clearTimeout(_secretTimer);
+  _secretTimer = setTimeout(()=>{ _secretClicks=0; }, 2000);
+  if(_secretClicks >= 5){
+    _secretClicks = 0;
+    const card = document.getElementById('uni-tsubasa');
+    if(card && card.style.display==='none'){
+      card.style.display = '';
+      // Flash effect on the card
+      card.style.animation = 'bannerIn 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+      // Show subtle hint
+      const hint = document.createElement('div');
+      hint.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:8px 20px;font-size:12px;letter-spacing:0.1em;z-index:999;pointer-events:none';
+      hint.textContent = '⚡ Modo Tsubasa desbloqueado!';
+      document.body.appendChild(hint);
+      setTimeout(()=>hint.remove(), 2500);
+    }
+  }
+}
+
+function dismissBenchTransition(){
+  document.getElementById('bench-transition-overlay').classList.remove('show');
+  loadRound();
+}
+
 function selectUniverse(universe){
   gameUniverse = universe;
   document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
@@ -1864,10 +1936,10 @@ function confirmPick(){
   renderLivePitch(added.name);
   const total=Object.values(chosenTactic.quota).reduce((a,b)=>a+b,0);
   if(currentRound>=total){
-    // Starters complete — move to bench phase (3 substitutes, any position)
+    // Starters complete — show transition popup then move to bench phase
     inBenchPhase=true;
     bonusActive=null; doublePickDone=false;
-    loadRound();
+    document.getElementById('bench-transition-overlay').classList.add('show');
     return;
   }
 
@@ -3321,19 +3393,29 @@ function renderFullBracketHTML() {
       '<div class="bracket-col"><div class="bracket-col-title">Meias</div><div class="b-round">'+sfH+'</div></div>' +
       '<div class="bracket-col"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>';
   } else {
+    // Bracket: left side (16avos A → Oitavos A → Quartos A) | Final+Champion | right side (Quartos B → Oitavos B → 16avos B)
     const r32a = (fullBracket.r32||[]).slice(0,8).map(matchEl).join('');
     const r32b = (fullBracket.r32||[]).slice(8,16).map(matchEl).join('');
-    const r16H = (fullBracket.r16||[]).slice(0,8).map(matchEl).join('');
-    const qfH  = (fullBracket.qf||[]).slice(0,4).map(matchEl).join('');
-    const sfH  = (fullBracket.sf||[]).slice(0,2).map(matchEl).join('');
+    const r16a = (fullBracket.r16||[]).slice(0,4).map(matchEl).join('');
+    const r16b = (fullBracket.r16||[]).slice(4,8).map(matchEl).join('');
+    const qfa  = (fullBracket.qf||[]).slice(0,2).map(matchEl).join('');
+    const qfb  = (fullBracket.qf||[]).slice(2,4).map(matchEl).join('');
+    const sfaH = (fullBracket.sf||[]).slice(0,1).map(matchEl).join('');
+    const sfbH = (fullBracket.sf||[]).slice(1,2).map(matchEl).join('');
     const finH = (fullBracket.fin||[]).slice(0,1).map(matchEl).join('');
     bracketGrid =
+      // Left half (flows right toward centre)
       '<div class="bracket-col"><div class="bracket-col-title">16avos A</div><div class="b-round">'+r32a+'</div></div>' +
-      '<div class="bracket-col"><div class="bracket-col-title">16avos B</div><div class="b-round">'+r32b+'</div></div>' +
-      '<div class="bracket-col"><div class="bracket-col-title">Oitavos</div><div class="b-round">'+r16H+'</div></div>' +
-      '<div class="bracket-col"><div class="bracket-col-title">Quartos</div><div class="b-round">'+qfH+'</div></div>' +
-      '<div class="bracket-col"><div class="bracket-col-title">Meias</div><div class="b-round">'+sfH+'</div></div>' +
-      '<div class="bracket-col"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>';
+      '<div class="bracket-col"><div class="bracket-col-title">Oitavos A</div><div class="b-round">'+r16a+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Quartos A</div><div class="b-round">'+qfa+'</div></div>' +
+      '<div class="bracket-col"><div class="bracket-col-title">Meia A</div><div class="b-round">'+sfaH+'</div></div>' +
+      // Centre: Final + Champion
+      '<div class="bracket-col bracket-col-centre"><div class="bracket-col-title">Final</div><div class="b-round">'+finH+champH+'</div></div>' +
+      // Right half (flows left toward centre — mirrored)
+      '<div class="bracket-col bracket-col-right"><div class="bracket-col-title">Meia B</div><div class="b-round">'+sfbH+'</div></div>' +
+      '<div class="bracket-col bracket-col-right"><div class="bracket-col-title">Quartos B</div><div class="b-round">'+qfb+'</div></div>' +
+      '<div class="bracket-col bracket-col-right"><div class="bracket-col-title">Oitavos B</div><div class="b-round">'+r16b+'</div></div>' +
+      '<div class="bracket-col bracket-col-right"><div class="bracket-col-title">16avos B</div><div class="b-round">'+r32b+'</div></div>';
   }
 
   el.innerHTML = groupsHtml + '<div class="bracket-grid">' + bracketGrid + '</div>';
@@ -3724,6 +3806,23 @@ setupHeroBackground();
       <div class="lineup-swap-list" id="lu-swap-list"></div>
       <div class="lineup-swap-cancel" id="lu-swap-cancel">Cancelar</div>
     </div>
+  </div>
+</div>
+
+<div id="bench-transition-overlay" class="bench-transition-overlay">
+  <div class="bench-transition-modal">
+    <span class="bench-transition-icon">🪑</span>
+    <div class="bench-transition-title">Plantel Completo!</div>
+    <div class="bench-transition-sub">
+      O teu 11 está feito. Agora escolhe os teus <strong>3 suplentes</strong> — um por cada linha.<br>
+      Entram em caso de lesão ou antes do jogo no popup de line-up.
+    </div>
+    <div class="bench-transition-slots">
+      <div class="bench-transition-slot">1× Defesa</div>
+      <div class="bench-transition-slot">1× Médio</div>
+      <div class="bench-transition-slot">1× Avançado</div>
+    </div>
+    <button class="btn btn-gold" onclick="dismissBenchTransition()" style="min-width:180px">Escolher Suplentes →</button>
   </div>
 </div>
 
