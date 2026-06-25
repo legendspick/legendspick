@@ -1145,6 +1145,181 @@ header { padding:28px 0 20px; border-bottom:1px solid var(--border); }
 .fstat-value { font-family:'Bebas Neue',sans-serif; font-size:32px; }
 
 footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:11px; color:var(--text3); letter-spacing:0.06em; text-transform:uppercase; }
+/* ================================================
+   MOBILE RESPONSIVE — complete overhaul ≤ 600px
+   ================================================ */
+@media (max-width: 600px) {
+
+  /* Base layout */
+  .container { padding:0 12px; }
+  .screen { padding:24px 0 48px; }
+
+  /* Header */
+  header { padding:12px 0; }
+  .logo { font-size:22px; }
+  .tagline { font-size:10px; }
+
+  /* Hero */
+  .hero { padding:36px 0 28px; }
+  h1 { font-size:44px; }
+  .hero-eyebrow { font-size:11px; }
+  .hero-stats { grid-template-columns:repeat(2,1fr); gap:1px; }
+  .hero-stat .num { font-size:28px; }
+  .hero-stat { padding:14px 10px; }
+  .btn.btn-gold { width:100%; padding:14px; font-size:15px; }
+
+  /* Section titles */
+  .section-title { font-size:28px; }
+  .section-sub { font-size:13px; }
+
+  /* Mode grid — stack vertically */
+  .mode-grid { grid-template-columns:1fr; }
+  .mode-card { padding:18px 16px; }
+  .mode-name { font-size:22px; }
+
+  /* Tactics grid */
+  .tactic-grid { grid-template-columns:1fr 1fr; gap:1px; }
+  .tactic-card { padding:14px 10px; }
+  .tactic-name { font-size:18px; }
+  .tactic-label { font-size:10px; }
+  .tactic-desc { font-size:11px; }
+
+  /* Draft layout — single column */
+  .draft-layout { grid-template-columns:1fr; }
+  .live-pitch-panel { position:static; order:-1; }
+  .live-pitch { min-height:220px; padding:10px 8px; }
+
+  /* Player grid */
+  .player-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .player-card { padding:10px 8px; }
+  .p-name { font-size:13px; }
+  .p-pos { font-size:10px; }
+  .p-rating-num { font-size:11px; }
+
+  /* Draft controls */
+  .draft-controls { gap:8px; }
+  .btn { padding:10px 16px; font-size:13px; }
+  #prog-label { font-size:11px; }
+
+  /* Draft info bar */
+  .draft-info { padding:10px 12px; font-size:13px; }
+  .rarity-badge { font-size:9px; padding:1px 6px; }
+
+  /* Squad screen */
+  .squad-header { margin-bottom:16px; }
+  .squad-avg { font-size:44px; }
+  .pitch-full { padding:16px 10px; }
+  .pitch-slot-full { width:60px; }
+  .pitch-avatar-full { width:42px; height:42px; font-size:16px; }
+  .pitch-name-full { font-size:9px; }
+  .pitch-info-full { font-size:9px; }
+  .pitch-row-full { gap:4px; }
+
+  /* Team name inputs */
+  .team-name-section { flex-direction:column; gap:10px; }
+  .team-name-input { font-size:18px; padding:8px 10px; }
+
+  /* Simulation screen */
+  .section-title { font-size:24px; }
+  #sim-log { max-height:280px; font-size:12px; }
+  .sim-match { padding-bottom:6px; margin-bottom:6px; }
+  .sim-round { font-size:9px; }
+  .sim-goal, .sim-goal-opp { font-size:10px; }
+
+  /* Groups grid in bracket */
+  .groups-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
+  .group-mini { padding:6px; }
+  .group-mini-title { font-size:9px; }
+  .group-mini-team { font-size:10px; padding:2px 0; }
+
+  /* Bracket — scroll horizontally */
+  .bracket-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .bracket-grid { min-width:700px; }
+  .b-team { padding:3px 4px; font-size:9px; }
+  .b-team .bn { max-width:50px; }
+
+  /* Live match field */
+  .lmv-field-wrap { grid-template-columns:1fr 80px 1fr; min-height:200px; }
+  .lmv-player { width:36px; }
+  .lmv-player-shirt { width:22px; height:22px; font-size:8px; margin-bottom:2px; }
+  .lmv-player-name { font-size:6px; max-width:36px; }
+  .lmv-player-rat { font-size:6px; }
+  .lmv-score-main { font-size:22px; letter-spacing:2px; }
+  .lmv-team-nm { font-size:12px; }
+  .lmv-team-rt { font-size:9px; }
+  .lmv-events-list { max-height:60px; }
+  .lmv-ev { font-size:8px; }
+  .lmv-centre-circle { width:30px; height:30px; }
+  .lmv-stats { grid-template-columns:1fr auto 1fr; gap:2px 4px; padding:5px 8px; }
+  .lmv-stat-home, .lmv-stat-away { font-size:11px; }
+  .lmv-stat-label { font-size:8px; }
+  .lmv-topbar { padding:4px 8px; }
+  .lmv-scoreboard { padding:8px 10px; }
+  .lmv-clock-box { font-size:10px; }
+
+  /* Lineup popup */
+  .lineup-modal { max-height:85vh; }
+  .lineup-team-name { font-size:16px; }
+  .lineup-team-rating { font-size:10px; }
+  .lineup-vs { font-size:20px; }
+  .lineup-player-name { font-size:11px; }
+  .lineup-player-rating { font-size:14px; }
+  .lineup-pos-group { font-size:8px; }
+
+  /* MVP & stats */
+  .mvp-card { padding:14px 16px; gap:12px; }
+  .mvp-name { font-size:24px; }
+  .mvp-goals { font-size:36px; }
+  .final-stats { grid-template-columns:repeat(2,1fr); }
+  .fstat { padding:14px 10px; }
+  .fstat-value { font-size:28px; }
+
+  /* Result banner */
+  .result-banner { padding:32px 16px; }
+  .result-title { font-size:28px; }
+  .result-trophy { font-size:42px; }
+
+  /* Bonus/sub popups */
+  .bonus-modal, .sub-modal, .share-modal { padding:20px 16px; }
+  .bonus-title { font-size:22px; }
+  .bonus-btn { padding:12px 14px; }
+  .bonus-btn-title { font-size:13px; }
+
+  /* Bench strip */
+  .bench-strip-row { gap:4px; }
+  .bench-slot { padding:6px 4px; }
+  .bench-slot .bs-name { font-size:10px; }
+
+  /* Rarity reveal */
+  .rarity-name { font-size:32px; }
+  .rarity-tier { font-size:12px; }
+
+  /* Trophy celebration */
+  .lmv-cel-title { font-size:22px; }
+  .lmv-cel-team { font-size:16px; }
+  .lmv-cel-trophy { width:52px; height:52px; }
+  .lmv-cel-players { gap:6px; }
+  .lmv-cel-player-shirt { width:22px; height:22px; }
+  .lmv-cel-player-name { font-size:7px; max-width:34px; }
+
+  /* Penalty shootout */
+  .lmv-pen-dot { width:18px; height:18px; font-size:9px; }
+  .lmv-pens-score { font-size:22px; }
+
+  /* Buttons row */
+  div[style*="display:flex"][style*="gap:10px"] { flex-direction:column; }
+  div[style*="display:flex"][style*="gap:10px"] .btn { width:100%; }
+}
+
+/* Slightly larger phones / small tablets */
+@media (max-width: 768px) and (min-width: 601px) {
+  .groups-grid { grid-template-columns:repeat(3,1fr); }
+  .player-grid { grid-template-columns:repeat(3,1fr); }
+  .tactic-grid { grid-template-columns:repeat(2,1fr); }
+  .final-stats { grid-template-columns:repeat(2,1fr); }
+  .bracket-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+}
+
 </style>
 </head>
 <body>
@@ -1295,9 +1470,9 @@ footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; 
       <div id="result-banner" class="result-banner"></div>
       <div class="final-stats" id="final-stats"></div>
       <!-- Squad display in result -->
-      <div class="bracket-section">
+      <div class="bracket-section"><div class="bracket-wrapper" id="bracket-display-wrapper">
         <div class="bracket-title"><svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;display:inline-block;vertical-align:-0.15em"><defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F0D878"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9C7A2E"/></linearGradient></defs><!-- Base --><rect x="30" y="105" width="40" height="10" rx="2" fill="url(#goldGrad)"/><rect x="38" y="95" width="24" height="12" rx="2" fill="url(#goldGrad)"/><!-- Stem --><path d="M44 70 L40 95 L60 95 L56 70 Z" fill="url(#goldGrad)"/><!-- Cup body - spiraling bands like the real trophy --><path d="M25 20 C25 45 20 60 50 75 C80 60 75 45 75 20 C75 35 65 45 50 48 C35 45 25 35 25 20 Z" fill="url(#goldGrad)"/><path d="M30 15 C30 35 35 50 50 58 C65 50 70 35 70 15 C70 28 62 38 50 40 C38 38 30 28 30 15 Z" fill="url(#goldGrad)" opacity="0.85"/><!-- Top sphere --><circle cx="50" cy="14" r="13" fill="url(#goldGrad)"/><circle cx="46" cy="10" r="3" fill="#FCEFC0" opacity="0.6"/></svg> Bracket do Torneio</div>
-        <div class="bracket" id="bracket-display"></div>
+        <div id="bracket-display"></div></div>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
